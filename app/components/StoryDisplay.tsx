@@ -9,32 +9,46 @@ export default function StoryDisplay({ story, isLoading }: StoryDisplayProps) {
   if (!story && !isLoading) return null;
 
   return (
-    <div className="mt-8 w-full max-w-2xl mx-auto">
-      <div className="bg-white rounded-3xl shadow-lg border-2 border-amber-200 p-8">
-        <div className="flex items-center gap-2 mb-6">
-          <span className="text-2xl">📖</span>
-          <h2 className="text-xl font-bold text-amber-800">Your Story</h2>
+    <div className="mt-6 w-full max-w-2xl mx-auto">
+      <div className="bg-white rounded-3xl border-4 border-indigo-200 shadow-[var(--clay-card)] p-6 md:p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center justify-center w-10 h-10 bg-background rounded-2xl border-2 border-indigo-200 shrink-0">
+            <svg
+              className="w-5 h-5 text-primary"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <h2 className="font-heading text-xl font-semibold text-primary">Your Story</h2>
           {isLoading && (
-            <span className="ml-auto inline-flex items-center gap-1.5 text-sm text-amber-600">
-              <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-bounce [animation-delay:-0.3s]"></span>
-              <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-bounce [animation-delay:-0.15s]"></span>
-              <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-bounce"></span>
+            <span className="ml-auto inline-flex items-center gap-1.5" aria-label="Story is loading">
+              <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce [animation-delay:-0.3s]" />
+              <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce [animation-delay:-0.15s]" />
+              <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce" />
             </span>
           )}
         </div>
-        <div className="prose prose-amber max-w-none">
+
+        <div className="space-y-4">
           {story.split('\n').map((paragraph, index) =>
             paragraph.trim() ? (
               <p
                 key={index}
-                className="text-gray-700 leading-relaxed text-lg mb-4 last:mb-0 font-serif"
+                className="text-foreground/80 leading-relaxed text-base md:text-lg font-serif"
               >
                 {paragraph}
               </p>
-            ) : null
+            ) : null,
           )}
           {isLoading && !story && (
-            <p className="text-amber-400 italic animate-pulse text-lg font-serif">
+            <p className="text-secondary italic animate-pulse text-lg font-serif">
               Once upon a time...
             </p>
           )}

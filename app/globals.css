@@ -1,26 +1,65 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── Spacing ── */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* ── Standard shadow depths ── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* ── Claymorphism offset shadows ── */
+  --clay-card:               6px 8px 0px rgba(79, 70, 229, 0.2);
+  --clay-hero-icon:          5px 6px 0px rgba(67, 56, 202, 0.35);
+  --clay-icon:               4px 4px 0px rgba(99, 102, 241, 0.25);
+  --clay-chip:               3px 4px 0px rgba(99, 102, 241, 0.3);
+  --clay-chip-inactive:      2px 3px 0px rgba(99, 102, 241, 0.1);
+  --clay-btn-primary:        4px 5px 0px rgba(79, 70, 229, 0.3);
+  --clay-btn-primary-hover:  2px 3px 0px rgba(79, 70, 229, 0.3);
+  --clay-btn-cta:            5px 6px 0px rgba(234, 88, 12, 0.3);
+  --clay-btn-cta-hover:      3px 4px 0px rgba(234, 88, 12, 0.3);
+  --clay-btn-cta-active:     1px 2px 0px rgba(234, 88, 12, 0.3);
+  --clay-btn-cta-disabled:   5px 6px 0px rgba(234, 88, 12, 0.15);
+  --clay-success:            4px 4px 0px rgba(16, 185, 129, 0.3);
+  --clay-error:              4px 4px 0px rgba(239, 68, 68, 0.25);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* ── Design System Color Palette (from MASTER.md) ── */
+  --color-primary:     #4F46E5;
+  --color-primary-hover: #4338CA;
+  --color-secondary:   #818CF8;
+  --color-cta:         #F97316;
+  --color-cta-hover:   #EA580C;
+  --color-cta-border:  #FB923C;
+  --color-background:  #EEF2FF;
+  --color-foreground:  #1E1B4B;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* ── Typography ── */
+  --font-heading: var(--font-fredoka);
+  --font-sans:    var(--font-nunito);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

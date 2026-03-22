@@ -9,24 +9,20 @@ interface IssueFormProps {
 
 const config = {
   feedback: {
-    emoji: '💬',
-    title: 'Share Feedback',
-    description: "We'd love to hear what you think about Fabletime!",
     placeholder: 'What do you love? What could be better? Any ideas?',
     buttonLabel: 'Send Feedback',
-    buttonColor: 'bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300',
-    accentColor: 'border-blue-200',
-    successMessage: 'Thanks for your feedback! We really appreciate it. 💙',
+    buttonClass:
+      'border-secondary bg-primary hover:bg-primary-hover disabled:opacity-60 shadow-[var(--clay-btn-primary)] hover:shadow-[var(--clay-btn-primary-hover)] hover:translate-y-0.5',
+    inputBorder: 'border-indigo-200 focus:border-primary focus:ring-primary/20',
+    successMessage: 'Thanks for your feedback! We really appreciate it.',
   },
   bug: {
-    emoji: '🐛',
-    title: 'Report a Bug',
-    description: "Something not working right? Let us know and we'll fix it.",
     placeholder: 'Describe what happened and what you expected to happen...',
     buttonLabel: 'Submit Bug Report',
-    buttonColor: 'bg-red-500 hover:bg-red-600 disabled:bg-red-300',
-    accentColor: 'border-red-200',
-    successMessage: 'Bug report submitted! Thanks for helping us improve. 🛠️',
+    buttonClass:
+      'border-rose-400 bg-rose-500 hover:bg-rose-600 disabled:opacity-60 shadow-[var(--clay-error)] hover:shadow-[2px_3px_0px_rgba(239,68,68,0.3)] hover:translate-y-0.5',
+    inputBorder: 'border-rose-200 focus:border-rose-400 focus:ring-rose-200',
+    successMessage: 'Bug report submitted! Thanks for helping us improve.',
   },
 };
 
@@ -67,12 +63,37 @@ export default function IssueForm({ type }: IssueFormProps) {
   if (submitted) {
     return (
       <div className="text-center py-12">
-        <div className="text-5xl mb-4">✅</div>
-        <p className="text-lg font-semibold text-gray-700 mb-6">{cfg.successMessage}</p>
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-3xl border-4 border-green-300 shadow-[var(--clay-success)] mb-4">
+          <svg
+            className="w-8 h-8 text-green-600"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <p className="text-lg font-semibold text-foreground mb-6">{cfg.successMessage}</p>
         <Link
           href="/"
-          className="inline-block bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-8 rounded-xl transition-colors"
+          className="inline-flex items-center gap-2 font-bold py-3 px-8 rounded-2xl border-4 border-secondary bg-primary text-white transition-all duration-200 shadow-[var(--clay-btn-primary)] hover:shadow-[var(--clay-btn-primary-hover)] hover:translate-y-0.5 cursor-pointer"
         >
+          <svg
+            className="w-4 h-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
           Back to Fabletime
         </Link>
       </div>
@@ -85,9 +106,10 @@ export default function IssueForm({ type }: IssueFormProps) {
       <div>
         <label
           htmlFor="email"
-          className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide"
+          className="block text-xs font-semibold text-secondary mb-2 uppercase tracking-wider"
         >
-          Email <span className="text-gray-400 font-normal normal-case">(optional)</span>
+          Email{' '}
+          <span className="text-indigo-300 font-normal normal-case">(optional)</span>
         </label>
         <input
           id="email"
@@ -95,7 +117,7 @@ export default function IssueForm({ type }: IssueFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className={`w-full rounded-xl border-2 ${cfg.accentColor} bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-200 transition-colors`}
+          className={`w-full rounded-2xl border-4 ${cfg.inputBorder} bg-background/50 px-4 py-3 text-foreground placeholder:text-secondary/50 focus:outline-none focus:ring-2 transition-all duration-200`}
           disabled={isSubmitting}
         />
       </div>
@@ -104,7 +126,7 @@ export default function IssueForm({ type }: IssueFormProps) {
       <div>
         <label
           htmlFor="message"
-          className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide"
+          className="block text-xs font-semibold text-secondary mb-2 uppercase tracking-wider"
         >
           Message <span className="text-red-400">*</span>
         </label>
@@ -115,32 +137,38 @@ export default function IssueForm({ type }: IssueFormProps) {
           placeholder={cfg.placeholder}
           rows={5}
           required
-          className={`w-full rounded-xl border-2 ${cfg.accentColor} bg-gray-50 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-200 transition-colors resize-none`}
+          className={`w-full rounded-2xl border-4 ${cfg.inputBorder} bg-background/50 px-4 py-3 text-foreground placeholder:text-secondary/50 focus:outline-none focus:ring-2 transition-all duration-200 resize-none`}
           disabled={isSubmitting}
         />
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 text-sm font-medium">
+        <div
+          className="p-4 bg-red-50 border-4 border-red-200 rounded-2xl text-red-700 text-sm font-medium"
+          role="alert"
+        >
           {error}
         </div>
       )}
 
-      <div className="flex gap-4">
+      <div className="flex gap-3">
         <Link
           href="/"
-          className="flex-1 text-center rounded-xl border-2 border-gray-200 text-gray-600 font-semibold py-3 px-6 hover:bg-gray-50 transition-colors"
+          className="flex-1 text-center rounded-2xl border-4 border-indigo-100 text-primary font-semibold py-3 px-6 hover:bg-background hover:border-indigo-200 transition-all duration-200 cursor-pointer"
         >
           Cancel
         </Link>
         <button
           type="submit"
           disabled={isSubmitting || !message.trim()}
-          className={`flex-1 rounded-xl ${cfg.buttonColor} text-white font-bold py-3 px-6 transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+          className={`flex-1 rounded-2xl border-4 ${cfg.buttonClass} text-white font-bold py-3 px-6 transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer`}
         >
           {isSubmitting ? (
             <>
-              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span
+                className="inline-block w-4 h-4 border-[3px] border-white border-t-transparent rounded-full animate-spin"
+                aria-hidden="true"
+              />
               Submitting...
             </>
           ) : (
