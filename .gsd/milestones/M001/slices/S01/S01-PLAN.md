@@ -53,7 +53,7 @@
   - Verify: `npx tsc --noEmit && node -e "require('@supabase/supabase-js')" && grep -q "created_at" supabase/schema.sql && grep -q "SUPABASE" .env.local.example`
   - Done when: `lib/supabase.ts` compiles, `supabase/schema.sql` defines all three tables with `created_at timestamptz`, `@supabase/supabase-js` is in `package.json` dependencies
 
-- [ ] **T02: Add story persistence and X-Story-Id header to generate API route** `est:30m`
+- [x] **T02: Add story persistence and X-Story-Id header to generate API route** `est:30m`
   - Why: Core deliverable — implements R001 (persist every story) and R002 (non-blocking DB write). This is the most complex change: UUID generation, header on response, text accumulation during stream, and Supabase insert after stream close.
   - Files: `app/api/generate/route.ts`
   - Do: Import `createClient` from `@/lib/supabase`. At the top of the POST handler (after input validation), generate `const storyId = crypto.randomUUID()`. Add `X-Story-Id: storyId` and `Access-Control-Expose-Headers: X-Story-Id` to the Response headers. Inside the ReadableStream `start()`, accumulate each text chunk into a `fullResponse` buffer string. After `controller.close()`, call `supabase.from('stories').insert({ id: storyId, characters, theme, length, prompt, response: fullResponse })`. Wrap the insert in try/catch — log errors with `console.error` including storyId, never throw.

@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -54,9 +55,13 @@ If the theme is "kindness", show acts of kindness and their positive effects.
 
 Write the story directly without any preamble or meta-commentary. Begin with "Once upon a time..." or a creative variation.`;
 
+    const storyId = crypto.randomUUID();
+
     const stream = new ReadableStream({
       async start(controller) {
         try {
+          let fullResponse = '';
+
           const anthropicStream = client.messages.stream({
             model: 'claude-opus-4-20250514',
             max_tokens: 2048,
@@ -69,9 +74,27 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
               chunk.delta.type === 'text_delta'
             ) {
               controller.enqueue(new TextEncoder().encode(chunk.delta.text));
+              fullResponse += chunk.delta.text;
             }
           }
           controller.close();
+
+          // Persist story after stream is fully delivered to the client
+          try {
+            const { error: dbError } = await supabase.from('stories').insert({
+              id: storyId,
+              characters,
+              theme,
+              length,
+              prompt,
+              response: fullResponse,
+            });
+            if (dbError) {
+              console.error('[S01] Failed to persist story:', storyId, dbError);
+            }
+          } catch (dbError) {
+            console.error('[S01] Failed to persist story:', storyId, dbError);
+          }
         } catch (error) {
           controller.error(error);
         }
@@ -82,6 +105,8 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Transfer-Encoding': 'chunked',
+        'X-Story-Id': storyId,
+        'Access-Control-Expose-Headers': 'X-Story-Id',
       },
     });
   } catch (error) {
