@@ -60,7 +60,7 @@
   - Verify: `npx tsc --noEmit && grep -q "X-Story-Id" app/api/generate/route.ts && grep -q "fullResponse" app/api/generate/route.ts && grep -q "controller.close" app/api/generate/route.ts`
   - Done when: `route.ts` compiles, generates a UUID, sets the header, accumulates the full response, and inserts to Supabase after stream close with error handling
 
-- [ ] **T03: Wire StoryForm to capture story_id from response header** `est:15m`
+- [x] **T03: Wire StoryForm to capture story_id from response header** `est:15m`
   - Why: Completes the client-side contract — S02's rating UI needs `storyId` from StoryForm state. Without this, the story_id is generated and sent but never captured by the client.
   - Files: `app/components/StoryForm.tsx`
   - Do: Add `const [storyId, setStoryId] = useState<string | null>(null)` to StoryForm state. In `handleSubmit`, after the `fetch()` call and before consuming the stream body, read `const id = response.headers.get('X-Story-Id')` and call `setStoryId(id)`. Reset `setStoryId(null)` at the start of `handleSubmit` (alongside the existing `setStory('')` reset). Pass `storyId` to `StoryDisplay` as a prop (add the prop to StoryDisplay's interface but don't use it yet — S02 will add the rating UI there).

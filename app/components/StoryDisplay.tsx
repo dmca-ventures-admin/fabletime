@@ -3,9 +3,10 @@
 interface StoryDisplayProps {
   story: string;
   isLoading: boolean;
+  storyId: string | null;
 }
 
-export default function StoryDisplay({ story, isLoading }: StoryDisplayProps) {
+export default function StoryDisplay({ story, isLoading, storyId }: StoryDisplayProps) {
   if (!story && !isLoading) return null;
 
   return (

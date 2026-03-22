@@ -100,6 +100,7 @@ export default function StoryForm() {
   const [story, setStory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [storyId, setStoryId] = useState<string | null>(null);
 
   const toggleCharacter = (value: string) => {
     if (isLoading) return;
@@ -120,6 +121,7 @@ export default function StoryForm() {
     e.preventDefault();
     setStory('');
     setError('');
+    setStoryId(null);
     setIsLoading(true);
 
     try {
@@ -131,6 +133,9 @@ export default function StoryForm() {
 
       if (!response.ok) throw new Error('Failed to generate story');
       if (!response.body) throw new Error('No response body');
+
+      const id = response.headers.get('X-Story-Id');
+      setStoryId(id);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -289,7 +294,7 @@ export default function StoryForm() {
         </div>
       )}
 
-      <StoryDisplay story={story} isLoading={isLoading} />
+      <StoryDisplay story={story} isLoading={isLoading} storyId={storyId} />
     </div>
   );
 }

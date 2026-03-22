@@ -50,3 +50,9 @@ Modify `StoryForm.tsx` to read the `X-Story-Id` header from the generate API res
 
 - `app/components/StoryForm.tsx` — modified with storyId state and header reading
 - `app/components/StoryDisplay.tsx` — modified interface to accept storyId prop
+
+## Observability Impact
+
+- **New client state:** `storyId` in StoryForm is available for downstream components (S02 rating UI). It can be inspected via React DevTools in the browser.
+- **Header consumption:** The `X-Story-Id` header set by T02 is now consumed client-side. Verify end-to-end by checking that `storyId` state is non-null after a successful generation (React DevTools → StoryForm → Hooks → storyId).
+- **Failure visibility:** If the header is missing (server error before header is set), `storyId` will be `null` — downstream components should handle this gracefully. No console.error is added client-side since a missing header is not an error condition the user can act on.
