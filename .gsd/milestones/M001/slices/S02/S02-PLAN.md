@@ -48,7 +48,7 @@
   - Verify: `npx tsc --noEmit` passes, `test -f app/api/rate/route.ts`
   - Done when: POST with valid data returns 201, POST with `stars: 0` or missing `story_id` returns 400, DB errors return 500 with structured JSON
 
-- [ ] **T02: Build star rating UI in StoryDisplay and wire hasRated state** `est:1h`
+- [x] **T02: Build star rating UI in StoryDisplay and wire hasRated state** `est:1h`
   - Why: R003 (rating appears after story), R005 (once per session). This task delivers the user-facing feature: star picker, feedback textarea, submission, thank-you message, and reset on new generation.
   - Files: `app/components/StoryDisplay.tsx`, `app/components/StoryForm.tsx`
   - Do: (1) Add `hasRated` state and `setHasRated` to `StoryForm`. Reset `hasRated` to false in `handleSubmit` before generating. Pass `onRated={() => setHasRated(true)}` and `hasRated` as props to `StoryDisplay`. (2) In `StoryDisplay`, add a rating section below the story card, visible when `!isLoading && story && storyId && !hasRated`. Use a `<fieldset>` with `role="radiogroup"` and 5 radio inputs styled as stars for accessibility. Support keyboard navigation (arrow keys). Add an optional `<textarea>` for feedback and a submit button. On submit, POST to `/api/rate` with `{ story_id: storyId, stars, feedback }`. On success, call `onRated()`. When `hasRated` is true, show a thank-you message instead. (3) Style with theme-aware CSS variables: `--color-cta` / orange for filled stars, `--color-secondary` for unfilled, claymorphism shadows matching existing card design.

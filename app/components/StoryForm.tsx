@@ -101,6 +101,7 @@ export default function StoryForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [storyId, setStoryId] = useState<string | null>(null);
+  const [hasRated, setHasRated] = useState(false);
 
   const toggleCharacter = (value: string) => {
     if (isLoading) return;
@@ -122,6 +123,7 @@ export default function StoryForm() {
     setStory('');
     setError('');
     setStoryId(null);
+    setHasRated(false);
     setIsLoading(true);
 
     try {
@@ -294,7 +296,7 @@ export default function StoryForm() {
         </div>
       )}
 
-      <StoryDisplay story={story} isLoading={isLoading} storyId={storyId} />
+      <StoryDisplay story={story} isLoading={isLoading} storyId={storyId} hasRated={hasRated} onRated={() => setHasRated(true)} />
     </div>
   );
 }

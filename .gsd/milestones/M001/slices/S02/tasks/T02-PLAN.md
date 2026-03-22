@@ -58,6 +58,13 @@ The rating must be accessible (radio group semantics, keyboard navigation, scree
 - `grep -q "radiogroup\|radio" app/components/StoryDisplay.tsx` — accessible star markup present
 - `grep -q "onRated" app/components/StoryDisplay.tsx` — callback wired
 
+## Observability Impact
+
+- **New runtime signals:** Rating submission errors surface as inline error messages in the UI and are visible in the browser console. Network failures to `POST /api/rate` are caught and displayed to the user.
+- **Inspection surfaces:** Browser DevTools Network tab shows `POST /api/rate` requests with status codes. The `hasRated` state transition is observable via React DevTools or by the visible switch from rating form to thank-you message.
+- **Failure visibility:** Submission errors show an inline error message below the submit button. The submit button re-enables after a failed submission so the user can retry.
+- **How a future agent inspects this task:** `grep -q "radiogroup\|radio" app/components/StoryDisplay.tsx` confirms accessible markup. `grep -q "hasRated" app/components/StoryForm.tsx` confirms state wiring. Browser UAT confirms the full flow.
+
 ## Inputs
 
 - `app/components/StoryDisplay.tsx` — Current component to add rating UI to
