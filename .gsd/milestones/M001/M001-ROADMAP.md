@@ -50,7 +50,7 @@ This milestone is complete only when all are true:
 - [x] **S01: Supabase Setup & Story Persistence** `risk:medium` `depends:[]`
   > After this: generate a story → row appears in Supabase `stories` table with character(s), theme, length, prompt, response, and timestamp. Client receives a `story_id` for downstream use.
 
-- [ ] **S02: Per-Story Rating & Feedback** `risk:low` `depends:[S01]`
+- [x] **S02: Per-Story Rating & Feedback** `risk:low` `depends:[S01]`
   > After this: after a story finishes generating, a 5-star rating UI with optional text appears below the story → submit → row in `ratings` table linked to story via story_id → form replaced with thank-you message.
 
 - [ ] **S03: Custom Characters & Themes with Popularity** `risk:medium` `depends:[S01]`
