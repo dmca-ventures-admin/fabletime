@@ -52,6 +52,13 @@ Replaces the hardcoded character and theme arrays in `StoryForm.tsx` with dynami
 - `grep -q "customTheme" app/components/StoryForm.tsx` succeeds
 - `grep -q "max" app/components/StoryForm.tsx` succeeds (max-3 enforcement)
 
+## Observability Impact
+
+- **New signal**: `[S03] Failed to fetch suggestions:` console error when the `/api/suggestions` fetch fails — the UI falls back to showing only custom text inputs.
+- **Inspection**: The component's visual state (loading skeletons → suggestion buttons or fallback message → custom inputs) is directly observable in the browser. No new API endpoints are added.
+- **Failure visibility**: Suggestions fetch errors are logged with `[S03]` prefix and the UI degrades gracefully (shows custom inputs only). Validation errors (max 3 chars, max 3 words) are shown inline in the form and prevent submission. Submit errors are shown as inline alerts.
+- **How a future agent inspects this task**: Open the app in the browser, verify dynamic buttons render from API data, verify custom inputs accept comma-separated characters, verify max-3 enforcement disables further selection, verify form submits with merged characters + theme.
+
 ## Inputs
 
 - `app/components/StoryForm.tsx` — existing form component with hardcoded arrays (to be refactored)
