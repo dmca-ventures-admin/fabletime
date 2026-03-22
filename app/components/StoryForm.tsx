@@ -94,12 +94,27 @@ const themes = [
 ];
 
 export default function StoryForm() {
-  const [character, setCharacter] = useState('Fox');
+  const [selectedCharacters, setSelectedCharacters] = useState<Set<string>>(new Set(['Fox']));
   const [length, setLength] = useState('short');
   const [theme, setTheme] = useState('Kindness');
   const [story, setStory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const toggleCharacter = (value: string) => {
+    if (isLoading) return;
+    setSelectedCharacters((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        // Don't allow deselecting the last character
+        if (next.size === 1) return prev;
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +126,7 @@ export default function StoryForm() {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ character, length, theme }),
+        body: JSON.stringify({ characters: Array.from(selectedCharacters), length, theme }),
       });
 
       if (!response.ok) throw new Error('Failed to generate story');
@@ -143,19 +158,20 @@ export default function StoryForm() {
         <div className="space-y-7">
           {/* Character Selection */}
           <fieldset>
-            <legend className="block text-xs font-semibold text-secondary mb-3 uppercase tracking-wider">
-              Choose Your Hero
+            <legend className="block text-xs font-semibold text-secondary mb-1 uppercase tracking-wider">
+              Choose Your Heroes
             </legend>
+            <p className="text-xs text-secondary/60 mb-3">Pick one or more characters</p>
             <div className="grid grid-cols-3 gap-2">
               {characters.map((c) => (
                 <button
                   key={c.value}
                   type="button"
-                  onClick={() => !isLoading && setCharacter(c.value)}
+                  onClick={() => toggleCharacter(c.value)}
                   disabled={isLoading}
-                  aria-pressed={character === c.value}
+                  aria-pressed={selectedCharacters.has(c.value)}
                   className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border-4 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed ${
-                    character === c.value
+                    selectedCharacters.has(c.value)
                       ? 'border-secondary bg-background shadow-[var(--clay-chip)]'
                       : 'border-indigo-100 bg-white hover:border-indigo-200 hover:bg-background/40 shadow-[var(--clay-chip-inactive)]'
                   }`}
@@ -165,7 +181,7 @@ export default function StoryForm() {
                   </span>
                   <span
                     className={`text-xs font-semibold ${
-                      character === c.value ? 'text-primary' : 'text-secondary'
+                      selectedCharacters.has(c.value) ? 'text-primary' : 'text-secondary'
                     }`}
                   >
                     {c.label}
