@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T01",
+  "unitId": "M001/S03/T01",
+  "timestamp": 1774179085158,
+  "passed": true,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "test -f supabase/seed.sql",
+      "exitCode": 0,
+      "durationMs": 3,
+      "verdict": "pass"
+    },
+    {
+      "command": "test -f lib/content-filter.ts",
+      "exitCode": 0,
+      "durationMs": 2,
+      "verdict": "pass"
+    },
+    {
+      "command": "grep -q \"upsert_entry\" supabase/schema.sql",
+      "exitCode": 0,
+      "durationMs": 3,
+      "verdict": "pass"
+    }
+  ]
+}

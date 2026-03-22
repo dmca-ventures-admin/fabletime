@@ -52,7 +52,7 @@
   - Verify: `npx tsc --noEmit && test -f supabase/seed.sql && test -f lib/content-filter.ts && grep -q "upsert_entry" supabase/schema.sql && grep -q "child_friendly" supabase/schema.sql`
   - Done when: Schema extended with function + column, seed file has 10 entries, content filter compiles and exports `isChildFriendly`
 
-- [ ] **T02: Build suggestions endpoint and add usage tracking to generate route** `est:45m`
+- [x] **T02: Build suggestions endpoint and add usage tracking to generate route** `est:45m`
   - Why: Creates the API surface that powers dynamic suggestions (R006, R007) and tracks what characters/themes are actually used (R010). The suggestions endpoint content-filters using the cached `child_friendly` column, only calling Claude for entries not yet checked. The generate route upserts each character and the theme after DB insert.
   - Files: `app/api/suggestions/route.ts`, `app/api/generate/route.ts`
   - Do: (1) Create GET /api/suggestions that queries `custom_entries` for top entries by usage_count. For entries where `child_friendly IS NULL`, call `isChildFriendly()` and update the column. Return only entries where `child_friendly = true`, up to 10 per type. (2) In generate/route.ts, after the story insert block, call `supabase.rpc('upsert_entry', ...)` for each character and the theme. Add server-side validation: reject characters arrays > 3, reject entries > 3 words. Log errors with `[S03]` prefix.

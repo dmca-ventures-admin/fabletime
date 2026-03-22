@@ -20,6 +20,20 @@ export async function POST(request: NextRequest) {
       return new Response('Missing required fields', { status: 400 });
     }
 
+    if (characters.length > 3) {
+      return new Response('Maximum 3 characters allowed', { status: 400 });
+    }
+
+    // Validate that each character and the theme are 3 words or fewer
+    for (const character of characters) {
+      if (typeof character === 'string' && character.trim().split(/\s+/).length > 3) {
+        return new Response('Character/theme names must be 3 words or fewer', { status: 400 });
+      }
+    }
+    if (typeof theme === 'string' && theme.trim().split(/\s+/).length > 3) {
+      return new Response('Character/theme names must be 3 words or fewer', { status: 400 });
+    }
+
     const lengthDesc = lengthDescriptions[length] || '300-400 words';
 
     // Build character description based on how many were selected
@@ -94,6 +108,24 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
             }
           } catch (dbError) {
             console.error('[S01] Failed to persist story:', storyId, dbError);
+          }
+
+          // Track usage for each character and the theme (S03)
+          try {
+            const upsertResults = await Promise.all([
+              ...characters.map((character: string) =>
+                supabase.rpc('upsert_entry', { p_type: 'character', p_value: character })
+              ),
+              supabase.rpc('upsert_entry', { p_type: 'theme', p_value: theme }),
+            ]);
+
+            for (const { error } of upsertResults) {
+              if (error) {
+                console.error('[S03] Usage tracking upsert failed:', error);
+              }
+            }
+          } catch (upsertError) {
+            console.error('[S03] Usage tracking failed:', upsertError);
           }
         } catch (error) {
           controller.error(error);
