@@ -53,7 +53,7 @@ This milestone is complete only when all are true:
 - [x] **S02: Per-Story Rating & Feedback** `risk:low` `depends:[S01]`
   > After this: after a story finishes generating, a 5-star rating UI with optional text appears below the story → submit → row in `ratings` table linked to story via story_id → form replaced with thank-you message.
 
-- [ ] **S03: Custom Characters & Themes with Popularity** `risk:medium` `depends:[S01]`
+- [x] **S03: Custom Characters & Themes with Popularity** `risk:medium` `depends:[S01]`
   > After this: character/theme pickers show dynamic top 10 from DB → user can type custom entries → generate → usage count increments → popular child-friendly entries appear in suggestions.
 
 ## Boundary Map
