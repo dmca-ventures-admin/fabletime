@@ -45,6 +45,13 @@ The `ratings` table already exists in `supabase/schema.sql` with columns: `id` (
 - `lib/supabase.ts` — Supabase singleton client to import
 - `supabase/schema.sql` — Reference for `ratings` table schema (id, story_id, stars, feedback, created_at)
 
+## Observability Impact
+
+- **New signal:** `console.error('[S02] Failed to save rating:', error)` — emitted on Supabase DB errors (constraint violations, permission denied, missing table). Grep server logs for `[S02]` to find all rating-related failures.
+- **New signal:** `console.error('[S02] Unexpected error in rate route:', err)` — emitted on network errors or malformed JSON body. Distinguishes infrastructure failures from DB-level issues.
+- **Inspection surface:** `POST /api/rate` returns structured JSON `{ error: "..." }` with 400 (validation) or 500 (DB/network) status codes. A future agent can `curl` this endpoint to verify it responds correctly without needing the UI.
+- **Failure state visible:** Invalid FK (non-existent `story_id`) returns 500 with `{ error: "Failed to save rating" }` and logs the Supabase error object with full constraint violation details.
+
 ## Expected Output
 
 - `app/api/rate/route.ts` — New API route file with POST handler, validation, Supabase insert, and error handling

@@ -41,7 +41,7 @@
 
 ## Tasks
 
-- [ ] **T01: Create POST /api/rate server route with validation** `est:30m`
+- [x] **T01: Create POST /api/rate server route with validation** `est:30m`
   - Why: R004 requires ratings to be persisted to Supabase. The API route is independently testable and is a prerequisite for the UI.
   - Files: `app/api/rate/route.ts`
   - Do: Create a POST handler that parses `{ story_id, stars, feedback }` from the request body. Validate: `stars` is an integer 1–5, `story_id` is a non-empty string, `feedback` is optional string or null. On validation failure return 400 with JSON `{ error }`. Insert to Supabase `ratings` table using the `{ data, error }` destructure pattern (KNOWLEDGE.md) AND try/catch for network errors. Return 201 with `{ success: true }` on success, 500 with `{ error }` on DB/network failure. Log errors with `[S02]` prefix.
