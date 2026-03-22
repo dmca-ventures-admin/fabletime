@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     "AI-powered story generator for parents and kids. Pick characters, choose a learning theme, and generate a unique bedtime story to read aloud to your child.",
 };
 
+// Inline script to apply saved theme before first paint (avoids flash)
+const themeScript = `(function(){try{var t=localStorage.getItem('fabletime-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}})()`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,6 +32,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${fredoka.variable} ${nunito.variable} h-full antialiased`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
         <Analytics />

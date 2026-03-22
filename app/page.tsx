@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import StoryForm from '@/app/components/StoryForm';
+import ThemeToggle from '@/app/components/ThemeToggle';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-purple-50 to-indigo-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-background via-[var(--surface-page-via)] to-[var(--surface-page-to)] flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-10 max-w-3xl">
         {/* Header */}
         <div className="text-center mb-10">
@@ -33,12 +34,12 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t-4 border-indigo-100 bg-white/60 backdrop-blur-sm py-4">
+      <footer className="border-t-4 border-[var(--border-footer)] bg-[var(--surface-footer)] backdrop-blur-sm py-4">
         <div className="container mx-auto px-4 max-w-3xl flex items-center justify-center gap-3 flex-wrap">
           <span className="text-sm text-secondary/70">Have thoughts?</span>
           <Link
             href="/feedback"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover border-2 border-indigo-200 hover:border-secondary rounded-xl px-4 py-2 transition-all duration-200 hover:bg-background cursor-pointer"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover border-2 border-[var(--border-subtle)] hover:border-secondary rounded-xl px-4 py-2 transition-all duration-200 hover:bg-[var(--surface-hover)] cursor-pointer"
           >
             <svg
               className="w-4 h-4"
@@ -56,7 +57,7 @@ export default function Home() {
           </Link>
           <Link
             href="/bug"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-rose-500 hover:text-rose-700 border-2 border-rose-200 hover:border-rose-400 rounded-xl px-4 py-2 transition-all duration-200 hover:bg-rose-50 cursor-pointer"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-rose-500 hover:text-rose-700 border-2 border-[var(--border-rose-subtle)] hover:border-[var(--border-rose)] rounded-xl px-4 py-2 transition-all duration-200 hover:bg-[var(--surface-rose-bg)] cursor-pointer"
           >
             <svg
               className="w-4 h-4"
@@ -72,6 +73,7 @@ export default function Home() {
             </svg>
             Report a Bug
           </Link>
+          <ThemeToggle />
         </div>
       </footer>
     </div>

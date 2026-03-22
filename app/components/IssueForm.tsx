@@ -13,7 +13,7 @@ const config = {
     buttonLabel: 'Send Feedback',
     buttonClass:
       'border-secondary bg-primary hover:bg-primary-hover disabled:opacity-60 shadow-[var(--clay-btn-primary)] hover:shadow-[var(--clay-btn-primary-hover)] hover:translate-y-0.5',
-    inputBorder: 'border-indigo-200 focus:border-primary focus:ring-primary/20',
+    inputBorder: 'border-[var(--border-card)] focus:border-primary focus:ring-primary/20',
     successMessage: 'Thanks for your feedback! We really appreciate it.',
   },
   bug: {
@@ -21,7 +21,7 @@ const config = {
     buttonLabel: 'Submit Bug Report',
     buttonClass:
       'border-rose-400 bg-rose-500 hover:bg-rose-600 disabled:opacity-60 shadow-[var(--clay-error)] hover:shadow-[2px_3px_0px_rgba(239,68,68,0.3)] hover:translate-y-0.5',
-    inputBorder: 'border-rose-200 focus:border-rose-400 focus:ring-rose-200',
+    inputBorder: 'border-[var(--border-rose-subtle)] focus:border-[var(--border-rose)] focus:ring-[var(--border-rose-subtle)]',
     successMessage: 'Bug report submitted! Thanks for helping us improve.',
   },
 };
@@ -63,9 +63,9 @@ export default function IssueForm({ type }: IssueFormProps) {
   if (submitted) {
     return (
       <div className="text-center py-12">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-3xl border-4 border-green-300 shadow-[var(--clay-success)] mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--surface-success-bg)] rounded-3xl border-4 border-[var(--border-success)] shadow-[var(--clay-success)] mb-4">
           <svg
-            className="w-8 h-8 text-green-600"
+            className="w-8 h-8 text-[var(--text-success)]"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -109,7 +109,7 @@ export default function IssueForm({ type }: IssueFormProps) {
           className="block text-xs font-semibold text-secondary mb-2 uppercase tracking-wider"
         >
           Email{' '}
-          <span className="text-indigo-300 font-normal normal-case">(optional)</span>
+          <span className="text-[var(--text-hint)] font-normal normal-case">(optional)</span>
         </label>
         <input
           id="email"
@@ -117,7 +117,7 @@ export default function IssueForm({ type }: IssueFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className={`w-full rounded-2xl border-4 ${cfg.inputBorder} bg-background/50 px-4 py-3 text-foreground placeholder:text-secondary/50 focus:outline-none focus:ring-2 transition-all duration-200`}
+          className={`w-full rounded-2xl border-4 ${cfg.inputBorder} bg-[var(--surface-input)] px-4 py-3 text-foreground placeholder:text-secondary/50 focus:outline-none focus:ring-2 transition-all duration-200`}
           disabled={isSubmitting}
         />
       </div>
@@ -137,14 +137,14 @@ export default function IssueForm({ type }: IssueFormProps) {
           placeholder={cfg.placeholder}
           rows={5}
           required
-          className={`w-full rounded-2xl border-4 ${cfg.inputBorder} bg-background/50 px-4 py-3 text-foreground placeholder:text-secondary/50 focus:outline-none focus:ring-2 transition-all duration-200 resize-none`}
+          className={`w-full rounded-2xl border-4 ${cfg.inputBorder} bg-[var(--surface-input)] px-4 py-3 text-foreground placeholder:text-secondary/50 focus:outline-none focus:ring-2 transition-all duration-200 resize-none`}
           disabled={isSubmitting}
         />
       </div>
 
       {error && (
         <div
-          className="p-4 bg-red-50 border-4 border-red-200 rounded-2xl text-red-700 text-sm font-medium"
+          className="p-4 bg-[var(--surface-error-bg)] border-4 border-[var(--border-error)] rounded-2xl text-[var(--text-error)] text-sm font-medium"
           role="alert"
         >
           {error}
@@ -154,7 +154,7 @@ export default function IssueForm({ type }: IssueFormProps) {
       <div className="flex gap-3">
         <Link
           href="/"
-          className="flex-1 text-center rounded-2xl border-4 border-indigo-100 text-primary font-semibold py-3 px-6 hover:bg-background hover:border-indigo-200 transition-all duration-200 cursor-pointer"
+          className="flex-1 text-center rounded-2xl border-4 border-[var(--surface-cancel-border)] text-primary font-semibold py-3 px-6 hover:bg-[var(--surface-hover)] hover:border-[var(--border-card)] transition-all duration-200 cursor-pointer"
         >
           Cancel
         </Link>

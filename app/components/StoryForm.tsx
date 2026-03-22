@@ -153,7 +153,7 @@ export default function StoryForm() {
     <div className="w-full max-w-2xl mx-auto">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-3xl border-4 border-indigo-200 shadow-[var(--clay-card)] p-6 md:p-8"
+        className="bg-[var(--surface-card)] rounded-3xl border-4 border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8"
       >
         <div className="space-y-7">
           {/* Character Selection */}
@@ -172,8 +172,8 @@ export default function StoryForm() {
                   aria-pressed={selectedCharacters.has(c.value)}
                   className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border-4 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed ${
                     selectedCharacters.has(c.value)
-                      ? 'border-secondary bg-background shadow-[var(--clay-chip)]'
-                      : 'border-indigo-100 bg-white hover:border-indigo-200 hover:bg-background/40 shadow-[var(--clay-chip-inactive)]'
+                      ? 'border-secondary bg-[var(--surface-chip-active)] shadow-[var(--clay-chip)]'
+                      : 'border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] hover:border-[var(--border-card)] hover:bg-[var(--surface-hover)] shadow-[var(--clay-chip-inactive)]'
                   }`}
                 >
                   <span className="text-2xl leading-none" role="img" aria-label={c.label}>
@@ -207,7 +207,7 @@ export default function StoryForm() {
                   className={`flex-1 flex flex-col items-center py-3 px-2 rounded-2xl border-4 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed ${
                     length === l.value
                       ? 'border-secondary bg-primary text-white shadow-[var(--clay-chip)]'
-                      : 'border-indigo-100 bg-white text-primary hover:border-indigo-200 hover:bg-background shadow-[var(--clay-chip-inactive)]'
+                      : 'border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] text-primary hover:border-[var(--border-card)] hover:bg-[var(--surface-hover)] shadow-[var(--clay-chip-inactive)]'
                   }`}
                 >
                   <span className="font-heading font-semibold text-base">{l.label}</span>
@@ -239,7 +239,7 @@ export default function StoryForm() {
                   className={`flex items-center gap-2.5 py-3 px-4 rounded-2xl border-4 font-semibold text-sm transition-all duration-200 cursor-pointer disabled:cursor-not-allowed ${
                     theme === t.value
                       ? 'border-secondary bg-primary text-white shadow-[var(--clay-chip)]'
-                      : 'border-indigo-100 bg-white text-primary hover:border-indigo-200 hover:bg-background shadow-[var(--clay-chip-inactive)]'
+                      : 'border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] text-primary hover:border-[var(--border-card)] hover:bg-[var(--surface-hover)] shadow-[var(--clay-chip-inactive)]'
                   }`}
                 >
                   {t.icon}
@@ -282,7 +282,7 @@ export default function StoryForm() {
 
       {error && (
         <div
-          className="mt-4 p-4 bg-red-50 border-4 border-red-200 rounded-2xl text-red-700 text-sm font-medium shadow-[var(--clay-error)]"
+          className="mt-4 p-4 bg-[var(--surface-error-bg)] border-4 border-[var(--border-error)] rounded-2xl text-[var(--text-error)] text-sm font-medium shadow-[var(--clay-error)]"
           role="alert"
         >
           {error}

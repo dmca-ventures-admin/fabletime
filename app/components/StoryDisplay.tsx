@@ -10,9 +10,9 @@ export default function StoryDisplay({ story, isLoading }: StoryDisplayProps) {
 
   return (
     <div className="mt-6 w-full max-w-2xl mx-auto">
-      <div className="bg-white rounded-3xl border-4 border-indigo-200 shadow-[var(--clay-card)] p-6 md:p-8">
+      <div className="bg-[var(--surface-card)] rounded-3xl border-4 border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="flex items-center justify-center w-10 h-10 bg-background rounded-2xl border-2 border-indigo-200 shrink-0">
+          <div className="flex items-center justify-center w-10 h-10 bg-[var(--surface-chip-active)] rounded-2xl border-2 border-[var(--border-card)] shrink-0">
             <svg
               className="w-5 h-5 text-primary"
               viewBox="0 0 24 24"
