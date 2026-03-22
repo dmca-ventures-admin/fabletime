@@ -47,7 +47,7 @@ This milestone is complete only when all are true:
 
 ## Slices
 
-- [ ] **S01: Supabase Setup & Story Persistence** `risk:medium` `depends:[]`
+- [x] **S01: Supabase Setup & Story Persistence** `risk:medium` `depends:[]`
   > After this: generate a story → row appears in Supabase `stories` table with character(s), theme, length, prompt, response, and timestamp. Client receives a `story_id` for downstream use.
 
 - [ ] **S02: Per-Story Rating & Feedback** `risk:low` `depends:[S01]`
