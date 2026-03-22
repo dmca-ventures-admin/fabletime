@@ -29,6 +29,7 @@
 - `grep -q "created_at" supabase/schema.sql` — Schema includes timestamp columns (R013)
 - `grep -q "custom_entries" supabase/schema.sql` — All three tables defined in schema
 - `node -e "require('@supabase/supabase-js')"` — Supabase package is installed
+- `grep -q "console.error" app/api/generate/route.ts` — Insert failures are logged with correlation ID for server-side diagnosis
 
 ## Observability / Diagnostics
 
@@ -45,7 +46,7 @@
 
 ## Tasks
 
-- [ ] **T01: Install Supabase client, create schema, and configure env** `est:20m`
+- [x] **T01: Install Supabase client, create schema, and configure env** `est:20m`
   - Why: Provides the database client, table definitions, and environment configuration that all subsequent tasks depend on. Creating all three tables now (stories, ratings, custom_entries) prevents migration ordering issues for S02/S03.
   - Files: `package.json`, `lib/supabase.ts`, `supabase/schema.sql`, `.env.local.example`
   - Do: Install `@supabase/supabase-js`. Create `lib/supabase.ts` with a singleton `createClient()` export using `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_ANON_KEY`. Write `supabase/schema.sql` with DDL for `stories` (id UUID PK default gen_random_uuid(), characters TEXT[], theme TEXT, length TEXT, prompt TEXT, response TEXT, created_at TIMESTAMPTZ default now()), `ratings` (id UUID PK, story_id UUID FK references stories, stars INT check 1-5, feedback TEXT, created_at TIMESTAMPTZ), and `custom_entries` (id UUID PK, type TEXT, value TEXT, usage_count INT default 1, created_at TIMESTAMPTZ, UNIQUE(type, value)). Add Supabase env var placeholders to `.env.local.example`. Disable RLS on all tables per D003 (anonymous model).
