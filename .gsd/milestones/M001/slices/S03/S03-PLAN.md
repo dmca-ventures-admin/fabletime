@@ -45,7 +45,7 @@
 
 ## Tasks
 
-- [ ] **T01: Add seed data, Postgres upsert function, and content filter utility** `est:45m`
+- [x] **T01: Add seed data, Postgres upsert function, and content filter utility** `est:45m`
   - Why: Establishes the data layer (seed entries, atomic upsert, cached content filter) that the API endpoints and frontend depend on. Without seeds the suggestions page is empty on first load (R014). Without the upsert function, concurrent story generations cause race conditions. Without the content filter, inappropriate entries could surface (R011).
   - Files: `supabase/schema.sql`, `supabase/seed.sql`, `lib/content-filter.ts`
   - Do: (1) Add `child_friendly BOOLEAN DEFAULT NULL` column to `custom_entries` in schema.sql. (2) Add `upsert_entry(p_type TEXT, p_value TEXT)` Postgres function that does INSERT ... ON CONFLICT DO UPDATE SET usage_count = usage_count + 1. (3) Create seed.sql with idempotent INSERTs for 6 characters (Fox, Bear, Little Wizard, Brave Knight, Young Scientist, Mermaid) and 4 themes (Kindness, Courage, Empathy, Vocabulary). (4) Create lib/content-filter.ts exporting `isChildFriendly(text: string): Promise<boolean>` using Anthropic SDK with Claude Haiku for fast classification.

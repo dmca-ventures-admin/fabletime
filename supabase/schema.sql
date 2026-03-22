@@ -23,13 +23,26 @@ CREATE TABLE IF NOT EXISTS ratings (
 
 -- Custom entries table: user-submitted characters, themes, etc.
 CREATE TABLE IF NOT EXISTS custom_entries (
-  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  type        TEXT        NOT NULL,
-  value       TEXT        NOT NULL,
-  usage_count INTEGER     NOT NULL DEFAULT 1,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  type           TEXT        NOT NULL,
+  value          TEXT        NOT NULL,
+  usage_count    INTEGER     NOT NULL DEFAULT 1,
+  child_friendly BOOLEAN     DEFAULT NULL,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (type, value)
 );
+
+-- Atomic upsert function: inserts a new entry with usage_count=1, or increments
+-- the existing row's usage_count. Avoids read-then-write race conditions.
+CREATE OR REPLACE FUNCTION upsert_entry(p_type TEXT, p_value TEXT)
+RETURNS VOID AS $$
+BEGIN
+  INSERT INTO custom_entries (type, value, usage_count)
+  VALUES (p_type, p_value, 1)
+  ON CONFLICT (type, value)
+  DO UPDATE SET usage_count = custom_entries.usage_count + 1;
+END;
+$$ LANGUAGE plpgsql;
 
 -- D003: Anonymous model — no auth, RLS disabled on all tables
 ALTER TABLE stories DISABLE ROW LEVEL SECURITY;

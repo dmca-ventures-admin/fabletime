@@ -68,3 +68,10 @@ Establishes the data-layer foundation for dynamic suggestions: seed data so the 
 - `supabase/schema.sql` — extended with `child_friendly` column and `upsert_entry` function
 - `supabase/seed.sql` — new file with 10 seed INSERT statements
 - `lib/content-filter.ts` — new file exporting `isChildFriendly` function
+
+## Observability Impact
+
+- **Content filter failures** are logged to console with `[S03]` prefix including the rejected entry text and the error object, enabling grep-based triage.
+- **Inspection surface**: `SELECT type, value, usage_count, child_friendly FROM custom_entries ORDER BY usage_count DESC;` shows all entries, their popularity, and filter status (`NULL` = not yet checked, `true` = safe, `false` = filtered out).
+- **Fail-closed design**: if the Anthropic API is unreachable or errors, `isChildFriendly` returns `false` — the entry is excluded from suggestions rather than surfaced unchecked. This is visible as `child_friendly = NULL` entries that never become `true`.
+- **Seed data verification**: `SELECT count(*) FROM custom_entries WHERE child_friendly = true;` should return ≥10 after seed.sql is applied.
