@@ -19,7 +19,7 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: 'Fabletime — Magical Stories for Kids',
   description:
-    "Generate enchanting children's stories with AI. Pick a character, choose a theme, and watch a magical story come to life!",
+    "AI-powered story generator for parents and kids. Pick characters, choose a learning theme, and generate a unique bedtime story to read aloud to your child.",
 };
 
 export default function RootLayout({
