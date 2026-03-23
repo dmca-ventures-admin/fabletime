@@ -9,10 +9,16 @@ Parents can generate unique, age-appropriate bedtime stories on demand — perso
 ## Current State
 
 - **Live at** [fabletime.co](https://fabletime.co) on Vercel
+- **Preview deployments** on Vercel from `milestone/M001` branch (auth-gated via Vercel SSO)
 - Story generation via Claude Opus with streaming, child-safety guardrails, three-act structure
-- Multi-character selection (up to 6 hardcoded options)
-- 4 learning themes: Vocabulary, Empathy, Courage, Kindness
-- 3 story lengths: Short, Medium, Long
+- Stories persisted to Supabase with UUID tracking
+- Per-story star ratings (1–5) with optional feedback text
+- Dynamic character/theme suggestions fetched from Supabase, ranked by popularity
+- Custom character input (comma-separated, max 3 total, max 3 words each)
+- Custom theme input with suggestion override
+- Content filter (Claude Haiku) for user-submitted entries, with DB-cached results
+- Usage tracking via atomic Postgres upsert on each story generation
+- Server-side validation: max 3 characters, max 3 words per entry
 - Light/dark theme toggle with localStorage persistence
 - Feedback & bug report forms via GitHub Issues API
 - Claymorphism design system (Fredoka + Nunito fonts, clay shadows, rounded borders)
@@ -21,10 +27,13 @@ Parents can generate unique, age-appropriate bedtime stories on demand — perso
 
 - **Framework:** Next.js 16 (App Router), React 19, TypeScript
 - **Styling:** Tailwind CSS 4 with CSS custom properties for theming (`data-theme="dark"`)
-- **AI:** Anthropic SDK, Claude Opus, streaming via ReadableStream in route handlers
+- **AI:** Anthropic SDK — Claude Opus for story generation, Claude Haiku for content classification
+- **Database:** Supabase (Postgres) — two projects: `fabletime-preview` (dev/preview) and `fabletime-prod` (production)
+- **Tables:** `stories`, `ratings`, `custom_entries` (with `child_friendly` cache column and `upsert_entry` function)
 - **Analytics:** Vercel Analytics + Speed Insights
 - **Fonts:** Fredoka (headings), Nunito (body) via `next/font/google`
-- **State:** Client-side React state only (no server state, no database yet)
+- **State:** Client-side React state + Supabase for persistence
+- **Env separation:** Vercel env vars split by environment — preview/dev use preview DB, production uses prod DB
 
 ## Capability Contract
 
@@ -32,4 +41,10 @@ See `.gsd/REQUIREMENTS.md` for the explicit capability contract, requirement sta
 
 ## Milestone Sequence
 
-- [ ] M001: Data Layer & User Engagement — Supabase persistence for stories, per-story ratings, dynamic custom characters/themes with popularity-driven suggestions
+- [x] M001: Data Layer & User Engagement — Supabase persistence for stories, per-story ratings, dynamic custom characters/themes with popularity-driven suggestions
+
+## Next Steps
+
+- Deploy M001 to production (`vercel --prod`) when ready to ship to fabletime.co
+- Production Supabase DB (`fabletime-prod`) already has schema + seed data applied
+- GitHub issues in-progress: #7 (Custom Characters), #8 (Save Stories), #15 (Ratings)
