@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -17,6 +18,20 @@ export async function POST(request: NextRequest) {
 
     if (!characters || !Array.isArray(characters) || characters.length === 0 || !length || !theme) {
       return new Response('Missing required fields', { status: 400 });
+    }
+
+    if (characters.length > 3) {
+      return new Response('Maximum 3 characters allowed', { status: 400 });
+    }
+
+    // Validate that each character and the theme are 3 words or fewer
+    for (const character of characters) {
+      if (typeof character === 'string' && character.trim().split(/\s+/).length > 3) {
+        return new Response('Character/theme names must be 3 words or fewer', { status: 400 });
+      }
+    }
+    if (typeof theme === 'string' && theme.trim().split(/\s+/).length > 3) {
+      return new Response('Character/theme names must be 3 words or fewer', { status: 400 });
     }
 
     const lengthDesc = lengthDescriptions[length] || '300-400 words';
@@ -54,9 +69,13 @@ If the theme is "kindness", show acts of kindness and their positive effects.
 
 Write the story directly without any preamble or meta-commentary. Begin with "Once upon a time..." or a creative variation.`;
 
+    const storyId = crypto.randomUUID();
+
     const stream = new ReadableStream({
       async start(controller) {
         try {
+          let fullResponse = '';
+
           const anthropicStream = client.messages.stream({
             model: 'claude-opus-4-20250514',
             max_tokens: 2048,
@@ -69,9 +88,45 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
               chunk.delta.type === 'text_delta'
             ) {
               controller.enqueue(new TextEncoder().encode(chunk.delta.text));
+              fullResponse += chunk.delta.text;
             }
           }
           controller.close();
+
+          // Persist story after stream is fully delivered to the client
+          try {
+            const { error: dbError } = await supabase.from('stories').insert({
+              id: storyId,
+              characters,
+              theme,
+              length,
+              prompt,
+              response: fullResponse,
+            });
+            if (dbError) {
+              console.error('[S01] Failed to persist story:', storyId, dbError);
+            }
+          } catch (dbError) {
+            console.error('[S01] Failed to persist story:', storyId, dbError);
+          }
+
+          // Track usage for each character and the theme (S03)
+          try {
+            const upsertResults = await Promise.all([
+              ...characters.map((character: string) =>
+                supabase.rpc('upsert_entry', { p_type: 'character', p_value: character })
+              ),
+              supabase.rpc('upsert_entry', { p_type: 'theme', p_value: theme }),
+            ]);
+
+            for (const { error } of upsertResults) {
+              if (error) {
+                console.error('[S03] Usage tracking upsert failed:', error);
+              }
+            }
+          } catch (upsertError) {
+            console.error('[S03] Usage tracking failed:', upsertError);
+          }
         } catch (error) {
           controller.error(error);
         }
@@ -82,6 +137,8 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Transfer-Encoding': 'chunked',
+        'X-Story-Id': storyId,
+        'Access-Control-Expose-Headers': 'X-Story-Id',
       },
     });
   } catch (error) {

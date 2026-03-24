@@ -1,16 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import StoryDisplay from './StoryDisplay';
 
-const characters = [
-  { value: 'Fox', label: 'Fox', emoji: '🦊' },
-  { value: 'Bear', label: 'Bear', emoji: '🐻' },
-  { value: 'Little Wizard', label: 'Wizard', emoji: '🧙' },
-  { value: 'Brave Knight', label: 'Knight', emoji: '🛡️' },
-  { value: 'Young Scientist', label: 'Scientist', emoji: '🔬' },
-  { value: 'Mermaid', label: 'Mermaid', emoji: '🧜' },
-];
+const MAX_CHARACTERS = 3;
+const MAX_WORDS_PER_ENTRY = 3;
 
 const lengths = [
   { value: 'short', label: 'Short', sub: '~300 words' },
@@ -18,119 +12,183 @@ const lengths = [
   { value: 'long', label: 'Long', sub: '~800 words' },
 ];
 
-const themes = [
-  {
-    value: 'Vocabulary',
-    label: 'Vocabulary',
-    icon: (
-      <svg
-        className="w-5 h-5 shrink-0"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>
-    ),
-  },
-  {
-    value: 'Empathy',
-    label: 'Empathy',
-    icon: (
-      <svg
-        className="w-5 h-5 shrink-0"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    ),
-  },
-  {
-    value: 'Courage',
-    label: 'Courage',
-    icon: (
-      <svg
-        className="w-5 h-5 shrink-0"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-      </svg>
-    ),
-  },
-  {
-    value: 'Kindness',
-    label: 'Kindness',
-    icon: (
-      <svg
-        className="w-5 h-5 shrink-0"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
-      </svg>
-    ),
-  },
-];
+interface Suggestions {
+  characters: string[];
+  themes: string[];
+}
+
+/** Parse comma-separated input into trimmed, non-empty entries */
+function parseCustomCharacters(input: string): string[] {
+  return input
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/** Check if a single entry exceeds the max word count */
+function exceedsMaxWords(entry: string): boolean {
+  return entry.trim().split(/\s+/).length > MAX_WORDS_PER_ENTRY;
+}
 
 export default function StoryForm() {
-  const [selectedCharacters, setSelectedCharacters] = useState<Set<string>>(new Set(['Fox']));
+  // Suggestion state
+  const [suggestions, setSuggestions] = useState<Suggestions>({ characters: [], themes: [] });
+  const [suggestionsLoading, setSuggestionsLoading] = useState(true);
+  const [suggestionsError, setSuggestionsError] = useState(false);
+
+  // Selection state
+  const [selectedCharacters, setSelectedCharacters] = useState<Set<string>>(new Set());
   const [length, setLength] = useState('short');
-  const [theme, setTheme] = useState('Kindness');
+  const [selectedTheme, setSelectedTheme] = useState('');
+
+  // Custom input state
+  const [customCharacterInput, setCustomCharacterInput] = useState('');
+  const [customThemeInput, setCustomThemeInput] = useState('');
+  const [customCharacterError, setCustomCharacterError] = useState('');
+  const [customThemeError, setCustomThemeError] = useState('');
+
+  // Form state
   const [story, setStory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [storyId, setStoryId] = useState<string | null>(null);
+  const [hasRated, setHasRated] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  const toggleCharacter = (value: string) => {
+  // Fetch suggestions on mount
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchSuggestions() {
+      try {
+        const res = await fetch('/api/suggestions');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: Suggestions = await res.json();
+
+        if (!cancelled) {
+          setSuggestions(data);
+          setSuggestionsLoading(false);
+        }
+      } catch (err) {
+        console.error('[S03] Failed to fetch suggestions:', err);
+        if (!cancelled) {
+          setSuggestionsError(true);
+          setSuggestionsLoading(false);
+        }
+      }
+    }
+
+    fetchSuggestions();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Derived counts
+  const parsedCustomCharacters = parseCustomCharacters(customCharacterInput);
+  const totalCharacters = selectedCharacters.size + parsedCustomCharacters.length;
+  const maxReached = totalCharacters >= MAX_CHARACTERS;
+
+  // Resolve the final theme: custom input takes precedence if non-empty
+  const finalTheme = customThemeInput.trim() || selectedTheme;
+
+  // Resolve the final characters: merge selected suggestions + custom entries
+  const finalCharacters = [...Array.from(selectedCharacters), ...parsedCustomCharacters];
+
+  const toggleCharacter = useCallback((value: string) => {
     if (isLoading) return;
     setSelectedCharacters((prev) => {
       const next = new Set(prev);
       if (next.has(value)) {
-        // Don't allow deselecting the last character
-        if (next.size === 1) return prev;
         next.delete(value);
       } else {
+        // Don't allow selecting beyond max
+        if (next.size + parsedCustomCharacters.length >= MAX_CHARACTERS) return prev;
         next.add(value);
       }
       return next;
     });
-  };
+  }, [isLoading, parsedCustomCharacters.length]);
+
+  const handleCustomCharacterChange = useCallback((value: string) => {
+    setCustomCharacterInput(value);
+    setSubmitError('');
+
+    // Validate each entry
+    const entries = parseCustomCharacters(value);
+    const tooLong = entries.find(exceedsMaxWords);
+    if (tooLong) {
+      setCustomCharacterError(`"${tooLong}" exceeds ${MAX_WORDS_PER_ENTRY} words`);
+    } else {
+      setCustomCharacterError('');
+    }
+  }, []);
+
+  const handleCustomThemeChange = useCallback((value: string) => {
+    setCustomThemeInput(value);
+    setSubmitError('');
+
+    if (value.trim() && exceedsMaxWords(value)) {
+      setCustomThemeError(`Custom theme must be ${MAX_WORDS_PER_ENTRY} words or fewer`);
+    } else {
+      setCustomThemeError('');
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError('');
+
+    // Validate: at least 1 character
+    if (finalCharacters.length === 0) {
+      setSubmitError('Please select or type at least one character');
+      return;
+    }
+
+    // Validate: max characters
+    if (finalCharacters.length > MAX_CHARACTERS) {
+      setSubmitError(`Maximum ${MAX_CHARACTERS} characters allowed`);
+      return;
+    }
+
+    // Validate: no entries exceed word limit
+    const tooLongChar = finalCharacters.find(exceedsMaxWords);
+    if (tooLongChar) {
+      setSubmitError(`"${tooLongChar}" exceeds ${MAX_WORDS_PER_ENTRY} words`);
+      return;
+    }
+
+    // Validate: theme required
+    if (!finalTheme) {
+      setSubmitError('Please select or type a theme');
+      return;
+    }
+
+    if (finalTheme && exceedsMaxWords(finalTheme)) {
+      setSubmitError(`Theme must be ${MAX_WORDS_PER_ENTRY} words or fewer`);
+      return;
+    }
+
     setStory('');
     setError('');
+    setStoryId(null);
+    setHasRated(false);
     setIsLoading(true);
 
     try {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ characters: Array.from(selectedCharacters), length, theme }),
+        body: JSON.stringify({
+          characters: finalCharacters,
+          length,
+          theme: finalTheme,
+        }),
       });
 
       if (!response.ok) throw new Error('Failed to generate story');
       if (!response.body) throw new Error('No response body');
+
+      const id = response.headers.get('X-Story-Id');
+      setStoryId(id);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -149,6 +207,11 @@ export default function StoryForm() {
     }
   };
 
+  // Determine if custom character input should show a "max reached" warning
+  const customWouldExceedMax =
+    parsedCustomCharacters.length > 0 &&
+    selectedCharacters.size + parsedCustomCharacters.length > MAX_CHARACTERS;
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       <form
@@ -161,33 +224,108 @@ export default function StoryForm() {
             <legend className="block text-xs font-semibold text-secondary mb-1 uppercase tracking-wider">
               Choose Your Heroes
             </legend>
-            <p className="text-xs text-secondary/60 mb-3">Pick one or more characters</p>
-            <div className="grid grid-cols-3 gap-2">
-              {characters.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => toggleCharacter(c.value)}
-                  disabled={isLoading}
-                  aria-pressed={selectedCharacters.has(c.value)}
-                  className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border-4 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed ${
-                    selectedCharacters.has(c.value)
-                      ? 'border-secondary bg-[var(--surface-chip-active)] shadow-[var(--clay-chip)]'
-                      : 'border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] hover:border-[var(--border-card)] hover:bg-[var(--surface-hover)] shadow-[var(--clay-chip-inactive)]'
-                  }`}
-                >
-                  <span className="text-2xl leading-none" role="img" aria-label={c.label}>
-                    {c.emoji}
-                  </span>
-                  <span
-                    className={`text-xs font-semibold ${
-                      selectedCharacters.has(c.value) ? 'text-primary' : 'text-secondary'
-                    }`}
+            <p className="text-xs text-secondary/60 mb-3">
+              Pick up to {MAX_CHARACTERS} characters
+              {maxReached && (
+                <span className="text-amber-600 font-semibold ml-1">(max {MAX_CHARACTERS} reached)</span>
+              )}
+            </p>
+
+            {/* Dynamic suggestion buttons */}
+            {suggestionsLoading ? (
+              <div className="grid grid-cols-3 gap-2 mb-3" aria-label="Loading character suggestions">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border-4 border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] animate-pulse"
+                    aria-hidden="true"
                   >
-                    {c.label}
-                  </span>
-                </button>
-              ))}
+                    <div className="w-8 h-8 rounded-full bg-secondary/20" />
+                    <div className="w-12 h-3 rounded bg-secondary/20" />
+                  </div>
+                ))}
+              </div>
+            ) : suggestionsError || suggestions.characters.length === 0 ? (
+              <p className="text-xs text-secondary/60 mb-3 italic">
+                {suggestionsError
+                  ? 'Could not load suggestions — type your own characters below'
+                  : 'No popular characters yet — type your own below'}
+              </p>
+            ) : (
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {suggestions.characters.map((name) => {
+                  const isSelected = selectedCharacters.has(name);
+                  const isDisabled = isLoading || (!isSelected && maxReached);
+
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => toggleCharacter(name)}
+                      disabled={isDisabled}
+                      aria-pressed={isSelected}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border-4 transition-colors transition-shadow duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${
+                        isSelected
+                          ? 'border-secondary bg-[var(--surface-chip-active)] shadow-[var(--clay-chip)]'
+                          : 'border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] hover:border-[var(--border-card)] hover:bg-[var(--surface-hover)] shadow-[var(--clay-chip-inactive)]'
+                      }`}
+                    >
+                      <span
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                          isSelected
+                            ? 'bg-secondary text-white'
+                            : 'bg-secondary/15 text-secondary'
+                        }`}
+                        aria-hidden="true"
+                      >
+                        {name.charAt(0).toUpperCase()}
+                      </span>
+                      <span
+                        className={`text-xs font-semibold ${
+                          isSelected ? 'text-primary' : 'text-secondary'
+                        }`}
+                      >
+                        {name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Custom character input */}
+            <div>
+              <input
+                type="text"
+                value={customCharacterInput}
+                onChange={(e) => handleCustomCharacterChange(e.target.value)}
+                disabled={isLoading}
+                placeholder="Or type custom characters (comma-separated)..."
+                aria-label="Custom characters"
+                aria-invalid={!!customCharacterError || customWouldExceedMax}
+                aria-describedby={
+                  customCharacterError
+                    ? 'custom-character-error'
+                    : customWouldExceedMax
+                      ? 'custom-character-max-error'
+                      : undefined
+                }
+                className={`w-full px-4 py-2.5 rounded-xl border-2 text-sm bg-white/80 text-primary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
+                  customCharacterError || customWouldExceedMax
+                    ? 'border-red-400'
+                    : 'border-[var(--border-subtle)]'
+                }`}
+              />
+              {customCharacterError && (
+                <p id="custom-character-error" className="text-xs text-red-500 mt-1" role="alert">
+                  {customCharacterError}
+                </p>
+              )}
+              {customWouldExceedMax && !customCharacterError && (
+                <p id="custom-character-max-error" className="text-xs text-amber-600 mt-1" role="alert">
+                  Total characters exceed maximum of {MAX_CHARACTERS} — remove some selections or custom entries
+                </p>
+              )}
             </div>
           </fieldset>
 
@@ -204,7 +342,7 @@ export default function StoryForm() {
                   onClick={() => !isLoading && setLength(l.value)}
                   disabled={isLoading}
                   aria-pressed={length === l.value}
-                  className={`flex-1 flex flex-col items-center py-3 px-2 rounded-2xl border-4 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed ${
+                  className={`flex-1 flex flex-col items-center py-3 px-2 rounded-2xl border-4 transition-colors transition-shadow duration-200 cursor-pointer disabled:cursor-not-allowed ${
                     length === l.value
                       ? 'border-secondary bg-primary text-white shadow-[var(--clay-chip)]'
                       : 'border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] text-primary hover:border-[var(--border-card)] hover:bg-[var(--surface-hover)] shadow-[var(--clay-chip-inactive)]'
@@ -228,26 +366,87 @@ export default function StoryForm() {
             <legend className="block text-xs font-semibold text-secondary mb-3 uppercase tracking-wider">
               Learning Theme
             </legend>
-            <div className="grid grid-cols-2 gap-2">
-              {themes.map((t) => (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => !isLoading && setTheme(t.value)}
-                  disabled={isLoading}
-                  aria-pressed={theme === t.value}
-                  className={`flex items-center gap-2.5 py-3 px-4 rounded-2xl border-4 font-semibold text-sm transition-all duration-200 cursor-pointer disabled:cursor-not-allowed ${
-                    theme === t.value
-                      ? 'border-secondary bg-primary text-white shadow-[var(--clay-chip)]'
-                      : 'border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] text-primary hover:border-[var(--border-card)] hover:bg-[var(--surface-hover)] shadow-[var(--clay-chip-inactive)]'
-                  }`}
-                >
-                  {t.icon}
-                  {t.label}
-                </button>
-              ))}
+
+            {/* Dynamic theme suggestion buttons */}
+            {suggestionsLoading ? (
+              <div className="grid grid-cols-2 gap-2 mb-3" aria-label="Loading theme suggestions">
+                {[1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="py-3 px-4 rounded-2xl border-4 border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] animate-pulse"
+                    aria-hidden="true"
+                  >
+                    <div className="w-16 h-4 rounded bg-secondary/20" />
+                  </div>
+                ))}
+              </div>
+            ) : suggestionsError || suggestions.themes.length === 0 ? (
+              <p className="text-xs text-secondary/60 mb-3 italic">
+                {suggestionsError
+                  ? 'Could not load themes — type your own theme below'
+                  : 'No popular themes yet — type your own below'}
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                {suggestions.themes.map((name) => {
+                  const isSelected = selectedTheme === name && !customThemeInput.trim();
+
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => {
+                        if (!isLoading) {
+                          setSelectedTheme(name);
+                          // Clear custom theme when selecting a suggestion
+                          setCustomThemeInput('');
+                          setCustomThemeError('');
+                        }
+                      }}
+                      disabled={isLoading}
+                      aria-pressed={isSelected}
+                      className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl border-4 font-semibold text-sm transition-colors transition-shadow duration-200 cursor-pointer disabled:cursor-not-allowed ${
+                        isSelected
+                          ? 'border-secondary bg-primary text-white shadow-[var(--clay-chip)]'
+                          : 'border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] text-primary hover:border-[var(--border-card)] hover:bg-[var(--surface-hover)] shadow-[var(--clay-chip-inactive)]'
+                      }`}
+                    >
+                      {name}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Custom theme input */}
+            <div>
+              <input
+                type="text"
+                value={customThemeInput}
+                onChange={(e) => handleCustomThemeChange(e.target.value)}
+                disabled={isLoading}
+                placeholder="Or type a custom theme..."
+                aria-label="Custom theme"
+                aria-invalid={!!customThemeError}
+                aria-describedby={customThemeError ? 'custom-theme-error' : undefined}
+                className={`w-full px-4 py-2.5 rounded-xl border-2 text-sm bg-white/80 text-primary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
+                  customThemeError ? 'border-red-400' : 'border-[var(--border-subtle)]'
+                }`}
+              />
+              {customThemeError && (
+                <p id="custom-theme-error" className="text-xs text-red-500 mt-1" role="alert">
+                  {customThemeError}
+                </p>
+              )}
             </div>
           </fieldset>
+
+          {/* Submission error */}
+          {submitError && (
+            <p className="text-sm text-red-500 font-medium" role="alert">
+              {submitError}
+            </p>
+          )}
 
           {/* Submit Button */}
           <button
@@ -289,7 +488,7 @@ export default function StoryForm() {
         </div>
       )}
 
-      <StoryDisplay story={story} isLoading={isLoading} />
+      <StoryDisplay story={story} isLoading={isLoading} storyId={storyId} hasRated={hasRated} onRated={() => setHasRated(true)} />
     </div>
   );
 }

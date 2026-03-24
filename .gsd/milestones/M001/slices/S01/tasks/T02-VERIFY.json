@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T02",
+  "unitId": "M001/S01/T02",
+  "timestamp": 1774177718512,
+  "passed": true,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "grep -q \"X-Story-Id\" app/api/generate/route.ts",
+      "exitCode": 0,
+      "durationMs": 4,
+      "verdict": "pass"
+    },
+    {
+      "command": "grep -q \"fullResponse\" app/api/generate/route.ts",
+      "exitCode": 0,
+      "durationMs": 4,
+      "verdict": "pass"
+    }
+  ]
+}
