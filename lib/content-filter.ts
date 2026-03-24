@@ -18,7 +18,7 @@ const client = new Anthropic({
 export async function isChildFriendly(text: string): Promise<boolean> {
   try {
     const response = await client.messages.create({
-      model: 'claude-haiku-4-20250514',
+      model: 'claude-haiku-4-5',
       max_tokens: 3,
       system:
         'You are a content filter for a children\'s storytelling app (ages 4-8). ' +
