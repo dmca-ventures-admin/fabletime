@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
     // The story row is inserted after the stream closes (generate/route.ts), so the
     // rating request can arrive before the story exists. Retry once after a short
     // delay if the insert fails with a foreign key violation.
-    const MAX_RETRIES = 2;
-    const RETRY_DELAY_MS = 1500;
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 2000;
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       const { error } = await supabase.from('ratings').insert({
