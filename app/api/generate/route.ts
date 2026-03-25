@@ -71,6 +71,25 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
 
     const storyId = crypto.randomUUID();
 
+    // Insert placeholder story row BEFORE streaming so the rating endpoint
+    // can find it immediately when the user submits a rating.
+    try {
+      const { error: insertError } = await supabase.from('stories').insert({
+        id: storyId,
+        characters,
+        theme,
+        length,
+        prompt,
+        response: '',
+      });
+      if (insertError) {
+        console.error('[S01] Failed to insert placeholder story:', storyId, insertError);
+        // Continue anyway — story generation still works, rating may fail
+      }
+    } catch (insertErr) {
+      console.error('[S01] Failed to insert placeholder story:', storyId, insertErr);
+    }
+
     const stream = new ReadableStream({
       async start(controller) {
         try {
@@ -93,21 +112,17 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
           }
           controller.close();
 
-          // Persist story after stream is fully delivered to the client
+          // Update the placeholder with the full story response
           try {
-            const { error: dbError } = await supabase.from('stories').insert({
-              id: storyId,
-              characters,
-              theme,
-              length,
-              prompt,
-              response: fullResponse,
-            });
+            const { error: dbError } = await supabase
+              .from('stories')
+              .update({ response: fullResponse })
+              .eq('id', storyId);
             if (dbError) {
-              console.error('[S01] Failed to persist story:', storyId, dbError);
+              console.error('[S01] Failed to update story response:', storyId, dbError);
             }
           } catch (dbError) {
-            console.error('[S01] Failed to persist story:', storyId, dbError);
+            console.error('[S01] Failed to update story response:', storyId, dbError);
           }
 
           // Track usage for each character and the theme (S03)
@@ -119,7 +134,8 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
               supabase.rpc('upsert_entry', { p_type: 'theme', p_value: theme }),
             ]);
 
-            for (const { error } of upsertResults) {
+            for (const result of upsertResults) {
+              const { error } = result as { error: { message: string } | null };
               if (error) {
                 console.error('[S03] Usage tracking upsert failed:', error);
               }
