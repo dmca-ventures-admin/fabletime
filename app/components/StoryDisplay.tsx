@@ -76,11 +76,11 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
   const showThankYou = !isLoading && story && storyId && hasRated;
 
   return (
-    <div className="mt-6 w-full max-w-2xl mx-auto">
+    <div className="mt-8 w-full max-w-2xl mx-auto">
       {/* Story Card */}
-      <div className="bg-[var(--surface-card)] rounded-3xl border border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="flex items-center justify-center w-10 h-10 bg-[var(--surface-chip-active)] rounded-2xl border border-[var(--border-card)] shrink-0">
+      <div className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border-card)] shadow-sm p-6 md:p-10">
+        <div className="flex items-center gap-3 mb-7">
+          <div className="flex items-center justify-center w-9 h-9 bg-[var(--surface-chip-active)] rounded-xl border border-[var(--border-card)] shrink-0">
             <svg
               className="w-5 h-5 text-primary"
               viewBox="0 0 24 24"
@@ -104,12 +104,12 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
           )}
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           {story.split('\n').map((paragraph, index) =>
             paragraph.trim() ? (
               <p
                 key={index}
-                className="text-foreground/80 leading-relaxed text-base md:text-lg font-serif"
+                className="text-foreground leading-loose text-base md:text-lg font-serif"
               >
                 {paragraph}
               </p>
@@ -125,7 +125,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
 
       {/* Rating Form */}
       {showRatingForm && (
-        <div className="mt-4 bg-[var(--surface-card)] rounded-3xl border border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8">
+        <div className="mt-4 bg-[var(--surface-card)] rounded-2xl border border-[var(--border-card)] shadow-sm p-6 md:p-8">
           <h3 className="font-heading text-lg font-semibold text-primary mb-4 flex items-center gap-2">
             <span aria-hidden="true">⭐</span>
             Rate This Story
@@ -166,7 +166,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
                     className={`w-8 h-8 md:w-10 md:h-10 transition-colors duration-150 ${
                       n <= displayRating
                         ? 'text-cta'
-                        : 'text-secondary/40'
+                        : 'text-secondary opacity-30'
                     }`}
                   />
                   {/* Focus ring for keyboard navigation */}
@@ -209,7 +209,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
             type="button"
             onClick={handleRatingSubmit}
             disabled={selectedRating === 0 || isSubmitting}
-            className="py-3 px-6 rounded-2xl border-2 border-[var(--border-card)] bg-[var(--surface-chip-active)] text-primary font-heading font-semibold text-base shadow-[var(--clay-btn-primary)] hover:shadow-[var(--clay-btn-primary-hover)] hover:translate-y-0.5 active:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transition-all duration-200 cursor-pointer flex items-center gap-2"
+            className="py-2.5 px-6 rounded-xl border border-primary bg-primary text-white font-heading font-semibold text-base hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center gap-2"
           >
             {isSubmitting ? (
               <>
@@ -228,7 +228,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
 
       {/* Thank You Message */}
       {showThankYou && (
-        <div className="mt-4 bg-[var(--surface-success-bg)] rounded-3xl border border-[var(--border-success)] shadow-[var(--clay-success)] p-6 md:p-8 text-center">
+        <div className="mt-4 bg-[var(--surface-success-bg)] rounded-2xl border border-[var(--border-success)] p-6 md:p-8 text-center">
           <p className="font-heading text-lg font-semibold text-[var(--text-success)] flex items-center justify-center gap-2">
             Thanks for your feedback!
             <span aria-hidden="true">⭐</span>

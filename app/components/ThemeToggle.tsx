@@ -23,7 +23,7 @@ export default function ThemeToggle() {
   if (!mounted) {
     return (
       <button
-        className="inline-flex items-center gap-2 text-sm font-semibold border-2 rounded-xl px-4 py-2 border-[var(--border-subtle)] text-secondary opacity-0"
+        className="inline-flex items-center gap-2 text-sm font-semibold border rounded-lg px-3 py-1.5 border-[var(--border-subtle)] text-secondary opacity-0"
         aria-hidden="true"
         tabIndex={-1}
       >
@@ -36,7 +36,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="inline-flex items-center gap-2 text-sm font-semibold text-secondary hover:text-primary border-2 border-[var(--border-subtle)] hover:border-[var(--border-card)] rounded-xl px-4 py-2 transition-all duration-200 hover:bg-[var(--surface-hover)] cursor-pointer"
+      className="inline-flex items-center gap-2 text-sm font-semibold text-secondary hover:text-primary border border-[var(--border-subtle)] hover:border-[var(--border-card)] rounded-lg px-3 py-1.5 transition-colors duration-200 hover:bg-[var(--surface-hover)] cursor-pointer"
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >
       {theme === 'light' ? (

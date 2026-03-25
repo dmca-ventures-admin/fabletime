@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 :root {
+  /* ── Legacy shadow aliases (used by /feedback and /bug pages) ── */
+  --clay-card:             0 1px 3px rgba(0, 0, 0, 0.08);
+  --clay-btn-primary:      0 1px 2px rgba(79, 70, 229, 0.12);
+  --clay-btn-primary-hover: 0 1px 2px rgba(79, 70, 229, 0.08);
+  --clay-icon:             0 1px 2px rgba(0, 0, 0, 0.06);
+  --clay-error:            0 1px 2px rgba(239, 68, 68, 0.10);
+  --clay-success:          0 1px 2px rgba(16, 185, 129, 0.10);
+
   /* ── Spacing ── */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -10,100 +18,72 @@
   --space-2xl: 3rem;
   --space-3xl: 4rem;
 
-  /* ── Standard shadow depths ── */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.08);
-  --shadow-xl: 0 16px 24px rgba(0, 0, 0, 0.10);
-
-  /* ── Claymorphism offset shadows (Light) — toned down ── */
-  --clay-card:               3px 4px 0px rgba(79, 70, 229, 0.12);
-  --clay-hero-icon:          2px 3px 0px rgba(67, 56, 202, 0.20);
-  --clay-icon:               2px 2px 0px rgba(99, 102, 241, 0.15);
-  --clay-chip:               2px 2px 0px rgba(99, 102, 241, 0.18);
-  --clay-chip-inactive:      1px 2px 0px rgba(99, 102, 241, 0.07);
-  --clay-btn-primary:        2px 3px 0px rgba(79, 70, 229, 0.20);
-  --clay-btn-primary-hover:  1px 2px 0px rgba(79, 70, 229, 0.20);
-  --clay-btn-cta:            3px 4px 0px rgba(234, 88, 12, 0.22);
-  --clay-btn-cta-hover:      2px 2px 0px rgba(234, 88, 12, 0.22);
-  --clay-btn-cta-active:     1px 1px 0px rgba(234, 88, 12, 0.22);
-  --clay-btn-cta-disabled:   3px 4px 0px rgba(234, 88, 12, 0.08);
-  --clay-success:            2px 2px 0px rgba(16, 185, 129, 0.18);
-  --clay-error:              2px 2px 0px rgba(239, 68, 68, 0.15);
-
   /* ── Theme-aware surface colors (Light) ── */
   --surface-card:          #ffffff;
-  --border-card:           #dde2f5;
-  --border-subtle:         #e8eaf6;
-  --border-footer:         #e8eaf6;
-  --surface-footer:        rgba(255, 255, 255, 0.8);
-  --surface-input:         #f5f6ff;
+  --border-card:           #E5E7EB;
+  --border-subtle:         #F3F4F6;
+  --border-footer:         #E5E7EB;
+  --surface-footer:        rgba(255, 255, 255, 0.95);
+  --surface-input:         #F9FAFB;
   --surface-chip-active:   #EEF2FF;
-  --surface-chip-inactive: #fafafa;
-  --surface-hover:         rgba(238, 242, 255, 0.5);
-  --text-hint:             #c7d2fe;  /* indigo-200 — subtle placeholder */
-  --surface-error-bg:      #fef2f2;
-  --border-error:          #fecaca;
-  --text-error:            #b91c1c;
-  --surface-rose-bg:       #fff1f2;
-  --surface-rose-icon:     #ffe4e6;
-  --border-rose:           #fda4af;
-  --border-rose-subtle:    #fecdd3;
-  --surface-success-bg:    #f0fdf4;
-  --border-success:        #bbf7d0;
-  --text-success:          #15803d;
-  --surface-cancel-border: #e8eaf6;
+  --surface-chip-inactive: #F9FAFB;
+  --surface-hover:         #EEF2FF;
+  --text-hint:             #9CA3AF;
+  --surface-error-bg:      #FEF2F2;
+  --border-error:          #FECACA;
+  --text-error:            #DC2626;
+  --surface-rose-bg:       #FFF1F2;
+  --surface-rose-icon:     #FFE4E6;
+  --border-rose:           #FDA4AF;
+  --border-rose-subtle:    #FECDD3;
+  --surface-success-bg:    #F0FDF4;
+  --border-success:        #BBF7D0;
+  --text-success:          #15803D;
+  --surface-cancel-border: #E5E7EB;
 }
 
 [data-theme="dark"] {
-  /* ── Claymorphism offset shadows (Dark) — toned down ── */
-  --clay-card:               3px 4px 0px rgba(99, 102, 241, 0.10);
-  --clay-hero-icon:          2px 3px 0px rgba(99, 102, 241, 0.18);
-  --clay-icon:               2px 2px 0px rgba(129, 140, 248, 0.12);
-  --clay-chip:               2px 2px 0px rgba(129, 140, 248, 0.18);
-  --clay-chip-inactive:      1px 2px 0px rgba(129, 140, 248, 0.05);
-  --clay-btn-primary:        2px 3px 0px rgba(99, 102, 241, 0.18);
-  --clay-btn-primary-hover:  1px 2px 0px rgba(99, 102, 241, 0.18);
-  --clay-btn-cta:            3px 4px 0px rgba(251, 146, 60, 0.18);
-  --clay-btn-cta-hover:      2px 2px 0px rgba(251, 146, 60, 0.18);
-  --clay-btn-cta-active:     1px 1px 0px rgba(251, 146, 60, 0.18);
-  --clay-btn-cta-disabled:   3px 4px 0px rgba(251, 146, 60, 0.07);
-  --clay-success:            2px 2px 0px rgba(34, 197, 94, 0.15);
-  --clay-error:              2px 2px 0px rgba(248, 113, 113, 0.15);
+  /* ── Legacy shadow aliases (Dark) ── */
+  --clay-card:             0 1px 3px rgba(0, 0, 0, 0.30);
+  --clay-btn-primary:      0 1px 2px rgba(99, 102, 241, 0.15);
+  --clay-btn-primary-hover: 0 1px 2px rgba(99, 102, 241, 0.10);
+  --clay-icon:             0 1px 2px rgba(0, 0, 0, 0.20);
+  --clay-error:            0 1px 2px rgba(248, 113, 113, 0.15);
+  --clay-success:          0 1px 2px rgba(34, 197, 94, 0.12);
 
   /* ── Theme-aware surface colors (Dark) ── */
-  --surface-card:          #1c1a35;
-  --border-card:           #2e2b54;
-  --border-subtle:         #252245;
-  --border-footer:         #252245;
-  --surface-footer:        rgba(18, 16, 40, 0.90);
-  --surface-input:         rgba(38, 35, 68, 0.70);
-  --surface-chip-active:   #2a2760;
-  --surface-chip-inactive: #201d3a;
-  --surface-hover:         rgba(42, 39, 96, 0.40);
-  --text-hint:             #4c4a7a;  /* muted for placeholder text */
+  --surface-card:          #131929;
+  --border-card:           #1E2D45;
+  --border-subtle:         #1A2438;
+  --border-footer:         #1E2D45;
+  --surface-footer:        rgba(10, 14, 26, 0.95);
+  --surface-input:         #0F1829;
+  --surface-chip-active:   #1A2642;
+  --surface-chip-inactive: #111827;
+  --surface-hover:         #1A2642;
+  --text-hint:             #4B5563;
   --surface-error-bg:      rgba(127, 29, 29, 0.25);
-  --border-error:          #7f1d1d;
-  --text-error:            #fca5a5;
+  --border-error:          #7F1D1D;
+  --text-error:            #FCA5A5;
   --surface-rose-bg:       rgba(136, 19, 55, 0.20);
   --surface-rose-icon:     rgba(136, 19, 55, 0.28);
-  --border-rose:           #9f1239;
-  --border-rose-subtle:    #6b1030;
+  --border-rose:           #9F1239;
+  --border-rose-subtle:    #6B1030;
   --surface-success-bg:    rgba(20, 83, 45, 0.25);
-  --border-success:        #14532d;
-  --text-success:          #86efac;
-  --surface-cancel-border: #252245;
+  --border-success:        #14532D;
+  --text-success:          #86EFAC;
+  --surface-cancel-border: #1E2D45;
 }
 
-@theme inline {
+@theme {
   /* ── Design System Color Palette ── */
   --color-primary:       #4F46E5;
   --color-primary-hover: #4338CA;
-  --color-secondary:     #818CF8;
+  --color-secondary:     #6366F1;
   --color-cta:           #F97316;
   --color-cta-hover:     #EA580C;
   --color-cta-border:    #FB923C;
-  --color-background:    #F5F6FF;
+  --color-background:    #F8F9FF;
   --color-foreground:    #1E1B4B;
 
   /* ── Typography ── */
@@ -118,8 +98,8 @@
   --color-cta:           #FB923C;
   --color-cta-hover:     #F97316;
   --color-cta-border:    #FDBA74;
-  --color-background:    #0f0d24;
-  --color-foreground:    #E0E7FF;
+  --color-background:    #0A0E1A;
+  --color-foreground:    #EEF0FF;
 }
 
 body {
