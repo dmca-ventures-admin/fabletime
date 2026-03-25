@@ -78,9 +78,9 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
   return (
     <div className="mt-6 w-full max-w-2xl mx-auto">
       {/* Story Card */}
-      <div className="bg-[var(--surface-card)] rounded-3xl border-4 border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8">
+      <div className="bg-[var(--surface-card)] rounded-3xl border border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="flex items-center justify-center w-10 h-10 bg-[var(--surface-chip-active)] rounded-2xl border-2 border-[var(--border-card)] shrink-0">
+          <div className="flex items-center justify-center w-10 h-10 bg-[var(--surface-chip-active)] rounded-2xl border border-[var(--border-card)] shrink-0">
             <svg
               className="w-5 h-5 text-primary"
               viewBox="0 0 24 24"
@@ -125,7 +125,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
 
       {/* Rating Form */}
       {showRatingForm && (
-        <div className="mt-4 bg-[var(--surface-card)] rounded-3xl border-4 border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8">
+        <div className="mt-4 bg-[var(--surface-card)] rounded-3xl border border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8">
           <h3 className="font-heading text-lg font-semibold text-primary mb-4 flex items-center gap-2">
             <span aria-hidden="true">⭐</span>
             Rate This Story
@@ -190,14 +190,14 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
               onChange={(e) => setFeedbackText(e.target.value)}
               placeholder="What did you think? (optional)"
               rows={3}
-              className="w-full rounded-2xl border-2 border-[var(--border-card)] bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-shadow duration-150"
+              className="w-full rounded-2xl border border-[var(--border-card)] bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-shadow duration-150"
             />
           </div>
 
           {/* Submit Error */}
           {submitError && (
             <div
-              className="mb-4 p-3 bg-[var(--surface-error-bg)] border-2 border-[var(--border-error)] rounded-xl text-[var(--text-error)] text-sm font-medium"
+              className="mb-4 p-3 bg-[var(--surface-error-bg)] border border-[var(--border-error)] rounded-xl text-[var(--text-error)] text-sm font-medium"
               role="alert"
             >
               {submitError}
@@ -209,7 +209,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
             type="button"
             onClick={handleRatingSubmit}
             disabled={selectedRating === 0 || isSubmitting}
-            className="py-3 px-6 rounded-2xl border-4 border-[var(--border-card)] bg-[var(--surface-chip-active)] text-primary font-heading font-semibold text-base shadow-[var(--clay-btn-primary)] hover:shadow-[var(--clay-btn-primary-hover)] hover:translate-y-0.5 active:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transition-all duration-200 cursor-pointer flex items-center gap-2"
+            className="py-3 px-6 rounded-2xl border-2 border-[var(--border-card)] bg-[var(--surface-chip-active)] text-primary font-heading font-semibold text-base shadow-[var(--clay-btn-primary)] hover:shadow-[var(--clay-btn-primary-hover)] hover:translate-y-0.5 active:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transition-all duration-200 cursor-pointer flex items-center gap-2"
           >
             {isSubmitting ? (
               <>
@@ -228,7 +228,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
 
       {/* Thank You Message */}
       {showThankYou && (
-        <div className="mt-4 bg-[var(--surface-success-bg)] rounded-3xl border-4 border-[var(--border-success)] shadow-[var(--clay-success)] p-6 md:p-8 text-center">
+        <div className="mt-4 bg-[var(--surface-success-bg)] rounded-3xl border border-[var(--border-success)] shadow-[var(--clay-success)] p-6 md:p-8 text-center">
           <p className="font-heading text-lg font-semibold text-[var(--text-success)] flex items-center justify-center gap-2">
             Thanks for your feedback!
             <span aria-hidden="true">⭐</span>

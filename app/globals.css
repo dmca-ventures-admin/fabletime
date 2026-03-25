@@ -12,91 +12,87 @@
 
   /* ── Standard shadow depths ── */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 16px 24px rgba(0, 0, 0, 0.10);
 
-  /* ── Claymorphism offset shadows (Light) ── */
-  --clay-card:               6px 8px 0px rgba(79, 70, 229, 0.2);
-  --clay-hero-icon:          5px 6px 0px rgba(67, 56, 202, 0.35);
-  --clay-icon:               4px 4px 0px rgba(99, 102, 241, 0.25);
-  --clay-chip:               3px 4px 0px rgba(99, 102, 241, 0.3);
-  --clay-chip-inactive:      2px 3px 0px rgba(99, 102, 241, 0.1);
-  --clay-btn-primary:        4px 5px 0px rgba(79, 70, 229, 0.3);
-  --clay-btn-primary-hover:  2px 3px 0px rgba(79, 70, 229, 0.3);
-  --clay-btn-cta:            5px 6px 0px rgba(234, 88, 12, 0.3);
-  --clay-btn-cta-hover:      3px 4px 0px rgba(234, 88, 12, 0.3);
-  --clay-btn-cta-active:     1px 2px 0px rgba(234, 88, 12, 0.3);
-  --clay-btn-cta-disabled:   5px 6px 0px rgba(234, 88, 12, 0.15);
-  --clay-success:            4px 4px 0px rgba(16, 185, 129, 0.3);
-  --clay-error:              4px 4px 0px rgba(239, 68, 68, 0.25);
+  /* ── Claymorphism offset shadows (Light) — toned down ── */
+  --clay-card:               3px 4px 0px rgba(79, 70, 229, 0.12);
+  --clay-hero-icon:          2px 3px 0px rgba(67, 56, 202, 0.20);
+  --clay-icon:               2px 2px 0px rgba(99, 102, 241, 0.15);
+  --clay-chip:               2px 2px 0px rgba(99, 102, 241, 0.18);
+  --clay-chip-inactive:      1px 2px 0px rgba(99, 102, 241, 0.07);
+  --clay-btn-primary:        2px 3px 0px rgba(79, 70, 229, 0.20);
+  --clay-btn-primary-hover:  1px 2px 0px rgba(79, 70, 229, 0.20);
+  --clay-btn-cta:            3px 4px 0px rgba(234, 88, 12, 0.22);
+  --clay-btn-cta-hover:      2px 2px 0px rgba(234, 88, 12, 0.22);
+  --clay-btn-cta-active:     1px 1px 0px rgba(234, 88, 12, 0.22);
+  --clay-btn-cta-disabled:   3px 4px 0px rgba(234, 88, 12, 0.08);
+  --clay-success:            2px 2px 0px rgba(16, 185, 129, 0.18);
+  --clay-error:              2px 2px 0px rgba(239, 68, 68, 0.15);
 
   /* ── Theme-aware surface colors (Light) ── */
   --surface-card:          #ffffff;
-  --surface-page-via:      #faf5ff;  /* purple-50 */
-  --surface-page-to:       #e0e7ff;  /* indigo-100 */
-  --border-card:           #c7d2fe;  /* indigo-200 */
-  --border-subtle:         #e0e7ff;  /* indigo-100 */
-  --border-footer:         #e0e7ff;  /* indigo-100 */
-  --surface-footer:        rgba(255, 255, 255, 0.6);
-  --surface-input:         rgba(238, 242, 255, 0.5);
+  --border-card:           #dde2f5;
+  --border-subtle:         #e8eaf6;
+  --border-footer:         #e8eaf6;
+  --surface-footer:        rgba(255, 255, 255, 0.8);
+  --surface-input:         #f5f6ff;
   --surface-chip-active:   #EEF2FF;
-  --surface-chip-inactive: #ffffff;
-  --surface-hover:         rgba(238, 242, 255, 0.4);
-  --text-hint:             #a5b4fc;  /* indigo-300 */
-  --surface-error-bg:      #fef2f2;  /* red-50 */
-  --border-error:          #fecaca;  /* red-200 */
-  --text-error:            #b91c1c;  /* red-700 */
-  --surface-rose-bg:       #fff1f2;  /* rose-50 */
-  --surface-rose-icon:     #ffe4e6;  /* rose-100 */
-  --border-rose:           #fda4af;  /* rose-300 */
-  --border-rose-subtle:    #fecdd3;  /* rose-200 */
-  --surface-success-bg:    #dcfce7;  /* green-100 */
-  --border-success:        #86efac;  /* green-300 */
-  --text-success:          #16a34a;  /* green-600 */
-  --surface-cancel-border: #e0e7ff;  /* indigo-100 */
+  --surface-chip-inactive: #fafafa;
+  --surface-hover:         rgba(238, 242, 255, 0.5);
+  --text-hint:             #c7d2fe;  /* indigo-200 — subtle placeholder */
+  --surface-error-bg:      #fef2f2;
+  --border-error:          #fecaca;
+  --text-error:            #b91c1c;
+  --surface-rose-bg:       #fff1f2;
+  --surface-rose-icon:     #ffe4e6;
+  --border-rose:           #fda4af;
+  --border-rose-subtle:    #fecdd3;
+  --surface-success-bg:    #f0fdf4;
+  --border-success:        #bbf7d0;
+  --text-success:          #15803d;
+  --surface-cancel-border: #e8eaf6;
 }
 
 [data-theme="dark"] {
-  /* ── Claymorphism offset shadows (Dark) ── */
-  --clay-card:               6px 8px 0px rgba(99, 102, 241, 0.15);
-  --clay-hero-icon:          5px 6px 0px rgba(99, 102, 241, 0.25);
-  --clay-icon:               4px 4px 0px rgba(129, 140, 248, 0.2);
-  --clay-chip:               3px 4px 0px rgba(129, 140, 248, 0.25);
-  --clay-chip-inactive:      2px 3px 0px rgba(129, 140, 248, 0.08);
-  --clay-btn-primary:        4px 5px 0px rgba(99, 102, 241, 0.25);
-  --clay-btn-primary-hover:  2px 3px 0px rgba(99, 102, 241, 0.25);
-  --clay-btn-cta:            5px 6px 0px rgba(251, 146, 60, 0.25);
-  --clay-btn-cta-hover:      3px 4px 0px rgba(251, 146, 60, 0.25);
-  --clay-btn-cta-active:     1px 2px 0px rgba(251, 146, 60, 0.25);
-  --clay-btn-cta-disabled:   5px 6px 0px rgba(251, 146, 60, 0.1);
-  --clay-success:            4px 4px 0px rgba(34, 197, 94, 0.2);
-  --clay-error:              4px 4px 0px rgba(248, 113, 113, 0.2);
+  /* ── Claymorphism offset shadows (Dark) — toned down ── */
+  --clay-card:               3px 4px 0px rgba(99, 102, 241, 0.10);
+  --clay-hero-icon:          2px 3px 0px rgba(99, 102, 241, 0.18);
+  --clay-icon:               2px 2px 0px rgba(129, 140, 248, 0.12);
+  --clay-chip:               2px 2px 0px rgba(129, 140, 248, 0.18);
+  --clay-chip-inactive:      1px 2px 0px rgba(129, 140, 248, 0.05);
+  --clay-btn-primary:        2px 3px 0px rgba(99, 102, 241, 0.18);
+  --clay-btn-primary-hover:  1px 2px 0px rgba(99, 102, 241, 0.18);
+  --clay-btn-cta:            3px 4px 0px rgba(251, 146, 60, 0.18);
+  --clay-btn-cta-hover:      2px 2px 0px rgba(251, 146, 60, 0.18);
+  --clay-btn-cta-active:     1px 1px 0px rgba(251, 146, 60, 0.18);
+  --clay-btn-cta-disabled:   3px 4px 0px rgba(251, 146, 60, 0.07);
+  --clay-success:            2px 2px 0px rgba(34, 197, 94, 0.15);
+  --clay-error:              2px 2px 0px rgba(248, 113, 113, 0.15);
 
   /* ── Theme-aware surface colors (Dark) ── */
-  --surface-card:          #1e1b4b;
-  --surface-page-via:      #1a1640;
-  --surface-page-to:       #1e1b4b;
-  --border-card:           #3730a3;
-  --border-subtle:         #312e81;
-  --border-footer:         #312e81;
-  --surface-footer:        rgba(30, 27, 75, 0.8);
-  --surface-input:         rgba(49, 46, 129, 0.4);
-  --surface-chip-active:   #312e81;
-  --surface-chip-inactive: #1e1b4b;
-  --surface-hover:         rgba(49, 46, 129, 0.3);
-  --text-hint:             #6366f1;
-  --surface-error-bg:      rgba(127, 29, 29, 0.3);
-  --border-error:          #991b1b;
+  --surface-card:          #1c1a35;
+  --border-card:           #2e2b54;
+  --border-subtle:         #252245;
+  --border-footer:         #252245;
+  --surface-footer:        rgba(18, 16, 40, 0.90);
+  --surface-input:         rgba(38, 35, 68, 0.70);
+  --surface-chip-active:   #2a2760;
+  --surface-chip-inactive: #201d3a;
+  --surface-hover:         rgba(42, 39, 96, 0.40);
+  --text-hint:             #4c4a7a;  /* muted for placeholder text */
+  --surface-error-bg:      rgba(127, 29, 29, 0.25);
+  --border-error:          #7f1d1d;
   --text-error:            #fca5a5;
-  --surface-rose-bg:       rgba(159, 18, 57, 0.2);
-  --surface-rose-icon:     rgba(159, 18, 57, 0.3);
+  --surface-rose-bg:       rgba(136, 19, 55, 0.20);
+  --surface-rose-icon:     rgba(136, 19, 55, 0.28);
   --border-rose:           #9f1239;
-  --border-rose-subtle:    #881337;
-  --surface-success-bg:    rgba(22, 101, 52, 0.3);
-  --border-success:        #166534;
+  --border-rose-subtle:    #6b1030;
+  --surface-success-bg:    rgba(20, 83, 45, 0.25);
+  --border-success:        #14532d;
   --text-success:          #86efac;
-  --surface-cancel-border: #312e81;
+  --surface-cancel-border: #252245;
 }
 
 @theme inline {
@@ -107,7 +103,7 @@
   --color-cta:           #F97316;
   --color-cta-hover:     #EA580C;
   --color-cta-border:    #FB923C;
-  --color-background:    #EEF2FF;
+  --color-background:    #F5F6FF;
   --color-foreground:    #1E1B4B;
 
   /* ── Typography ── */

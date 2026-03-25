@@ -4,11 +4,11 @@ import ThemeToggle from '@/app/components/ThemeToggle';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-[var(--surface-page-via)] to-[var(--surface-page-to)] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-10 max-w-3xl">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-3xl border-4 border-secondary shadow-[var(--clay-hero-icon)] mb-5">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-3xl border-2 border-primary-hover shadow-[var(--clay-hero-icon)] mb-5">
             <svg
               className="w-10 h-10 text-white"
               viewBox="0 0 24 24"
@@ -34,7 +34,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t-4 border-[var(--border-footer)] bg-[var(--surface-footer)] backdrop-blur-sm py-4">
+      <footer className="border-t border-[var(--border-footer)] bg-[var(--surface-footer)] py-4">
         <div className="container mx-auto px-4 max-w-3xl flex items-center justify-center gap-3 flex-wrap">
           <span className="text-sm text-secondary/70">Have thoughts?</span>
           <Link
