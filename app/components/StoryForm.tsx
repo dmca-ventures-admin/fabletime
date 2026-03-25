@@ -133,6 +133,19 @@ export default function StoryForm() {
     }
   }, []);
 
+  const handleReset = useCallback(() => {
+    setStory('');
+    setStoryId(null);
+    setHasRated(false);
+    setError('');
+    setSubmitError('');
+    setSelectedCharacters(new Set());
+    setSelectedTheme('');
+    setCustomCharacterInput('');
+    setCustomThemeInput('');
+    setLength('short');
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError('');
@@ -300,7 +313,7 @@ export default function StoryForm() {
                 value={customCharacterInput}
                 onChange={(e) => handleCustomCharacterChange(e.target.value)}
                 disabled={isLoading}
-                placeholder="Or type custom characters (comma-separated)..."
+                placeholder="Or add your own characters..."
                 aria-label="Custom characters"
                 aria-invalid={!!customCharacterError || customWouldExceedMax}
                 aria-describedby={
@@ -324,6 +337,11 @@ export default function StoryForm() {
               {customWouldExceedMax && !customCharacterError && (
                 <p id="custom-character-max-error" className="text-xs text-amber-600 mt-1" role="alert">
                   Total characters exceed maximum of {MAX_CHARACTERS} — remove some selections or custom entries
+                </p>
+              )}
+              {customCharacterInput.length > 1 && !customCharacterInput.includes(',') && !customCharacterError && !customWouldExceedMax && (
+                <p className="text-xs text-secondary/60 mt-1">
+                  Tip: separate multiple characters with commas
                 </p>
               )}
             </div>
@@ -351,7 +369,7 @@ export default function StoryForm() {
                   <span className="font-heading font-semibold text-base">{l.label}</span>
                   <span
                     className={`text-xs mt-0.5 ${
-                      length === l.value ? 'text-indigo-200' : 'text-secondary'
+                      length === l.value ? 'text-white/70' : 'text-secondary'
                     }`}
                   >
                     {l.sub}
@@ -364,7 +382,7 @@ export default function StoryForm() {
           {/* Learning Theme */}
           <fieldset>
             <legend className="block text-xs font-semibold text-secondary mb-3 uppercase tracking-wider">
-              Learning Theme
+              What should the story teach?
             </legend>
 
             {/* Dynamic theme suggestion buttons */}
@@ -425,7 +443,7 @@ export default function StoryForm() {
                 value={customThemeInput}
                 onChange={(e) => handleCustomThemeChange(e.target.value)}
                 disabled={isLoading}
-                placeholder="Or type a custom theme..."
+                placeholder="Or describe your own theme..."
                 aria-label="Custom theme"
                 aria-invalid={!!customThemeError}
                 aria-describedby={customThemeError ? 'custom-theme-error' : undefined}
@@ -488,7 +506,7 @@ export default function StoryForm() {
         </div>
       )}
 
-      <StoryDisplay story={story} isLoading={isLoading} storyId={storyId} hasRated={hasRated} onRated={() => setHasRated(true)} />
+      <StoryDisplay story={story} isLoading={isLoading} storyId={storyId} hasRated={hasRated} onRated={() => setHasRated(true)} onReset={handleReset} />
     </div>
   );
 }

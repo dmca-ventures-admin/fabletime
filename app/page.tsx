@@ -21,11 +21,8 @@ export default function Home() {
           <h1 className="font-heading text-6xl font-semibold text-primary mb-2 tracking-tight">
             Fabletime
           </h1>
-          <p className="text-xl text-secondary font-medium mb-1">
+          <p className="text-xl text-secondary font-medium">
             Magical stories, made just for you
-          </p>
-          <p className="text-sm text-secondary/70 mt-1">
-            Pick your character, choose a theme, and watch your story come to life!
           </p>
         </div>
 
