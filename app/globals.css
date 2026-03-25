@@ -11,104 +11,104 @@
   --space-3xl: 4rem;
 
   /* ── Standard shadow depths ── */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10), 0 4px 8px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.08);
 
-  /* ── Claymorphism offset shadows (Light) ── */
-  --clay-card:               6px 8px 0px rgba(79, 70, 229, 0.2);
-  --clay-hero-icon:          5px 6px 0px rgba(67, 56, 202, 0.35);
-  --clay-icon:               4px 4px 0px rgba(99, 102, 241, 0.25);
-  --clay-chip:               3px 4px 0px rgba(99, 102, 241, 0.3);
-  --clay-chip-inactive:      2px 3px 0px rgba(99, 102, 241, 0.1);
-  --clay-btn-primary:        4px 5px 0px rgba(79, 70, 229, 0.3);
-  --clay-btn-primary-hover:  2px 3px 0px rgba(79, 70, 229, 0.3);
-  --clay-btn-cta:            5px 6px 0px rgba(234, 88, 12, 0.3);
-  --clay-btn-cta-hover:      3px 4px 0px rgba(234, 88, 12, 0.3);
-  --clay-btn-cta-active:     1px 2px 0px rgba(234, 88, 12, 0.3);
-  --clay-btn-cta-disabled:   5px 6px 0px rgba(234, 88, 12, 0.15);
-  --clay-success:            4px 4px 0px rgba(16, 185, 129, 0.3);
-  --clay-error:              4px 4px 0px rgba(239, 68, 68, 0.25);
+  /* ── Soft colored shadows (Light) ── */
+  --clay-card:               0 4px 24px rgba(109, 40, 217, 0.10), 0 1px 4px rgba(0, 0, 0, 0.05);
+  --clay-hero-icon:          0 8px 32px rgba(109, 40, 217, 0.28), 0 2px 8px rgba(109, 40, 217, 0.12);
+  --clay-icon:               0 4px 16px rgba(109, 40, 217, 0.18);
+  --clay-chip:               0 2px 8px rgba(109, 40, 217, 0.20);
+  --clay-chip-inactive:      0 1px 3px rgba(0, 0, 0, 0.06);
+  --clay-btn-primary:        0 4px 14px rgba(109, 40, 217, 0.28);
+  --clay-btn-primary-hover:  0 2px 8px rgba(109, 40, 217, 0.20);
+  --clay-btn-cta:            0 4px 20px rgba(245, 158, 11, 0.40);
+  --clay-btn-cta-hover:      0 6px 24px rgba(245, 158, 11, 0.45);
+  --clay-btn-cta-active:     0 2px 8px rgba(245, 158, 11, 0.30);
+  --clay-btn-cta-disabled:   0 2px 10px rgba(245, 158, 11, 0.15);
+  --clay-success:            0 4px 14px rgba(16, 185, 129, 0.20);
+  --clay-error:              0 4px 14px rgba(239, 68, 68, 0.18);
 
   /* ── Theme-aware surface colors (Light) ── */
   --surface-card:          #ffffff;
   --surface-page-via:      #faf5ff;  /* purple-50 */
-  --surface-page-to:       #e0e7ff;  /* indigo-100 */
-  --border-card:           #c7d2fe;  /* indigo-200 */
-  --border-subtle:         #e0e7ff;  /* indigo-100 */
-  --border-footer:         #e0e7ff;  /* indigo-100 */
-  --surface-footer:        rgba(255, 255, 255, 0.6);
-  --surface-input:         rgba(238, 242, 255, 0.5);
-  --surface-chip-active:   #EEF2FF;
+  --surface-page-to:       #ede9fe;  /* violet-100 */
+  --border-card:           #ddd6fe;  /* violet-200 */
+  --border-subtle:         #ede9fe;  /* violet-100 */
+  --border-footer:         #ede9fe;  /* violet-100 */
+  --surface-footer:        rgba(255, 255, 255, 0.85);
+  --surface-input:         rgba(237, 233, 254, 0.70);
+  --surface-chip-active:   #f5f3ff;  /* violet-50 */
   --surface-chip-inactive: #ffffff;
-  --surface-hover:         rgba(238, 242, 255, 0.4);
-  --text-hint:             #a5b4fc;  /* indigo-300 */
-  --surface-error-bg:      #fef2f2;  /* red-50 */
-  --border-error:          #fecaca;  /* red-200 */
-  --text-error:            #b91c1c;  /* red-700 */
-  --surface-rose-bg:       #fff1f2;  /* rose-50 */
-  --surface-rose-icon:     #ffe4e6;  /* rose-100 */
-  --border-rose:           #fda4af;  /* rose-300 */
-  --border-rose-subtle:    #fecdd3;  /* rose-200 */
-  --surface-success-bg:    #dcfce7;  /* green-100 */
-  --border-success:        #86efac;  /* green-300 */
-  --text-success:          #16a34a;  /* green-600 */
-  --surface-cancel-border: #e0e7ff;  /* indigo-100 */
+  --surface-hover:         rgba(237, 233, 254, 0.55);
+  --text-hint:             #c4b5fd;  /* violet-300 */
+  --surface-error-bg:      #fef2f2;
+  --border-error:          #fecaca;
+  --text-error:            #b91c1c;
+  --surface-rose-bg:       #fff1f2;
+  --surface-rose-icon:     #ffe4e6;
+  --border-rose:           #fda4af;
+  --border-rose-subtle:    #fecdd3;
+  --surface-success-bg:    #f0fdf4;
+  --border-success:        #86efac;
+  --text-success:          #16a34a;
+  --surface-cancel-border: #ede9fe;
 }
 
 [data-theme="dark"] {
-  /* ── Claymorphism offset shadows (Dark) ── */
-  --clay-card:               6px 8px 0px rgba(99, 102, 241, 0.15);
-  --clay-hero-icon:          5px 6px 0px rgba(99, 102, 241, 0.25);
-  --clay-icon:               4px 4px 0px rgba(129, 140, 248, 0.2);
-  --clay-chip:               3px 4px 0px rgba(129, 140, 248, 0.25);
-  --clay-chip-inactive:      2px 3px 0px rgba(129, 140, 248, 0.08);
-  --clay-btn-primary:        4px 5px 0px rgba(99, 102, 241, 0.25);
-  --clay-btn-primary-hover:  2px 3px 0px rgba(99, 102, 241, 0.25);
-  --clay-btn-cta:            5px 6px 0px rgba(251, 146, 60, 0.25);
-  --clay-btn-cta-hover:      3px 4px 0px rgba(251, 146, 60, 0.25);
-  --clay-btn-cta-active:     1px 2px 0px rgba(251, 146, 60, 0.25);
-  --clay-btn-cta-disabled:   5px 6px 0px rgba(251, 146, 60, 0.1);
-  --clay-success:            4px 4px 0px rgba(34, 197, 94, 0.2);
-  --clay-error:              4px 4px 0px rgba(248, 113, 113, 0.2);
+  /* ── Soft colored shadows (Dark) ── */
+  --clay-card:               0 4px 24px rgba(0, 0, 0, 0.50), 0 1px 4px rgba(0, 0, 0, 0.35);
+  --clay-hero-icon:          0 8px 32px rgba(139, 92, 246, 0.40), 0 2px 8px rgba(0, 0, 0, 0.40);
+  --clay-icon:               0 4px 16px rgba(139, 92, 246, 0.25);
+  --clay-chip:               0 2px 8px rgba(139, 92, 246, 0.30);
+  --clay-chip-inactive:      0 1px 3px rgba(0, 0, 0, 0.40);
+  --clay-btn-primary:        0 4px 14px rgba(139, 92, 246, 0.38);
+  --clay-btn-primary-hover:  0 2px 8px rgba(139, 92, 246, 0.28);
+  --clay-btn-cta:            0 4px 20px rgba(251, 191, 36, 0.35);
+  --clay-btn-cta-hover:      0 6px 24px rgba(251, 191, 36, 0.42);
+  --clay-btn-cta-active:     0 2px 8px rgba(251, 191, 36, 0.25);
+  --clay-btn-cta-disabled:   0 2px 10px rgba(251, 191, 36, 0.12);
+  --clay-success:            0 4px 14px rgba(34, 197, 94, 0.22);
+  --clay-error:              0 4px 14px rgba(248, 113, 113, 0.22);
 
   /* ── Theme-aware surface colors (Dark) ── */
-  --surface-card:          #1e1b4b;
-  --surface-page-via:      #1a1640;
-  --surface-page-to:       #1e1b4b;
-  --border-card:           #3730a3;
-  --border-subtle:         #312e81;
-  --border-footer:         #312e81;
-  --surface-footer:        rgba(30, 27, 75, 0.8);
-  --surface-input:         rgba(49, 46, 129, 0.4);
-  --surface-chip-active:   #312e81;
-  --surface-chip-inactive: #1e1b4b;
-  --surface-hover:         rgba(49, 46, 129, 0.3);
-  --text-hint:             #6366f1;
-  --surface-error-bg:      rgba(127, 29, 29, 0.3);
+  --surface-card:          #1a1030;
+  --surface-page-via:      #130924;
+  --surface-page-to:       #1a1030;
+  --border-card:           #4c1d95;  /* violet-900 */
+  --border-subtle:         #3b1378;
+  --border-footer:         #3b1378;
+  --surface-footer:        rgba(26, 16, 48, 0.92);
+  --surface-input:         rgba(76, 29, 149, 0.28);
+  --surface-chip-active:   #2e1065;  /* violet-950 */
+  --surface-chip-inactive: #1a1030;
+  --surface-hover:         rgba(76, 29, 149, 0.28);
+  --text-hint:             #7c3aed;  /* violet-600 */
+  --surface-error-bg:      rgba(127, 29, 29, 0.25);
   --border-error:          #991b1b;
   --text-error:            #fca5a5;
-  --surface-rose-bg:       rgba(159, 18, 57, 0.2);
-  --surface-rose-icon:     rgba(159, 18, 57, 0.3);
+  --surface-rose-bg:       rgba(159, 18, 57, 0.20);
+  --surface-rose-icon:     rgba(159, 18, 57, 0.28);
   --border-rose:           #9f1239;
   --border-rose-subtle:    #881337;
-  --surface-success-bg:    rgba(22, 101, 52, 0.3);
+  --surface-success-bg:    rgba(22, 101, 52, 0.25);
   --border-success:        #166534;
   --text-success:          #86efac;
-  --surface-cancel-border: #312e81;
+  --surface-cancel-border: #3b1378;
 }
 
 @theme inline {
   /* ── Design System Color Palette ── */
-  --color-primary:       #4F46E5;
-  --color-primary-hover: #4338CA;
-  --color-secondary:     #818CF8;
-  --color-cta:           #F97316;
-  --color-cta-hover:     #EA580C;
-  --color-cta-border:    #FB923C;
-  --color-background:    #EEF2FF;
-  --color-foreground:    #1E1B4B;
+  --color-primary:       #7c3aed;  /* violet-600 */
+  --color-primary-hover: #6d28d9;  /* violet-700 */
+  --color-secondary:     #a78bfa;  /* violet-400 */
+  --color-cta:           #f59e0b;  /* amber-500 */
+  --color-cta-hover:     #d97706;  /* amber-600 */
+  --color-cta-border:    #fcd34d;  /* amber-300 */
+  --color-background:    #fdf4ff;  /* fuchsia-50 — warm cream */
+  --color-foreground:    #2e1065;  /* violet-950 */
 
   /* ── Typography ── */
   --font-heading: var(--font-fredoka);
@@ -116,14 +116,14 @@
 }
 
 [data-theme="dark"] {
-  --color-primary:       #818CF8;
-  --color-primary-hover: #6366F1;
-  --color-secondary:     #A5B4FC;
-  --color-cta:           #FB923C;
-  --color-cta-hover:     #F97316;
-  --color-cta-border:    #FDBA74;
-  --color-background:    #0f0d24;
-  --color-foreground:    #E0E7FF;
+  --color-primary:       #a78bfa;  /* violet-400 */
+  --color-primary-hover: #8b5cf6;  /* violet-500 */
+  --color-secondary:     #c4b5fd;  /* violet-300 */
+  --color-cta:           #fbbf24;  /* amber-400 */
+  --color-cta-hover:     #f59e0b;  /* amber-500 */
+  --color-cta-border:    #fde68a;  /* amber-200 */
+  --color-background:    #0c0720;  /* deep violet-black */
+  --color-foreground:    #f3e8ff;  /* violet-100 */
 }
 
 body {

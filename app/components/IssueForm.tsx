@@ -63,7 +63,7 @@ export default function IssueForm({ type }: IssueFormProps) {
   if (submitted) {
     return (
       <div className="text-center py-12">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--surface-success-bg)] rounded-3xl border-4 border-[var(--border-success)] shadow-[var(--clay-success)] mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--surface-success-bg)] rounded-3xl border border-[var(--border-success)] shadow-[var(--clay-success)] mb-4">
           <svg
             className="w-8 h-8 text-[var(--text-success)]"
             viewBox="0 0 24 24"
@@ -80,7 +80,7 @@ export default function IssueForm({ type }: IssueFormProps) {
         <p className="text-lg font-semibold text-foreground mb-6">{cfg.successMessage}</p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 font-bold py-3 px-8 rounded-2xl border-4 border-secondary bg-primary text-white transition-all duration-200 shadow-[var(--clay-btn-primary)] hover:shadow-[var(--clay-btn-primary-hover)] hover:translate-y-0.5 cursor-pointer"
+          className="inline-flex items-center gap-2 font-bold py-3 px-8 rounded-2xl border-2 border-secondary/40 bg-primary text-white transition-all duration-200 shadow-[var(--clay-btn-primary)] hover:shadow-[var(--clay-btn-primary-hover)] hover:-translate-y-0.5 cursor-pointer"
         >
           <svg
             className="w-4 h-4"
@@ -117,7 +117,7 @@ export default function IssueForm({ type }: IssueFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className={`w-full rounded-2xl border-4 ${cfg.inputBorder} bg-[var(--surface-input)] px-4 py-3 text-foreground placeholder:text-secondary/50 focus:outline-none focus:ring-2 transition-all duration-200`}
+          className={`w-full rounded-xl border-2 ${cfg.inputBorder} bg-[var(--surface-input)] px-4 py-3 text-foreground placeholder:text-[var(--text-hint)] focus:outline-none focus:ring-2 transition-all duration-200`}
           disabled={isSubmitting}
         />
       </div>
@@ -137,14 +137,14 @@ export default function IssueForm({ type }: IssueFormProps) {
           placeholder={cfg.placeholder}
           rows={5}
           required
-          className={`w-full rounded-2xl border-4 ${cfg.inputBorder} bg-[var(--surface-input)] px-4 py-3 text-foreground placeholder:text-secondary/50 focus:outline-none focus:ring-2 transition-all duration-200 resize-none`}
+          className={`w-full rounded-xl border-2 ${cfg.inputBorder} bg-[var(--surface-input)] px-4 py-3 text-foreground placeholder:text-[var(--text-hint)] focus:outline-none focus:ring-2 transition-all duration-200 resize-none`}
           disabled={isSubmitting}
         />
       </div>
 
       {error && (
         <div
-          className="p-4 bg-[var(--surface-error-bg)] border-4 border-[var(--border-error)] rounded-2xl text-[var(--text-error)] text-sm font-medium"
+          className="p-4 bg-[var(--surface-error-bg)] border border-[var(--border-error)] rounded-2xl text-[var(--text-error)] text-sm font-medium"
           role="alert"
         >
           {error}
@@ -154,14 +154,14 @@ export default function IssueForm({ type }: IssueFormProps) {
       <div className="flex gap-3">
         <Link
           href="/"
-          className="flex-1 text-center rounded-2xl border-4 border-[var(--surface-cancel-border)] text-primary font-semibold py-3 px-6 hover:bg-[var(--surface-hover)] hover:border-[var(--border-card)] transition-all duration-200 cursor-pointer"
+          className="flex-1 text-center rounded-2xl border-2 border-[var(--surface-cancel-border)] text-primary font-semibold py-3 px-6 hover:bg-[var(--surface-hover)] hover:border-[var(--border-card)] transition-all duration-200 cursor-pointer"
         >
           Cancel
         </Link>
         <button
           type="submit"
           disabled={isSubmitting || !message.trim()}
-          className={`flex-1 rounded-2xl border-4 ${cfg.buttonClass} text-white font-bold py-3 px-6 transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer`}
+          className={`flex-1 rounded-2xl border-2 ${cfg.buttonClass} text-white font-bold py-3 px-6 transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer`}
         >
           {isSubmitting ? (
             <>

@@ -7,7 +7,7 @@ export default function BugPage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-[var(--surface-page-via)] to-[var(--surface-page-to)]">
       <main className="container mx-auto px-4 py-12 max-w-xl">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--surface-rose-icon)] rounded-3xl border-4 border-[var(--border-rose)] shadow-[var(--clay-error)] mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--surface-rose-icon)] rounded-3xl border-2 border-[var(--border-rose)]/40 shadow-[var(--clay-error)] mb-4">
             <svg
               className="w-8 h-8 text-rose-500"
               viewBox="0 0 24 24"
@@ -28,7 +28,7 @@ export default function BugPage() {
             Something not working right? Let us know and we'll fix it.
           </p>
         </div>
-        <div className="bg-[var(--surface-card)] rounded-3xl border-4 border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8">
+        <div className="bg-[var(--surface-card)] rounded-3xl border border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8">
           <IssueForm type="bug" />
         </div>
       </main>

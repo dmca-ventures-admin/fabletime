@@ -216,7 +216,7 @@ export default function StoryForm() {
     <div className="w-full max-w-2xl mx-auto">
       <form
         onSubmit={handleSubmit}
-        className="bg-[var(--surface-card)] rounded-3xl border-4 border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8"
+        className="bg-[var(--surface-card)] rounded-3xl border border-[var(--border-card)] shadow-[var(--clay-card)] p-6 md:p-8"
       >
         <div className="space-y-7">
           {/* Character Selection */}
@@ -237,7 +237,7 @@ export default function StoryForm() {
                 {[1, 2, 3].map((i) => (
                   <div
                     key={i}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border-4 border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] animate-pulse"
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] animate-pulse"
                     aria-hidden="true"
                   >
                     <div className="w-8 h-8 rounded-full bg-secondary/20" />
@@ -264,7 +264,7 @@ export default function StoryForm() {
                       onClick={() => toggleCharacter(name)}
                       disabled={isDisabled}
                       aria-pressed={isSelected}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border-4 transition-colors transition-shadow duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-colors transition-shadow duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${
                         isSelected
                           ? 'border-secondary bg-[var(--surface-chip-active)] shadow-[var(--clay-chip)]'
                           : 'border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] hover:border-[var(--border-card)] hover:bg-[var(--surface-hover)] shadow-[var(--clay-chip-inactive)]'
@@ -310,7 +310,7 @@ export default function StoryForm() {
                       ? 'custom-character-max-error'
                       : undefined
                 }
-                className={`w-full px-4 py-2.5 rounded-xl border-2 text-sm bg-white/80 text-primary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
                   customCharacterError || customWouldExceedMax
                     ? 'border-red-400'
                     : 'border-[var(--border-subtle)]'
@@ -342,7 +342,7 @@ export default function StoryForm() {
                   onClick={() => !isLoading && setLength(l.value)}
                   disabled={isLoading}
                   aria-pressed={length === l.value}
-                  className={`flex-1 flex flex-col items-center py-3 px-2 rounded-2xl border-4 transition-colors transition-shadow duration-200 cursor-pointer disabled:cursor-not-allowed ${
+                  className={`flex-1 flex flex-col items-center py-3 px-2 rounded-2xl border-2 transition-colors transition-shadow duration-200 cursor-pointer disabled:cursor-not-allowed ${
                     length === l.value
                       ? 'border-secondary bg-primary text-white shadow-[var(--clay-chip)]'
                       : 'border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] text-primary hover:border-[var(--border-card)] hover:bg-[var(--surface-hover)] shadow-[var(--clay-chip-inactive)]'
@@ -373,7 +373,7 @@ export default function StoryForm() {
                 {[1, 2].map((i) => (
                   <div
                     key={i}
-                    className="py-3 px-4 rounded-2xl border-4 border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] animate-pulse"
+                    className="py-3 px-4 rounded-2xl border-2 border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] animate-pulse"
                     aria-hidden="true"
                   >
                     <div className="w-16 h-4 rounded bg-secondary/20" />
@@ -405,7 +405,7 @@ export default function StoryForm() {
                       }}
                       disabled={isLoading}
                       aria-pressed={isSelected}
-                      className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl border-4 font-semibold text-sm transition-colors transition-shadow duration-200 cursor-pointer disabled:cursor-not-allowed ${
+                      className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl border-2 font-semibold text-sm transition-colors transition-shadow duration-200 cursor-pointer disabled:cursor-not-allowed ${
                         isSelected
                           ? 'border-secondary bg-primary text-white shadow-[var(--clay-chip)]'
                           : 'border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] text-primary hover:border-[var(--border-card)] hover:bg-[var(--surface-hover)] shadow-[var(--clay-chip-inactive)]'
@@ -429,7 +429,7 @@ export default function StoryForm() {
                 aria-label="Custom theme"
                 aria-invalid={!!customThemeError}
                 aria-describedby={customThemeError ? 'custom-theme-error' : undefined}
-                className={`w-full px-4 py-2.5 rounded-xl border-2 text-sm bg-white/80 text-primary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
                   customThemeError ? 'border-red-400' : 'border-[var(--border-subtle)]'
                 }`}
               />
@@ -452,7 +452,7 @@ export default function StoryForm() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-4 px-6 rounded-2xl border-4 border-cta-border bg-cta text-white font-heading font-semibold text-xl shadow-[var(--clay-btn-cta)] hover:shadow-[var(--clay-btn-cta-hover)] hover:translate-y-0.5 active:shadow-[var(--clay-btn-cta-active)] active:translate-y-1 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-[var(--clay-btn-cta-disabled)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-3"
+            className="w-full py-4 px-6 rounded-2xl border-2 border-cta-border/60 bg-cta text-white font-heading font-semibold text-xl shadow-[var(--clay-btn-cta)] hover:shadow-[var(--clay-btn-cta-hover)] hover:-translate-y-0.5 active:shadow-[var(--clay-btn-cta-active)] active:translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-[var(--clay-btn-cta-disabled)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-3"
           >
             {isLoading ? (
               <>
@@ -481,7 +481,7 @@ export default function StoryForm() {
 
       {error && (
         <div
-          className="mt-4 p-4 bg-[var(--surface-error-bg)] border-4 border-[var(--border-error)] rounded-2xl text-[var(--text-error)] text-sm font-medium shadow-[var(--clay-error)]"
+          className="mt-4 p-4 bg-[var(--surface-error-bg)] border border-[var(--border-error)] rounded-2xl text-[var(--text-error)] text-sm font-medium shadow-[var(--clay-error)]"
           role="alert"
         >
           {error}
