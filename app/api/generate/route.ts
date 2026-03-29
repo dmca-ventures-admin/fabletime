@@ -55,6 +55,7 @@ IMPORTANT: This story MUST be fully appropriate for children aged 8 and under. D
 Story requirements:
 - Length: ${lengthDesc}
 - Learning theme: ${theme} — weave this naturally into the story
+- Give each character a unique, creative, and uncommon name. Avoid overused names like Finley, Bella, Max, Luna, Oliver, Rosie, Willow, Milo, or Daisy. Choose names that feel fresh, whimsical, and unexpected — draw from diverse cultures, nature, sounds, or invented words that suit the character's personality.
 - Age-appropriate vocabulary and concepts
 - A clear beginning, middle, and end with a three-act structure:
   1. Setup: Introduce the character(s) and their world
