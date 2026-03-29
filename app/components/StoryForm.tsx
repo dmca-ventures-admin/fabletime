@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import StoryDisplay from './StoryDisplay';
 
 const MAX_CHARACTERS = 3;
@@ -120,6 +120,12 @@ export default function StoryForm() {
   const [hasRated, setHasRated] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
+  // AI validation state
+  const [charValidationWarning, setCharValidationWarning] = useState('');
+  const [themeValidationWarning, setThemeValidationWarning] = useState('');
+  const charValidationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const themeValidationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Fetch suggestions on mount
   useEffect(() => {
     let cancelled = false;
@@ -146,6 +152,67 @@ export default function StoryForm() {
     fetchSuggestions();
     return () => { cancelled = true; };
   }, []);
+
+  // Debounced AI validation for custom inputs
+  const validateInput = useCallback(async (value: string, type: 'character' | 'theme') => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+
+    try {
+      const res = await fetch('/api/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: trimmed, type }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+
+      if (!data.valid && data.suggestion) {
+        return `Did you mean "${data.suggestion}"?`;
+      } else if (!data.valid) {
+        return `This doesn't look like a valid ${type} — you can still continue.`;
+      }
+    } catch {
+      // Fail silently — validation is advisory
+    }
+    return '';
+  }, []);
+
+  // Trigger debounced validation on custom character input
+  useEffect(() => {
+    if (charValidationTimer.current) clearTimeout(charValidationTimer.current);
+    setCharValidationWarning('');
+
+    const entries = parseCustomCharacters(customCharacterInput);
+    const lastEntry = entries[entries.length - 1];
+    if (!lastEntry || !lastEntry.trim()) return;
+
+    charValidationTimer.current = setTimeout(async () => {
+      const warning = await validateInput(lastEntry, 'character');
+      if (warning) setCharValidationWarning(warning);
+    }, 800);
+
+    return () => {
+      if (charValidationTimer.current) clearTimeout(charValidationTimer.current);
+    };
+  }, [customCharacterInput, validateInput]);
+
+  // Trigger debounced validation on custom theme input
+  useEffect(() => {
+    if (themeValidationTimer.current) clearTimeout(themeValidationTimer.current);
+    setThemeValidationWarning('');
+
+    if (!customThemeInput.trim()) return;
+
+    themeValidationTimer.current = setTimeout(async () => {
+      const warning = await validateInput(customThemeInput, 'theme');
+      if (warning) setThemeValidationWarning(warning);
+    }, 800);
+
+    return () => {
+      if (themeValidationTimer.current) clearTimeout(themeValidationTimer.current);
+    };
+  }, [customThemeInput, validateInput]);
 
   // Derived counts
   const parsedCustomCharacters = parseCustomCharacters(customCharacterInput);
@@ -389,6 +456,12 @@ export default function StoryForm() {
                   Total characters exceed maximum of {MAX_CHARACTERS} — remove some selections or custom entries
                 </p>
               )}
+              {charValidationWarning && !customCharacterError && !customWouldExceedMax && (
+                <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                  <span aria-hidden="true">💡</span>
+                  {charValidationWarning}
+                </p>
+              )}
             </div>
           </fieldset>
 
@@ -502,6 +575,12 @@ export default function StoryForm() {
               {customThemeError && (
                 <p id="custom-theme-error" className="text-xs text-red-500 mt-1" role="alert">
                   {customThemeError}
+                </p>
+              )}
+              {themeValidationWarning && !customThemeError && (
+                <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                  <span aria-hidden="true">💡</span>
+                  {themeValidationWarning}
                 </p>
               )}
             </div>
