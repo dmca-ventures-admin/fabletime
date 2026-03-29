@@ -366,7 +366,7 @@ export default function StoryForm() {
             {/* Dynamic suggestion buttons */}
             {suggestionsLoading ? (
               <div className="grid grid-cols-3 gap-2 mb-3" aria-label="Loading character suggestions">
-                {[1, 2, 3].map((i) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
                   <div
                     key={i}
                     className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] animate-pulse"
@@ -506,7 +506,7 @@ export default function StoryForm() {
             {/* Dynamic theme suggestion buttons */}
             {suggestionsLoading ? (
               <div className="grid grid-cols-2 gap-2 mb-3" aria-label="Loading theme suggestions">
-                {[1, 2].map((i) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                   <div
                     key={i}
                     className="py-3 px-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] animate-pulse"

@@ -4,8 +4,9 @@ import { isChildFriendly } from '@/lib/content-filter';
 /**
  * GET /api/suggestions
  *
- * Returns top-10 characters and themes from the `custom_entries` table,
- * ordered by usage_count DESC, filtered to child-friendly entries only.
+ * Returns top-9 characters and top-8 themes from the `custom_entries`
+ * table, ordered by usage_count DESC, filtered to child-friendly entries
+ * only.
  *
  * Entries with `child_friendly = null` are lazily classified on first
  * request and the result is cached in the DB column.
@@ -63,15 +64,15 @@ export async function GET() {
       );
     }
 
-    // Filter to child-friendly only, take top 10
+    // Filter to child-friendly only, take top 9 characters and top 8 themes
     const characters = (characterRows ?? [])
       .filter((row) => row.child_friendly === true)
-      .slice(0, 10)
+      .slice(0, 9)
       .map((row) => row.value);
 
     const themes = (themeRows ?? [])
       .filter((row) => row.child_friendly === true)
-      .slice(0, 10)
+      .slice(0, 8)
       .map((row) => row.value);
 
     return Response.json({ characters, themes });
