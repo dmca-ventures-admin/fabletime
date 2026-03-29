@@ -62,10 +62,7 @@ Story requirements:
 - While the story should have a clear beginning, middle, and end, feel free to subvert expectations — a problem that gets solved in a surprising way, an unexpected helper, or a twist that feels delightful rather than predictable.
 - The story should be engaging, imaginative, and emotionally resonant
 ${characters.length > 1 ? '- Give each character a distinct personality and role in the story\n- Show the characters working together and supporting each other to overcome the challenge' : ''}
-If the learning theme is "vocabulary", include 3-5 interesting new words with context clues that help children understand them.
-If the theme is "empathy", show a character learning to understand someone else's feelings.
-If the theme is "courage", show the character overcoming a fear or challenge.
-If the theme is "kindness", show acts of kindness and their positive effects.
+Make the learning theme of "${theme}" central to how the characters grow and how the story resolves — it should feel woven in naturally, not tacked on.
 
 Write the story directly without any preamble or meta-commentary. Begin with "Once upon a time..." or a creative variation.`;
 
