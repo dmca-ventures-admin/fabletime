@@ -58,7 +58,7 @@ Story requirements:
 - Give each character a unique, creative, and uncommon name. Avoid overused names like Finley, Bella, Max, Luna, Oliver, Rosie, Willow, Milo, or Daisy. Choose names that feel fresh, whimsical, and unexpected — draw from diverse cultures, nature, sounds, or invented words that suit the character's personality.
 - Age-appropriate vocabulary and concepts
 - Write with vivid, sensory language and a warm, playful voice. Vary sentence length for rhythm. Use specific, colourful details rather than generic descriptions.
-- Bring some gentle delight to the story — this could be a funny moment, a playful bit of wordplay, a silly character quirk, or a light joke. Not every story needs all of these, but each story should have at least one moment that makes a child smile or giggle.
+- Give the story personality and variety. Mix and match from these elements — not every story needs all of them, but each should feel distinct: a funny moment, playful wordplay, or a silly character quirk; and/or a moment of mild plot tension where something briefly goes wrong or there's a small setback before a happy resolution. Keep any tension mild and age-appropriate (ages 4-8): no real danger, nothing scary — just enough to make the resolution feel earned.
 - While the story should have a clear beginning, middle, and end, feel free to subvert expectations — a problem that gets solved in a surprising way, an unexpected helper, or a twist that feels delightful rather than predictable.
 - The story should be engaging, imaginative, and emotionally resonant
 ${characters.length > 1 ? '- Give each character a distinct personality and role in the story\n- Show the characters working together and supporting each other to overcome the challenge' : ''}
