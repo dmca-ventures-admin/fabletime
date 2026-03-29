@@ -21,9 +21,10 @@ export default function Home() {
           <h1 className="font-heading text-7xl font-semibold text-primary mb-3 tracking-tight">
             Fabletime
           </h1>
-          <p className="text-xl text-secondary font-medium">
+          <p className="text-xl text-secondary font-medium mb-3">
             Magical stories, made just for you
           </p>
+          <ThemeToggle />
         </div>
 
         {/* Form */}
@@ -70,7 +71,6 @@ export default function Home() {
             </svg>
             Report a Bug
           </Link>
-          <ThemeToggle />
         </div>
       </footer>
     </div>
