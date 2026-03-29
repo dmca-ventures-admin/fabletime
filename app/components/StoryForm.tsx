@@ -6,6 +6,71 @@ import StoryDisplay from './StoryDisplay';
 const MAX_CHARACTERS = 3;
 const MAX_WORDS_PER_ENTRY = 3;
 
+/** Emoji lookup for known characters — custom/unknown entries get the default */
+const CHARACTER_EMOJI: Record<string, string> = {
+  fox: '🦊',
+  bear: '🐻',
+  wizard: '🧙',
+  knight: '🛡️',
+  scientist: '🔬',
+  mermaid: '🧜',
+  dragon: '🐉',
+  princess: '👸',
+  prince: '🤴',
+  pirate: '🏴‍☠️',
+  robot: '🤖',
+  cat: '🐱',
+  dog: '🐶',
+  owl: '🦉',
+  bunny: '🐰',
+  rabbit: '🐰',
+  unicorn: '🦄',
+  dinosaur: '🦕',
+  fairy: '🧚',
+  astronaut: '🧑‍🚀',
+  monkey: '🐒',
+  lion: '🦁',
+  elephant: '🐘',
+  penguin: '🐧',
+  fish: '🐟',
+  turtle: '🐢',
+  butterfly: '🦋',
+  frog: '🐸',
+  mouse: '🐭',
+  bird: '🐦',
+};
+const DEFAULT_CHARACTER_EMOJI = '⭐';
+
+/** Emoji lookup for known themes — custom/unknown entries get the default */
+const THEME_EMOJI: Record<string, string> = {
+  kindness: '🤝',
+  courage: '⚡',
+  empathy: '💛',
+  vocabulary: '📚',
+  friendship: '👫',
+  honesty: '💎',
+  creativity: '🎨',
+  patience: '🧘',
+  sharing: '🤲',
+  teamwork: '🤝',
+  curiosity: '🔍',
+  gratitude: '🙏',
+  respect: '🌟',
+  perseverance: '💪',
+  responsibility: '🏅',
+};
+const DEFAULT_THEME_EMOJI = '💡';
+
+/** Get the emoji for a character name (case-insensitive lookup) */
+function getCharacterEmoji(name: string): string {
+  return CHARACTER_EMOJI[name.toLowerCase().trim()] || DEFAULT_CHARACTER_EMOJI;
+}
+
+/** Get the emoji for a theme name (case-insensitive lookup) */
+function getThemeEmoji(name: string): string {
+  return THEME_EMOJI[name.toLowerCase().trim()] || DEFAULT_THEME_EMOJI;
+}
+
 const lengths = [
   { value: 'short', label: 'Short', sub: '~300 words' },
   { value: 'medium', label: 'Medium', sub: '~500 words' },
@@ -271,14 +336,12 @@ export default function StoryForm() {
                       }`}
                     >
                       <span
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                          isSelected
-                            ? 'bg-white/20 text-white'
-                            : 'bg-[var(--surface-chip-active)] text-primary'
+                        className={`text-2xl leading-none ${
+                          isSelected ? '' : ''
                         }`}
                         aria-hidden="true"
                       >
-                        {name.charAt(0).toUpperCase()}
+                        {getCharacterEmoji(name)}
                       </span>
                       <span
                         className={`text-xs font-semibold ${
@@ -411,6 +474,9 @@ export default function StoryForm() {
                           : 'border-[var(--border-card)] bg-[var(--surface-chip-inactive)] text-foreground hover:border-primary hover:bg-[var(--surface-chip-active)]'
                       }`}
                     >
+                      <span className="text-lg leading-none" aria-hidden="true">
+                        {getThemeEmoji(name)}
+                      </span>
                       {name}
                     </button>
                   );
