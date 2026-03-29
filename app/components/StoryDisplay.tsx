@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface StoryDisplayProps {
   story: string;
@@ -8,6 +8,8 @@ interface StoryDisplayProps {
   storyId: string | null;
   hasRated: boolean;
   onRated: () => void;
+  characters: string[];
+  theme: string;
 }
 
 function StarIcon({ filled, className }: { filled: boolean; className?: string }) {
@@ -27,12 +29,50 @@ function StarIcon({ filled, className }: { filled: boolean; className?: string }
   );
 }
 
-export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRated }: StoryDisplayProps) {
+export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRated, characters, theme }: StoryDisplayProps) {
   const [selectedRating, setSelectedRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
+  // Discussion questions state
+  const [questions, setQuestions] = useState<string[]>([]);
+  const [questionsLoading, setQuestionsLoading] = useState(false);
+  const [questionsError, setQuestionsError] = useState(false);
+
+  // Fetch discussion questions once the story finishes streaming
+  useEffect(() => {
+    if (!story || isLoading || questions.length > 0 || questionsLoading) return;
+    if (!characters.length || !theme) return;
+
+    let cancelled = false;
+    setQuestionsLoading(true);
+    setQuestionsError(false);
+
+    async function fetchQuestions() {
+      try {
+        const res = await fetch('/api/questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ story, characters, theme }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!cancelled && Array.isArray(data.questions)) {
+          setQuestions(data.questions);
+        }
+      } catch (err) {
+        console.error('[Q] Failed to fetch discussion questions:', err);
+        if (!cancelled) setQuestionsError(true);
+      } finally {
+        if (!cancelled) setQuestionsLoading(false);
+      }
+    }
+
+    fetchQuestions();
+    return () => { cancelled = true; };
+  }, [story, isLoading, characters, theme, questions.length, questionsLoading]);
 
   const displayRating = hoveredRating || selectedRating;
 
@@ -127,6 +167,46 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
           )}
         </div>
       </div>
+
+      {/* Discussion Questions */}
+      {!isLoading && story && (questionsLoading || questions.length > 0 || questionsError) && (
+        <div className="mt-4 bg-[var(--surface-card)] rounded-2xl border border-[var(--border-card)] shadow-sm p-6 md:p-8">
+          <h3 className="font-heading text-lg font-semibold text-primary mb-4 flex items-center gap-2">
+            <span aria-hidden="true">💬</span>
+            Discussion Questions
+          </h3>
+
+          {questionsLoading && (
+            <div className="space-y-3" aria-label="Loading discussion questions">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex gap-3 animate-pulse">
+                  <div className="w-6 h-6 rounded-full bg-secondary/20 shrink-0 mt-0.5" />
+                  <div className="flex-1 h-5 rounded bg-secondary/20" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {questionsError && (
+            <p className="text-sm text-secondary italic">
+              Could not load discussion questions — try generating another story.
+            </p>
+          )}
+
+          {questions.length > 0 && (
+            <ol className="space-y-3 list-none">
+              {questions.map((q, i) => (
+                <li key={i} className="flex gap-3 items-start">
+                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[var(--surface-chip-active)] text-primary text-xs font-bold shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  <span className="text-foreground text-base leading-relaxed">{q}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
+      )}
 
       {/* Rating Form */}
       {showRatingForm && (

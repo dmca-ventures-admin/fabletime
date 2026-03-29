@@ -554,7 +554,7 @@ export default function StoryForm() {
         </div>
       )}
 
-      <StoryDisplay story={story} isLoading={isLoading} storyId={storyId} hasRated={hasRated} onRated={() => setHasRated(true)} />
+      <StoryDisplay story={story} isLoading={isLoading} storyId={storyId} hasRated={hasRated} onRated={() => setHasRated(true)} characters={finalCharacters} theme={finalTheme} />
     </div>
   );
 }
