@@ -74,6 +74,11 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
 
   const showRatingForm = !isLoading && story && storyId && !hasRated;
   const showThankYou = !isLoading && story && storyId && hasRated;
+  const showStartOver = !isLoading && story;
+
+  const handleStartOver = () => {
+    window.location.href = window.location.pathname;
+  };
 
   return (
     <div className="mt-8 w-full max-w-2xl mx-auto">
@@ -233,6 +238,32 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
             Thanks for your feedback!
             <span aria-hidden="true">⭐</span>
           </p>
+        </div>
+      )}
+
+      {/* Start Over Button */}
+      {showStartOver && (
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={handleStartOver}
+            className="inline-flex items-center gap-2 py-2.5 px-6 rounded-xl border border-[var(--border-card)] bg-[var(--surface-card)] text-secondary hover:text-primary hover:border-primary font-heading font-semibold text-base transition-colors duration-200 cursor-pointer"
+          >
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M1 4v6h6" />
+              <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+            </svg>
+            Start over
+          </button>
         </div>
       )}
     </div>
