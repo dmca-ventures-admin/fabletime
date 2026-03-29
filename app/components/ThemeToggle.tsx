@@ -19,26 +19,47 @@ export default function ThemeToggle() {
     localStorage.setItem('fabletime-theme', next);
   };
 
-  // Avoid hydration mismatch — render nothing until mounted
+  const isDark = theme === 'dark';
+
+  // Avoid hydration mismatch — render invisible placeholder until mounted
   if (!mounted) {
     return (
-      <button
-        className="text-2xl leading-none p-1.5 rounded-full opacity-0"
+      <div
+        className="inline-flex items-center gap-0 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] p-0.5 opacity-0 select-none"
         aria-hidden="true"
-        tabIndex={-1}
       >
-        🌙
-      </button>
+        <span className="px-3 py-1 text-xs font-semibold rounded-full">Light</span>
+        <span className="px-3 py-1 text-xs font-semibold rounded-full">Dark</span>
+      </div>
     );
   }
 
   return (
     <button
       onClick={toggle}
-      className="text-2xl leading-none p-1.5 rounded-full hover:bg-[var(--surface-hover)] transition-colors duration-200 cursor-pointer"
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      role="switch"
+      aria-checked={isDark}
+      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      className="inline-flex items-center gap-0 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-chip-inactive)] p-0.5 cursor-pointer transition-colors duration-200 hover:border-[var(--border-card)]"
     >
-      {theme === 'light' ? '🌙' : '🌞'}
+      <span
+        className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 ${
+          !isDark
+            ? 'bg-primary text-white shadow-sm'
+            : 'text-secondary'
+        }`}
+      >
+        Light
+      </span>
+      <span
+        className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 ${
+          isDark
+            ? 'bg-primary text-white shadow-sm'
+            : 'text-secondary'
+        }`}
+      >
+        Dark
+      </span>
     </button>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface StoryDisplayProps {
   story: string;
@@ -40,12 +40,23 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
   const [questions, setQuestions] = useState<string[]>([]);
   const [questionsLoading, setQuestionsLoading] = useState(false);
   const [questionsError, setQuestionsError] = useState(false);
+  const questionsFetchedRef = useRef(false);
+
+  // Reset fetch guard when a new story starts
+  useEffect(() => {
+    if (isLoading) {
+      questionsFetchedRef.current = false;
+      setQuestions([]);
+      setQuestionsError(false);
+    }
+  }, [isLoading]);
 
   // Fetch discussion questions once the story finishes streaming
   useEffect(() => {
-    if (!story || isLoading || questions.length > 0 || questionsLoading) return;
+    if (isLoading || !story || questionsFetchedRef.current) return;
     if (!characters.length || !theme) return;
 
+    questionsFetchedRef.current = true;
     let cancelled = false;
     setQuestionsLoading(true);
     setQuestionsError(false);
@@ -72,7 +83,9 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
 
     fetchQuestions();
     return () => { cancelled = true; };
-  }, [story, isLoading, characters, theme, questions.length, questionsLoading]);
+  // story/characters/theme are read but the trigger is isLoading→false
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]);
 
   const displayRating = hoveredRating || selectedRating;
 
