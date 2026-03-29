@@ -38,6 +38,14 @@ const CHARACTER_EMOJI: Record<string, string> = {
   frog: '🐸',
   mouse: '🐭',
   bird: '🐦',
+  martian: '👽',
+  wolf: '🐺',
+  horse: '🐴',
+  panda: '🐼',
+  shark: '🦈',
+  bee: '🐝',
+  witch: '🧙‍♀️',
+  superhero: '🦸',
 };
 const DEFAULT_CHARACTER_EMOJI = '⭐';
 
@@ -61,14 +69,27 @@ const THEME_EMOJI: Record<string, string> = {
 };
 const DEFAULT_THEME_EMOJI = '💡';
 
-/** Get the emoji for a character name (case-insensitive lookup) */
+/** Get the emoji for a character name (case-insensitive lookup, falls back to word matching) */
 function getCharacterEmoji(name: string): string {
-  return CHARACTER_EMOJI[name.toLowerCase().trim()] || DEFAULT_CHARACTER_EMOJI;
+  const key = name.toLowerCase().trim();
+  if (CHARACTER_EMOJI[key]) return CHARACTER_EMOJI[key];
+  // Try matching any word in the name (e.g. "Little Wizard" → wizard → 🧙)
+  const words = key.split(/\s+/);
+  for (const word of words) {
+    if (CHARACTER_EMOJI[word]) return CHARACTER_EMOJI[word];
+  }
+  return DEFAULT_CHARACTER_EMOJI;
 }
 
-/** Get the emoji for a theme name (case-insensitive lookup) */
+/** Get the emoji for a theme name (case-insensitive lookup, falls back to word matching) */
 function getThemeEmoji(name: string): string {
-  return THEME_EMOJI[name.toLowerCase().trim()] || DEFAULT_THEME_EMOJI;
+  const key = name.toLowerCase().trim();
+  if (THEME_EMOJI[key]) return THEME_EMOJI[key];
+  const words = key.split(/\s+/);
+  for (const word of words) {
+    if (THEME_EMOJI[word]) return THEME_EMOJI[word];
+  }
+  return DEFAULT_THEME_EMOJI;
 }
 
 const lengths = [
