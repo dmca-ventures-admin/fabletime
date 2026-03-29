@@ -57,10 +57,9 @@ Story requirements:
 - Learning theme: ${theme} — weave this naturally into the story
 - Give each character a unique, creative, and uncommon name. Avoid overused names like Finley, Bella, Max, Luna, Oliver, Rosie, Willow, Milo, or Daisy. Choose names that feel fresh, whimsical, and unexpected — draw from diverse cultures, nature, sounds, or invented words that suit the character's personality.
 - Age-appropriate vocabulary and concepts
-- A clear beginning, middle, and end with a three-act structure:
-  1. Setup: Introduce the character(s) and their world
-  2. Conflict: Present a meaningful but age-appropriate challenge or roadblock that the character(s) must face. This should create gentle tension and keep the reader engaged.
-  3. Resolution: The character(s) overcome the challenge by applying the learning theme (${theme}), leading to an uplifting, positive ending
+- Write with vivid, sensory language and a warm, playful voice. Vary sentence length for rhythm. Use specific, colourful details rather than generic descriptions.
+- Bring some gentle delight to the story — this could be a funny moment, a playful bit of wordplay, a silly character quirk, or a light joke. Not every story needs all of these, but each story should have at least one moment that makes a child smile or giggle.
+- While the story should have a clear beginning, middle, and end, feel free to subvert expectations — a problem that gets solved in a surprising way, an unexpected helper, or a twist that feels delightful rather than predictable.
 - The story should be engaging, imaginative, and emotionally resonant
 ${characters.length > 1 ? '- Give each character a distinct personality and role in the story\n- Show the characters working together and supporting each other to overcome the challenge' : ''}
 If the learning theme is "vocabulary", include 3-5 interesting new words with context clues that help children understand them.
