@@ -406,41 +406,47 @@ export default function StoryForm() {
               </p>
             ) : (
               <div className="grid grid-cols-3 gap-2 mb-3">
-                {suggestions.characters.map((name) => {
-                  const isSelected = selectedCharacters.has(name);
-                  const isDisabled = isLoading || (!isSelected && maxReached);
+                {(() => {
+                  const usedCharEmojis = new Set<string>();
+                  return suggestions.characters.map((name) => {
+                    const isSelected = selectedCharacters.has(name);
+                    const isDisabled = isLoading || (!isSelected && maxReached);
+                    const emoji = getCharacterEmoji(name);
+                    const displayEmoji = usedCharEmojis.has(emoji) ? DEFAULT_CHARACTER_EMOJI : emoji;
+                    usedCharEmojis.add(displayEmoji);
 
-                  return (
-                    <button
-                      key={name}
-                      type="button"
-                      onClick={() => toggleCharacter(name)}
-                      disabled={isDisabled}
-                      aria-pressed={isSelected}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${
-                        isSelected
-                          ? 'border-primary bg-primary text-white'
-                          : 'border-[var(--border-card)] bg-[var(--surface-chip-inactive)] hover:border-primary hover:bg-[var(--surface-chip-active)]'
-                      }`}
-                    >
-                      <span
-                        className={`text-2xl leading-none ${
-                          isSelected ? '' : ''
-                        }`}
-                        aria-hidden="true"
-                      >
-                        {getCharacterEmoji(name)}
-                      </span>
-                      <span
-                        className={`text-xs font-semibold ${
-                          isSelected ? 'text-white' : 'text-foreground'
+                    return (
+                      <button
+                        key={name}
+                        type="button"
+                        onClick={() => toggleCharacter(name)}
+                        disabled={isDisabled}
+                        aria-pressed={isSelected}
+                        className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${
+                          isSelected
+                            ? 'border-primary bg-primary text-white'
+                            : 'border-[var(--border-card)] bg-[var(--surface-chip-inactive)] hover:border-primary hover:bg-[var(--surface-chip-active)]'
                         }`}
                       >
-                        {name}
-                      </span>
-                    </button>
-                  );
-                })}
+                        <span
+                          className={`text-2xl leading-none ${
+                            isSelected ? '' : ''
+                          }`}
+                          aria-hidden="true"
+                        >
+                          {displayEmoji}
+                        </span>
+                        <span
+                          className={`text-xs font-semibold ${
+                            isSelected ? 'text-white' : 'text-foreground'
+                          }`}
+                        >
+                          {name}
+                        </span>
+                      </button>
+                    );
+                  });
+                })()}
               </div>
             )}
 
@@ -545,36 +551,42 @@ export default function StoryForm() {
               </p>
             ) : (
               <div className="grid grid-cols-2 gap-2 mb-3">
-                {suggestions.themes.map((name) => {
-                  const isSelected = selectedTheme === name && !customThemeInput.trim();
+                {(() => {
+                  const usedThemeEmojis = new Set<string>();
+                  return suggestions.themes.map((name) => {
+                    const isSelected = selectedTheme === name && !customThemeInput.trim();
+                    const emoji = getThemeEmoji(name);
+                    const displayEmoji = usedThemeEmojis.has(emoji) ? DEFAULT_THEME_EMOJI : emoji;
+                    usedThemeEmojis.add(displayEmoji);
 
-                  return (
-                    <button
-                      key={name}
-                      type="button"
-                      onClick={() => {
-                        if (!isLoading) {
-                          setSelectedTheme(name);
-                          // Clear custom theme when selecting a suggestion
-                          setCustomThemeInput('');
-                          setCustomThemeError('');
-                        }
-                      }}
-                      disabled={isLoading}
-                      aria-pressed={isSelected}
-                      className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border font-semibold text-sm transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed ${
-                        isSelected
-                          ? 'border-primary bg-primary text-white'
-                          : 'border-[var(--border-card)] bg-[var(--surface-chip-inactive)] text-foreground hover:border-primary hover:bg-[var(--surface-chip-active)]'
-                      }`}
-                    >
-                      <span className="text-lg leading-none" aria-hidden="true">
-                        {getThemeEmoji(name)}
-                      </span>
-                      {name}
-                    </button>
-                  );
-                })}
+                    return (
+                      <button
+                        key={name}
+                        type="button"
+                        onClick={() => {
+                          if (!isLoading) {
+                            setSelectedTheme(name);
+                            // Clear custom theme when selecting a suggestion
+                            setCustomThemeInput('');
+                            setCustomThemeError('');
+                          }
+                        }}
+                        disabled={isLoading}
+                        aria-pressed={isSelected}
+                        className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border font-semibold text-sm transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed ${
+                          isSelected
+                            ? 'border-primary bg-primary text-white'
+                            : 'border-[var(--border-card)] bg-[var(--surface-chip-inactive)] text-foreground hover:border-primary hover:bg-[var(--surface-chip-active)]'
+                        }`}
+                      >
+                        <span className="text-lg leading-none" aria-hidden="true">
+                          {displayEmoji}
+                        </span>
+                        {name}
+                      </button>
+                    );
+                  });
+                })()}
               </div>
             )}
 
