@@ -12,9 +12,17 @@ const lengthDescriptions: Record<string, string> = {
   long: '800-1000 words',
 };
 
+const funninessInstructions: Record<number, string> = {
+  1: 'Keep the story warm and gentle with no particular emphasis on humour.',
+  2: 'Include a light funny moment or two — a little playful, but not over the top.',
+  3: 'Make the story noticeably amusing — include several funny moments and playful language.',
+  4: 'Make the story hilarious — pack it with silly situations, funny characters, and laugh-out-loud moments throughout.',
+  5: 'Go all out — make this story as funny as possible for young children. Absurd situations, ridiculous characters, maximum silliness — while keeping it warm and age-appropriate.',
+};
+
 export async function POST(request: NextRequest) {
   try {
-    const { characters, length, theme } = await request.json();
+    const { characters, length, theme, funninessLevel } = await request.json();
 
     if (!characters || !Array.isArray(characters) || characters.length === 0 || !length || !theme) {
       return new Response('Missing required fields', { status: 400 });
@@ -33,6 +41,10 @@ export async function POST(request: NextRequest) {
     if (typeof theme === 'string' && theme.trim().split(/\s+/).length > 3) {
       return new Response('Character/theme names must be 3 words or fewer', { status: 400 });
     }
+
+    // Clamp funniness level to valid range, default to 2
+    const clampedFunniness = Math.max(1, Math.min(5, Math.round(Number(funninessLevel) || 2)));
+    const funninessInstruction = funninessInstructions[clampedFunniness] || funninessInstructions[2];
 
     const lengthDesc = lengthDescriptions[length] || '300-400 words';
 
@@ -58,7 +70,7 @@ Story requirements:
 - Give each character a unique, creative, and uncommon name. Avoid overused names like Finley, Bella, Max, Luna, Oliver, Rosie, Willow, Milo, or Daisy. Choose names that feel fresh, whimsical, and unexpected — draw from diverse cultures, nature, sounds, or invented words that suit the character's personality.
 - Age-appropriate vocabulary and concepts
 - Write with vivid, sensory language and a warm, playful voice. Vary sentence length for rhythm. Use specific, colourful details rather than generic descriptions.
-- The story should be genuinely funny and entertaining for young children. Include multiple humorous elements throughout — silly character quirks, playful wordplay, a funny misunderstanding, a ridiculous situation, or slapstick moments. Every story must have several laugh-out-loud moments, not just one. You can also include mild plot tension (something briefly goes wrong before resolving happily) for variety. Keep all humour warm, gentle, and age-appropriate for ages 4-8.
+- ${funninessInstruction}
 - While the story should have a clear beginning, middle, and end, feel free to subvert expectations — a problem that gets solved in a surprising way, an unexpected helper, or a twist that feels delightful rather than predictable.
 - The story should be engaging, imaginative, and emotionally resonant
 ${characters.length > 1 ? '- Give each character a distinct personality and role in the story\n- Show the characters working together and supporting each other to overcome the challenge' : ''}
@@ -78,6 +90,7 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
         length,
         prompt,
         response: '',
+        funniness_level: clampedFunniness,
       });
       if (insertError) {
         console.error('[S01] Failed to insert placeholder story:', storyId, insertError);

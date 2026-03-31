@@ -46,6 +46,7 @@ const CHARACTER_EMOJI: Record<string, string> = {
   bee: '🐝',
   witch: '🧙‍♀️',
   superhero: '🦸',
+  messi: '⚽',
 };
 const DEFAULT_CHARACTER_EMOJI = '⭐';
 
@@ -126,6 +127,7 @@ export default function StoryForm() {
   const [selectedCharacters, setSelectedCharacters] = useState<Set<string>>(new Set());
   const [length, setLength] = useState('short');
   const [selectedTheme, setSelectedTheme] = useState('');
+  const [funninessLevel, setFunninessLevel] = useState(2);
 
   // Custom input state
   const [customCharacterInput, setCustomCharacterInput] = useState('');
@@ -334,6 +336,7 @@ export default function StoryForm() {
           characters: finalCharacters,
           length,
           theme: finalTheme,
+          funninessLevel,
         }),
       });
 
@@ -625,6 +628,47 @@ export default function StoryForm() {
               {submitError}
             </p>
           )}
+
+          {/* Funniness Level */}
+          <fieldset>
+            <legend className="block text-xs font-semibold text-secondary mb-3 uppercase tracking-wider">
+              Funniness Level
+            </legend>
+            <div className="px-1">
+              <input
+                type="range"
+                min="1"
+                max="5"
+                step="1"
+                value={funninessLevel}
+                onChange={(e) => setFunninessLevel(Number(e.target.value))}
+                disabled={isLoading}
+                aria-label="Funniness level"
+                aria-valuemin={1}
+                aria-valuemax={5}
+                aria-valuenow={funninessLevel}
+                aria-valuetext={
+                  ['Not funny at all', 'A little funny', 'Pretty amusing', 'Hilarious', 'Too funny for words'][funninessLevel - 1]
+                }
+                className="w-full h-2 rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--border-subtle)] accent-[var(--color-primary)]"
+              />
+              <div className="flex justify-between mt-2">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <span
+                    key={n}
+                    className={`text-[10px] font-semibold transition-colors duration-200 ${
+                      funninessLevel === n ? 'text-primary' : 'text-secondary/50'
+                    }`}
+                  >
+                    {n}
+                  </span>
+                ))}
+              </div>
+              <p className="text-center text-sm font-semibold text-foreground mt-1">
+                {['😐 Not funny at all', '🙂 A little funny', '😄 Pretty amusing', '😂 Hilarious', '🤣 Too funny for words'][funninessLevel - 1]}
+              </p>
+            </div>
+          </fieldset>
 
           {/* Submit Button */}
           <button
