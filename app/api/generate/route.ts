@@ -66,7 +66,7 @@ IMPORTANT: This story MUST be fully appropriate for children aged 8 and under. D
 
 Story requirements:
 - Length: ${lengthDesc}
-- Learning theme: ${theme} — weave this naturally into the story
+- Learning theme: ${theme} — show the theme through what the characters do and feel. Never state the moral directly. The reader should absorb the lesson without being told it. Avoid sentences like "And so they learned..." or any line that directly names the lesson.
 - Give each character a unique, creative, and uncommon name. Avoid overused names like Finley, Bella, Max, Luna, Oliver, Rosie, Willow, Milo, or Daisy. Choose names that feel fresh, whimsical, and unexpected — draw from diverse cultures, nature, sounds, or invented words that suit the character's personality. Beyond the name — give each character a clear personality quirk, a small flaw, and an inner worry or fear that feels real. The story should grow naturally from who the characters are, not just what happens to them.
 - Age-appropriate vocabulary and concepts
 - Write with vivid, sensory language and a warm, playful voice. Vary sentence length for rhythm. Use specific, colourful details rather than generic descriptions.
