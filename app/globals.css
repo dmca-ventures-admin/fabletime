@@ -40,6 +40,8 @@
   --border-success:        #BBF7D0;
   --text-success:          #15803D;
   --surface-cancel-border: #E5E7EB;
+  --surface-page-via:      #F5F3FF;
+  --surface-page-to:       #EEF2FF;
 }
 
 [data-theme="dark"] {
@@ -73,6 +75,8 @@
   --border-success:        #14532D;
   --text-success:          #86EFAC;
   --surface-cancel-border: #1E2D45;
+  --surface-page-via:      #0F1829;
+  --surface-page-to:       #111827;
 }
 
 @theme {
