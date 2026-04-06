@@ -511,15 +511,15 @@ export default function StoryForm() {
                   onClick={() => !isLoading && setLength(l.value)}
                   disabled={isLoading}
                   aria-pressed={length === l.value}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg border transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed text-sm ${
+                  className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl border font-semibold text-sm transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed ${
                     length === l.value
-                      ? 'border-primary bg-primary text-white font-semibold'
+                      ? 'border-primary bg-primary text-white'
                       : 'border-[var(--border-card)] bg-[var(--surface-chip-inactive)] text-foreground hover:border-primary hover:bg-[var(--surface-chip-active)]'
                   }`}
                 >
-                  <span className="font-semibold">{l.label}</span>
+                  <span>{l.label}</span>
                   <span
-                    className={`text-xs ${
+                    className={`text-xs font-normal ${
                       length === l.value ? 'text-indigo-200' : 'text-secondary'
                     }`}
                   >
@@ -719,6 +719,30 @@ export default function StoryForm() {
           </button>
         </div>
       </form>
+
+      {/* Sticky Generate button — mobile only, hidden once story is showing */}
+      {!story && !isLoading && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-4 pb-4 pt-2 bg-gradient-to-t from-[var(--bg-background,_white)] to-transparent pointer-events-none">
+          <button
+            type="button"
+            onClick={() => {
+              const form = document.querySelector('form');
+              if (form) form.requestSubmit();
+            }}
+            className="w-full py-4 px-6 rounded-xl bg-cta hover:bg-cta-hover text-white font-heading font-semibold text-xl transition-colors duration-200 cursor-pointer flex items-center justify-center gap-3 pointer-events-auto shadow-lg"
+          >
+            <svg
+              className="w-6 h-6"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+            </svg>
+            Generate Story
+          </button>
+        </div>
+      )}
 
       {error && (
         <div
