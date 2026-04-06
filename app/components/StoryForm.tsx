@@ -634,27 +634,29 @@ export default function StoryForm() {
             <legend className="block text-xs font-semibold text-secondary mb-3 uppercase tracking-wider">
               Funniness Level
             </legend>
-            <div className="px-1">
-              <input
-                type="range"
-                min="1"
-                max="5"
-                step="1"
-                value={funninessLevel}
-                onChange={(e) => setFunninessLevel(Number(e.target.value))}
-                disabled={isLoading}
-                aria-label="Funniness level"
-                aria-valuemin={1}
-                aria-valuemax={5}
-                aria-valuenow={funninessLevel}
-                aria-valuetext={
-                  ['Not funny at all', 'A little funny', 'Pretty amusing', 'Hilarious', 'Too funny for words'][funninessLevel - 1]
-                }
-                className="w-full h-2 rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--border-subtle)] accent-[var(--color-primary)]"
-              />
-              <p className="text-center text-4xl mt-2" aria-hidden="true">
-                {['😐', '🙂', '😄', '😂', '🤣'][funninessLevel - 1]}
-              </p>
+            <div className="flex justify-between gap-2" role="radiogroup" aria-label="Funniness level">
+              {(['😐', '🙂', '😄', '😂', '🤣'] as const).map((emoji, i) => {
+                const level = i + 1;
+                const isSelected = funninessLevel === level;
+                return (
+                  <button
+                    key={level}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    aria-label={['Not funny at all', 'A little funny', 'Pretty amusing', 'Hilarious', 'Too funny for words'][i]}
+                    disabled={isLoading}
+                    onClick={() => setFunninessLevel(level)}
+                    className={`flex-1 py-2 rounded-xl transition-all duration-200 text-center cursor-pointer disabled:cursor-not-allowed ${
+                      isSelected
+                        ? 'bg-[var(--surface-chip-active)] border border-[var(--border-chip-active)] text-4xl'
+                        : 'text-2xl opacity-40 hover:opacity-70'
+                    }`}
+                  >
+                    {emoji}
+                  </button>
+                );
+              })}
             </div>
           </fieldset>
 
