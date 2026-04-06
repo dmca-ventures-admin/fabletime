@@ -634,39 +634,92 @@ export default function StoryForm() {
             <legend className="block text-xs font-semibold text-secondary mb-3 uppercase tracking-wider">
               Funniness Level
             </legend>
-            <div className="px-1">
-              <input
-                type="range"
-                min="1"
-                max="5"
-                step="1"
-                value={funninessLevel}
-                onChange={(e) => setFunninessLevel(Number(e.target.value))}
-                disabled={isLoading}
-                aria-label="Funniness level"
-                aria-valuemin={1}
-                aria-valuemax={5}
-                aria-valuenow={funninessLevel}
-                aria-valuetext={
-                  ['Not funny at all', 'A little funny', 'Pretty amusing', 'Hilarious', 'Too funny for words'][funninessLevel - 1]
+            <div className="px-4">
+              <style>{`
+                .funniness-slider {
+                  -webkit-appearance: none;
+                  appearance: none;
+                  width: 100%;
+                  height: 44px;
+                  background: transparent;
+                  outline: none;
+                  cursor: pointer;
+                  position: relative;
+                  z-index: 2;
                 }
-                className="w-full h-2 rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--border-subtle)] accent-[var(--color-primary)]"
-              />
-              <div className="flex justify-between mt-2">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <span
-                    key={n}
-                    className={`text-[10px] font-semibold transition-colors duration-200 ${
-                      funninessLevel === n ? 'text-primary' : 'text-secondary/50'
-                    }`}
-                  >
-                    {n}
-                  </span>
-                ))}
+                .funniness-slider:disabled { opacity: 0.5; cursor: not-allowed; }
+                .funniness-slider::-webkit-slider-runnable-track {
+                  height: 6px;
+                  border-radius: 9999px;
+                  background: transparent;
+                }
+                .funniness-slider::-webkit-slider-thumb {
+                  -webkit-appearance: none;
+                  width: 32px;
+                  height: 32px;
+                  border-radius: 50%;
+                  background: transparent;
+                  border: none;
+                  margin-top: -13px;
+                  cursor: pointer;
+                }
+                .funniness-slider::-moz-range-track {
+                  height: 6px;
+                  border-radius: 9999px;
+                  background: transparent;
+                }
+                .funniness-slider::-moz-range-thumb {
+                  width: 32px;
+                  height: 32px;
+                  border-radius: 50%;
+                  background: transparent;
+                  border: none;
+                  cursor: pointer;
+                }
+              `}</style>
+              {/* Wrapper adds horizontal padding so emoji has room at both ends */}
+              <div className="relative" style={{ height: '44px', paddingLeft: '16px', paddingRight: '16px', boxSizing: 'border-box' }}>
+                {/* Track — spans the padded area */}
+                <div
+                  className="absolute"
+                  style={{ left: '16px', right: '16px', top: '50%', marginTop: '-3px', height: '6px', borderRadius: '9999px',
+                    background: `linear-gradient(to right, var(--color-primary) ${(funninessLevel - 1) * 25}%, var(--border-subtle) ${(funninessLevel - 1) * 25}%)` }}
+                />
+                {/* Range input spans full width for interaction */}
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="1"
+                  value={funninessLevel}
+                  onChange={(e) => setFunninessLevel(Number(e.target.value))}
+                  disabled={isLoading}
+                  aria-label="Funniness level"
+                  aria-valuemin={1}
+                  aria-valuemax={5}
+                  aria-valuenow={funninessLevel}
+                  aria-valuetext={['Not funny at all', 'A little funny', 'Pretty amusing', 'Hilarious', 'Too funny for words'][funninessLevel - 1]}
+                  className="funniness-slider absolute inset-0 w-full"
+                />
+                {/* Emoji — travels 0% to 100% of the padded inner width */}
+                <span
+                  className="absolute pointer-events-none select-none"
+                  style={{
+                    fontSize: '26px',
+                    lineHeight: 1,
+                    top: '50%',
+                    marginTop: '-13px',
+                    left: `calc(16px + ${(funninessLevel - 1) / 4} * (100% - 32px))`,
+                    transform: 'translateX(-50%)',
+                    width: '32px',
+                    textAlign: 'center',
+                    zIndex: 3,
+                  }}
+                  aria-hidden="true"
+                >
+                  {['😐', '🙂', '😄', '😂', '🤣'][funninessLevel - 1]}
+                </span>
               </div>
-              <p className="text-center text-sm font-semibold text-foreground mt-1">
-                {['😐 Not funny at all', '🙂 A little funny', '😄 Pretty amusing', '😂 Hilarious', '🤣 Too funny for words'][funninessLevel - 1]}
-              </p>
             </div>
           </fieldset>
 
