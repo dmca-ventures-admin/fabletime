@@ -691,14 +691,16 @@ export default function StoryForm() {
                     background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${(funninessLevel - 1) * 25}%, var(--border-subtle) ${(funninessLevel - 1) * 25}%, var(--border-subtle) 100%)`
                   }}
                 />
-                {/* Emoji overlay positioned on the thumb */}
+                {/* Emoji overlay — uses same offset formula browsers use for thumb position */}
                 <span
                   className="absolute pointer-events-none text-3xl select-none"
                   style={{
-                    left: `calc(${(funninessLevel - 1) * 25}% - ${(funninessLevel - 1) * 8}px + 4px)`,
-                    transform: 'translateX(-50%)',
+                    // Browsers offset thumb by thumbRadius at each end (20px for 40px thumb)
+                    // So thumb travels: 20px (left) to trackWidth-20px (right)
+                    // We replicate this with calc: left = 20px + (level-1)/4 * (100% - 40px)
+                    left: `calc(20px + ${(funninessLevel - 1) / 4} * (100% - 40px))`,
+                    transform: 'translate(-50%, -50%)',
                     top: '50%',
-                    marginTop: '-20px',
                   }}
                   aria-hidden="true"
                 >
