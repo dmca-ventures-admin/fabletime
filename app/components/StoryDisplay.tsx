@@ -30,7 +30,7 @@ function StarIcon({ filled, className }: { filled: boolean; className?: string }
   );
 }
 
-export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRated, characters, theme }: StoryDisplayProps) {
+export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRated, characters, theme, onGenerateAnother }: StoryDisplayProps) {
   const [selectedRating, setSelectedRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState('');
