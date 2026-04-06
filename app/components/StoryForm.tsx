@@ -492,6 +492,9 @@ export default function StoryForm() {
                   {charValidationWarning}
                 </p>
               )}
+              {!customCharacterInput && (
+                <p className="text-xs text-secondary italic mt-1">Add multiple: Pirate, Dragon, Princess</p>
+              )}
             </div>
           </fieldset>
 
@@ -508,15 +511,15 @@ export default function StoryForm() {
                   onClick={() => !isLoading && setLength(l.value)}
                   disabled={isLoading}
                   aria-pressed={length === l.value}
-                  className={`flex-1 flex flex-col items-center py-3 px-2 rounded-xl border transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg border transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed text-sm ${
                     length === l.value
-                      ? 'border-primary bg-primary text-white'
+                      ? 'border-primary bg-primary text-white font-semibold'
                       : 'border-[var(--border-card)] bg-[var(--surface-chip-inactive)] text-foreground hover:border-primary hover:bg-[var(--surface-chip-active)]'
                   }`}
                 >
-                  <span className="font-heading font-semibold text-base">{l.label}</span>
+                  <span className="font-semibold">{l.label}</span>
                   <span
-                    className={`text-xs mt-0.5 ${
+                    className={`text-xs ${
                       length === l.value ? 'text-indigo-200' : 'text-secondary'
                     }`}
                   >
@@ -619,6 +622,9 @@ export default function StoryForm() {
                   {themeValidationWarning}
                 </p>
               )}
+              {!customThemeInput && (
+                <p className="text-xs text-secondary italic mt-1">Try: Bravery, Honesty, Friendship</p>
+              )}
             </div>
           </fieldset>
 
@@ -631,9 +637,10 @@ export default function StoryForm() {
 
           {/* Funniness Level */}
           <fieldset>
-            <legend className="block text-xs font-semibold text-secondary mb-3 uppercase tracking-wider">
+            <legend className="block text-xs font-semibold text-secondary mb-1 uppercase tracking-wider">
               Funniness Level
             </legend>
+            <p className="text-xs text-secondary mb-3">How funny should the story be?</p>
             <div className="px-4">
               {/* Slider CSS is in globals.css */}
               {/* Wrapper adds horizontal padding so emoji has room at both ends */}
@@ -722,7 +729,23 @@ export default function StoryForm() {
         </div>
       )}
 
-      <StoryDisplay story={story} isLoading={isLoading} storyId={storyId} hasRated={hasRated} onRated={() => setHasRated(true)} characters={finalCharacters} theme={finalTheme} />
+      <StoryDisplay
+        story={story}
+        isLoading={isLoading}
+        storyId={storyId}
+        hasRated={hasRated}
+        onRated={() => setHasRated(true)}
+        characters={finalCharacters}
+        theme={finalTheme}
+        onGenerateAnother={() => {
+          // Reset story state only — keep all form selections
+          setStory('');
+          setStoryId(null);
+          setHasRated(false);
+          setIsLoading(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
 }

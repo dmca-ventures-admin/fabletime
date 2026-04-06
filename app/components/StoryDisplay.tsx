@@ -10,6 +10,7 @@ interface StoryDisplayProps {
   onRated: () => void;
   characters: string[];
   theme: string;
+  onGenerateAnother?: () => void;
 }
 
 function StarIcon({ filled, className }: { filled: boolean; className?: string }) {
@@ -29,7 +30,7 @@ function StarIcon({ filled, className }: { filled: boolean; className?: string }
   );
 }
 
-export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRated, characters, theme }: StoryDisplayProps) {
+export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRated, characters, theme, onGenerateAnother }: StoryDisplayProps) {
   const [selectedRating, setSelectedRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState('');
@@ -134,6 +135,14 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
 
   const handleStartOver = () => {
     window.location.href = window.location.pathname;
+  };
+
+  const handleGenerateAnother = () => {
+    if (onGenerateAnother) {
+      onGenerateAnother();
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -337,9 +346,30 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
         </div>
       )}
 
-      {/* Start Over Button */}
+      {/* Post-story actions */}
       {showStartOver && (
-        <div className="mt-6 text-center">
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* Primary: generate another with same settings */}
+          <button
+            type="button"
+            onClick={handleGenerateAnother}
+            className="inline-flex items-center gap-2 py-2.5 px-6 rounded-xl bg-primary hover:bg-primary-hover text-white font-heading font-semibold text-base transition-colors duration-200 cursor-pointer"
+          >
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14M5 12l7 7 7-7" />
+            </svg>
+            Generate another story
+          </button>
+          {/* Secondary: full reset */}
           <button
             type="button"
             onClick={handleStartOver}
