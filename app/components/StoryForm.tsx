@@ -652,20 +652,8 @@ export default function StoryForm() {
                 }
                 className="w-full h-2 rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--border-subtle)] accent-[var(--color-primary)]"
               />
-              <div className="flex justify-between mt-2">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <span
-                    key={n}
-                    className={`text-[10px] font-semibold transition-colors duration-200 ${
-                      funninessLevel === n ? 'text-primary' : 'text-secondary/50'
-                    }`}
-                  >
-                    {n}
-                  </span>
-                ))}
-              </div>
-              <p className="text-center text-sm font-semibold text-foreground mt-1">
-                {['😐 Not funny at all', '🙂 A little funny', '😄 Pretty amusing', '😂 Hilarious', '🤣 Too funny for words'][funninessLevel - 1]}
+              <p className="text-center text-4xl mt-2" aria-hidden="true">
+                {['😐', '🙂', '😄', '😂', '🤣'][funninessLevel - 1]}
               </p>
             </div>
           </fieldset>
