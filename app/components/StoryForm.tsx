@@ -709,7 +709,8 @@ export default function StoryForm() {
                     top: '50%',
                     marginTop: '-13px',
                     // Match browser thumb travel: thumb centre goes from 16px to trackWidth-16px
-                    left: `calc(${(funninessLevel - 1) / 4} * (100% - 32px))`,
+                    left: `calc(16px + ${(funninessLevel - 1) / 4} * (100% - 32px))`,
+                    transform: 'translateX(-50%)',
                     width: '32px',
                     textAlign: 'center',
                     zIndex: 3,
