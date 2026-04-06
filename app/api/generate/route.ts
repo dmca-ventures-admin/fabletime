@@ -71,7 +71,7 @@ Story requirements:
 - Age-appropriate vocabulary and concepts
 - Write with vivid, sensory language and a warm, playful voice. Vary sentence length for rhythm. Use specific, colourful details rather than generic descriptions.
 - ${funninessInstruction}
-- While the story should have a clear beginning, middle, and end, feel free to subvert expectations — a problem that gets solved in a surprising way, an unexpected helper, or a twist that feels delightful rather than predictable.
+- Story structure: Use a story arc with real shape: a normal day is disrupted by a problem; the character tries to fix it the wrong way first and it backfires; then they try a different approach that reflects the theme; end with a quiet moment that shows how they have changed. Vary the specific arc — not every story needs the same shape — but every story needs that middle failure beat. That failure is what gives the story depth.
 - The story should be engaging, imaginative, and emotionally resonant
 ${characters.length > 1 ? '- Give each character a distinct personality and role in the story\n- Show the characters working together and supporting each other to overcome the challenge' : ''}
 Make the learning theme of "${theme}" central to how the characters grow and how the story resolves — it should feel woven in naturally, not tacked on.
