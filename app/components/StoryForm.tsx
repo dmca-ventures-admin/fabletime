@@ -634,7 +634,7 @@ export default function StoryForm() {
             <legend className="block text-xs font-semibold text-secondary mb-3 uppercase tracking-wider">
               Funniness Level
             </legend>
-            <div className="px-1">
+            <div className="px-4">
               <style>{`
                 .funniness-slider {
                   -webkit-appearance: none;
@@ -677,14 +677,15 @@ export default function StoryForm() {
                   cursor: pointer;
                 }
               `}</style>
-              <div className="relative" style={{ height: '44px' }}>
-                {/* Track */}
+              {/* Wrapper adds horizontal padding so emoji has room at both ends */}
+              <div className="relative" style={{ height: '44px', paddingLeft: '16px', paddingRight: '16px', boxSizing: 'border-box' }}>
+                {/* Track — spans the padded area */}
                 <div
-                  className="absolute left-0 right-0"
-                  style={{ top: '50%', marginTop: '-3px', height: '6px', borderRadius: '9999px',
+                  className="absolute"
+                  style={{ left: '16px', right: '16px', top: '50%', marginTop: '-3px', height: '6px', borderRadius: '9999px',
                     background: `linear-gradient(to right, var(--color-primary) ${(funninessLevel - 1) * 25}%, var(--border-subtle) ${(funninessLevel - 1) * 25}%)` }}
                 />
-                {/* Range input — transparent but fully interactive */}
+                {/* Range input spans full width for interaction */}
                 <input
                   type="range"
                   min="1"
@@ -700,7 +701,7 @@ export default function StoryForm() {
                   aria-valuetext={['Not funny at all', 'A little funny', 'Pretty amusing', 'Hilarious', 'Too funny for words'][funninessLevel - 1]}
                   className="funniness-slider absolute inset-0 w-full"
                 />
-                {/* Emoji — sits on thumb position, pointer-events none so slider stays interactive */}
+                {/* Emoji — travels 0% to 100% of the padded inner width */}
                 <span
                   className="absolute pointer-events-none select-none"
                   style={{
@@ -708,7 +709,6 @@ export default function StoryForm() {
                     lineHeight: 1,
                     top: '50%',
                     marginTop: '-13px',
-                    // Match browser thumb travel: thumb centre goes from 16px to trackWidth-16px
                     left: `calc(16px + ${(funninessLevel - 1) / 4} * (100% - 32px))`,
                     transform: 'translateX(-50%)',
                     width: '32px',
