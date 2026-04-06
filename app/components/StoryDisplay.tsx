@@ -54,7 +54,10 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
   // Fetch discussion questions once the story finishes streaming
   useEffect(() => {
     if (isLoading || !story || questionsFetchedRef.current) return;
-    if (!characters.length || !theme) return;
+    if (!characters.length || !theme) {
+      setQuestionsError(true);
+      return;
+    }
 
     questionsFetchedRef.current = true;
     let cancelled = false;

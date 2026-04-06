@@ -40,6 +40,8 @@
   --border-success:        #BBF7D0;
   --text-success:          #15803D;
   --surface-cancel-border: #E5E7EB;
+  --surface-page-via:      #F5F3FF;
+  --surface-page-to:       #EEF2FF;
 }
 
 [data-theme="dark"] {
@@ -61,7 +63,7 @@
   --surface-chip-active:   #1A2642;
   --surface-chip-inactive: #111827;
   --surface-hover:         #1A2642;
-  --text-hint:             #4B5563;
+  --text-hint:             #6B7A99;
   --surface-error-bg:      rgba(127, 29, 29, 0.25);
   --border-error:          #7F1D1D;
   --text-error:            #FCA5A5;
@@ -73,6 +75,8 @@
   --border-success:        #14532D;
   --text-success:          #86EFAC;
   --surface-cancel-border: #1E2D45;
+  --surface-page-via:      #0F1829;
+  --surface-page-to:       #111827;
 }
 
 @theme {
@@ -116,4 +120,46 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ── Funniness slider — custom range input ── */
+.funniness-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 44px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+}
+.funniness-slider:disabled { opacity: 0.5; cursor: not-allowed; }
+.funniness-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: transparent;
+}
+.funniness-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  margin-top: -13px;
+  cursor: pointer;
+}
+.funniness-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: transparent;
+}
+.funniness-slider::-moz-range-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }

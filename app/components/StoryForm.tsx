@@ -470,7 +470,7 @@ export default function StoryForm() {
                       ? 'custom-character-max-error'
                       : undefined
                 }
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] focus:outline-none focus:ring-2 focus:ring-secondary/60 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
                   customCharacterError || customWouldExceedMax
                     ? 'border-red-400'
                     : 'border-[var(--border-subtle)]'
@@ -604,7 +604,7 @@ export default function StoryForm() {
                 aria-label="Custom theme"
                 aria-invalid={!!customThemeError}
                 aria-describedby={customThemeError ? 'custom-theme-error' : undefined}
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] focus:outline-none focus:ring-2 focus:ring-secondary/60 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
                   customThemeError ? 'border-red-400' : 'border-[var(--border-subtle)]'
                 }`}
               />
@@ -635,48 +635,7 @@ export default function StoryForm() {
               Funniness Level
             </legend>
             <div className="px-4">
-              <style>{`
-                .funniness-slider {
-                  -webkit-appearance: none;
-                  appearance: none;
-                  width: 100%;
-                  height: 44px;
-                  background: transparent;
-                  outline: none;
-                  cursor: pointer;
-                  position: relative;
-                  z-index: 2;
-                }
-                .funniness-slider:disabled { opacity: 0.5; cursor: not-allowed; }
-                .funniness-slider::-webkit-slider-runnable-track {
-                  height: 6px;
-                  border-radius: 9999px;
-                  background: transparent;
-                }
-                .funniness-slider::-webkit-slider-thumb {
-                  -webkit-appearance: none;
-                  width: 32px;
-                  height: 32px;
-                  border-radius: 50%;
-                  background: transparent;
-                  border: none;
-                  margin-top: -13px;
-                  cursor: pointer;
-                }
-                .funniness-slider::-moz-range-track {
-                  height: 6px;
-                  border-radius: 9999px;
-                  background: transparent;
-                }
-                .funniness-slider::-moz-range-thumb {
-                  width: 32px;
-                  height: 32px;
-                  border-radius: 50%;
-                  background: transparent;
-                  border: none;
-                  cursor: pointer;
-                }
-              `}</style>
+              {/* Slider CSS is in globals.css */}
               {/* Wrapper adds horizontal padding so emoji has room at both ends */}
               <div className="relative" style={{ height: '44px', paddingLeft: '16px', paddingRight: '16px', boxSizing: 'border-box' }}>
                 {/* Track — spans the padded area */}
