@@ -640,50 +640,51 @@ export default function StoryForm() {
                   -webkit-appearance: none;
                   appearance: none;
                   width: 100%;
-                  height: 6px;
-                  border-radius: 9999px;
+                  height: 44px;
+                  background: transparent;
                   outline: none;
                   cursor: pointer;
-                  background: transparent;
+                  position: relative;
+                  z-index: 2;
                 }
                 .funniness-slider:disabled { opacity: 0.5; cursor: not-allowed; }
-                /* Hide native thumb — emoji takes its place */
+                .funniness-slider::-webkit-slider-runnable-track {
+                  height: 6px;
+                  border-radius: 9999px;
+                  background: transparent;
+                }
                 .funniness-slider::-webkit-slider-thumb {
                   -webkit-appearance: none;
-                  appearance: none;
-                  width: 0;
-                  height: 0;
+                  width: 32px;
+                  height: 32px;
+                  border-radius: 50%;
                   background: transparent;
                   border: none;
+                  margin-top: -13px;
+                  cursor: pointer;
+                }
+                .funniness-slider::-moz-range-track {
+                  height: 6px;
+                  border-radius: 9999px;
+                  background: transparent;
                 }
                 .funniness-slider::-moz-range-thumb {
-                  width: 0;
-                  height: 0;
+                  width: 32px;
+                  height: 32px;
+                  border-radius: 50%;
                   background: transparent;
                   border: none;
+                  cursor: pointer;
                 }
               `}</style>
-              {/* Custom slider: track + emoji button overlay */}
-              <div
-                className="relative w-full"
-                style={{ height: '40px', display: 'flex', alignItems: 'center' }}
-              >
-                {/* Track background */}
-                <div className="absolute w-full" style={{ height: '6px', borderRadius: '9999px', overflow: 'hidden' }}>
-                  <div className="h-full" style={{ background: 'var(--border-subtle)' }} />
-                </div>
-                {/* Filled portion */}
+              <div className="relative" style={{ height: '44px' }}>
+                {/* Track */}
                 <div
-                  className="absolute"
-                  style={{
-                    height: '6px',
-                    borderRadius: '9999px',
-                    background: 'var(--color-primary)',
-                    width: `calc(${(funninessLevel - 1) / 4} * (100% - 32px) + 16px)`,
-                    left: 0,
-                  }}
+                  className="absolute left-0 right-0"
+                  style={{ top: '50%', marginTop: '-3px', height: '6px', borderRadius: '9999px',
+                    background: `linear-gradient(to right, var(--color-primary) ${(funninessLevel - 1) * 25}%, var(--border-subtle) ${(funninessLevel - 1) * 25}%)` }}
                 />
-                {/* Invisible range input on top for interaction */}
+                {/* Range input — transparent but fully interactive */}
                 <input
                   type="range"
                   min="1"
@@ -697,20 +698,21 @@ export default function StoryForm() {
                   aria-valuemax={5}
                   aria-valuenow={funninessLevel}
                   aria-valuetext={['Not funny at all', 'A little funny', 'Pretty amusing', 'Hilarious', 'Too funny for words'][funninessLevel - 1]}
-                  className="funniness-slider absolute inset-0 w-full h-full"
-                  style={{ zIndex: 2, opacity: 0.001 }}
+                  className="funniness-slider absolute inset-0 w-full"
                 />
-                {/* Emoji thumb — positioned to match where browser thumb would be */}
+                {/* Emoji — sits on thumb position, pointer-events none so slider stays interactive */}
                 <span
                   className="absolute pointer-events-none select-none"
                   style={{
-                    fontSize: '28px',
+                    fontSize: '26px',
                     lineHeight: 1,
-                    // thumb travels from 16px (half thumb) to trackWidth-16px
+                    top: '50%',
+                    marginTop: '-13px',
+                    // Match browser thumb travel: thumb centre goes from 16px to trackWidth-16px
                     left: `calc(${(funninessLevel - 1) / 4} * (100% - 32px))`,
                     width: '32px',
                     textAlign: 'center',
-                    zIndex: 1,
+                    zIndex: 3,
                   }}
                   aria-hidden="true"
                 >
