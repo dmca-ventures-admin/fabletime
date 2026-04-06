@@ -634,29 +634,77 @@ export default function StoryForm() {
             <legend className="block text-xs font-semibold text-secondary mb-3 uppercase tracking-wider">
               Funniness Level
             </legend>
-            <div className="flex justify-between gap-2" role="radiogroup" aria-label="Funniness level">
-              {(['😐', '🙂', '😄', '😂', '🤣'] as const).map((emoji, i) => {
-                const level = i + 1;
-                const isSelected = funninessLevel === level;
-                return (
-                  <button
-                    key={level}
-                    type="button"
-                    role="radio"
-                    aria-checked={isSelected}
-                    aria-label={['Not funny at all', 'A little funny', 'Pretty amusing', 'Hilarious', 'Too funny for words'][i]}
-                    disabled={isLoading}
-                    onClick={() => setFunninessLevel(level)}
-                    className={`flex-1 py-2 rounded-xl transition-all duration-200 text-center cursor-pointer disabled:cursor-not-allowed ${
-                      isSelected
-                        ? 'bg-[var(--surface-chip-active)] border border-[var(--border-chip-active)] text-4xl'
-                        : 'text-2xl opacity-40 hover:opacity-70'
-                    }`}
-                  >
-                    {emoji}
-                  </button>
-                );
-              })}
+            <div className="px-1">
+              <style>{`
+                .funniness-slider {
+                  -webkit-appearance: none;
+                  appearance: none;
+                  width: 100%;
+                  height: 6px;
+                  border-radius: 9999px;
+                  background: var(--border-subtle);
+                  outline: none;
+                  cursor: pointer;
+                }
+                .funniness-slider:disabled { opacity: 0.5; cursor: not-allowed; }
+                .funniness-slider::-webkit-slider-thumb {
+                  -webkit-appearance: none;
+                  appearance: none;
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 50%;
+                  background: transparent;
+                  cursor: pointer;
+                  font-size: 32px;
+                  line-height: 1;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  content: attr(data-emoji);
+                }
+                .funniness-slider::-moz-range-thumb {
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 50%;
+                  background: transparent;
+                  border: none;
+                  cursor: pointer;
+                  font-size: 32px;
+                }
+              `}</style>
+              <div className="relative flex items-center">
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="1"
+                  value={funninessLevel}
+                  onChange={(e) => setFunninessLevel(Number(e.target.value))}
+                  disabled={isLoading}
+                  aria-label="Funniness level"
+                  aria-valuemin={1}
+                  aria-valuemax={5}
+                  aria-valuenow={funninessLevel}
+                  aria-valuetext={['Not funny at all', 'A little funny', 'Pretty amusing', 'Hilarious', 'Too funny for words'][funninessLevel - 1]}
+                  className="funniness-slider w-full"
+                  style={{
+                    background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${(funninessLevel - 1) * 25}%, var(--border-subtle) ${(funninessLevel - 1) * 25}%, var(--border-subtle) 100%)`
+                  }}
+                />
+                {/* Emoji overlay positioned on the thumb */}
+                <span
+                  className="absolute pointer-events-none text-3xl select-none"
+                  style={{
+                    left: `calc(${(funninessLevel - 1) * 25}% - ${(funninessLevel - 1) * 8}px + 4px)`,
+                    transform: 'translateX(-50%)',
+                    top: '50%',
+                    marginTop: '-20px',
+                  }}
+                  aria-hidden="true"
+                >
+                  {['😐', '🙂', '😄', '😂', '🤣'][funninessLevel - 1]}
+                </span>
+              </div>
             </div>
           </fieldset>
 
