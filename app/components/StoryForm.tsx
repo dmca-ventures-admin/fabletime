@@ -697,8 +697,8 @@ export default function StoryForm() {
                   aria-valuemax={5}
                   aria-valuenow={funninessLevel}
                   aria-valuetext={['Not funny at all', 'A little funny', 'Pretty amusing', 'Hilarious', 'Too funny for words'][funninessLevel - 1]}
-                  className="funniness-slider absolute inset-0 w-full h-full opacity-0"
-                  style={{ zIndex: 2 }}
+                  className="funniness-slider absolute inset-0 w-full h-full"
+                  style={{ zIndex: 2, opacity: 0.001 }}
                 />
                 {/* Emoji thumb — positioned to match where browser thumb would be */}
                 <span
