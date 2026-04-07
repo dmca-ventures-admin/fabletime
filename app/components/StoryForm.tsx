@@ -390,7 +390,7 @@ export default function StoryForm() {
       >
         <div className="space-y-8">
           {/* Instruction line */}
-          <p className="text-sm text-secondary">
+          <p className="text-base font-medium text-foreground">
             Pick characters, choose a learning theme, and get a personalised story.
           </p>
 
