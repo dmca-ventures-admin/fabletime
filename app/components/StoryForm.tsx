@@ -375,6 +375,11 @@ export default function StoryForm() {
         className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border-card)] shadow-sm p-6 md:p-10"
       >
         <div className="space-y-8">
+          {/* Instruction line */}
+          <p className="text-sm text-secondary">
+            Pick characters, choose a learning theme, and get a personalised story.
+          </p>
+
           {/* Character Selection */}
           <fieldset>
             <legend className="block text-xs font-semibold text-secondary mb-1 uppercase tracking-wider">

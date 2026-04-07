@@ -24,9 +24,6 @@ export default function Home() {
           <p className="text-xl text-secondary font-medium mb-3">
             Magical stories, made just for you
           </p>
-          <p className="text-sm text-secondary mt-1 mb-3">
-            Pick characters, choose a learning theme, and get a personalised story.
-          </p>
           <ThemeToggle />
         </div>
 
