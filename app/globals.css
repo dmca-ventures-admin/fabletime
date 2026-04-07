@@ -142,13 +142,17 @@ body {
 }
 .funniness-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
+  appearance: none;
   width: 32px;
   height: 32px;
   border-radius: 50%;
   background: transparent;
   border: none;
+  box-shadow: none;
+  outline: none;
   margin-top: -13px;
   cursor: pointer;
+  opacity: 0;
 }
 .funniness-slider::-moz-range-track {
   height: 6px;
@@ -161,5 +165,7 @@ body {
   border-radius: 50%;
   background: transparent;
   border: none;
+  box-shadow: none;
   cursor: pointer;
+  opacity: 0;
 }
