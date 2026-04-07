@@ -148,6 +148,20 @@ export default function StoryForm() {
   const [themeValidationWarning, setThemeValidationWarning] = useState('');
   const charValidationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const themeValidationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const submitButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [inlineButtonVisible, setInlineButtonVisible] = useState(false);
+
+  // Hide sticky button when the inline Generate button is visible
+  useEffect(() => {
+    const el = submitButtonRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInlineButtonVisible(entry.isIntersecting),
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Fetch suggestions on mount
   useEffect(() => {
@@ -375,6 +389,11 @@ export default function StoryForm() {
         className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border-card)] shadow-sm p-6 md:p-10"
       >
         <div className="space-y-8">
+          {/* Instruction line */}
+          <p className="text-base text-secondary">
+            Pick characters, choose a learning theme, and get a personalised story.
+          </p>
+
           {/* Character Selection */}
           <fieldset>
             <legend className="block text-xs font-semibold text-secondary mb-1 uppercase tracking-wider">
@@ -691,6 +710,7 @@ export default function StoryForm() {
 
           {/* Submit Button */}
           <button
+            ref={submitButtonRef}
             type="submit"
             disabled={isLoading}
             className="w-full py-4 px-6 rounded-xl bg-cta hover:bg-cta-hover text-white font-heading font-semibold text-xl disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center justify-center gap-3"
@@ -721,25 +741,38 @@ export default function StoryForm() {
       </form>
 
       {/* Sticky Generate button — mobile only, hidden once story is showing */}
-      {!story && !isLoading && (
+      {!story && !inlineButtonVisible && (
         <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-4 pb-4 pt-2 bg-gradient-to-t from-[var(--bg-background,_white)] to-transparent pointer-events-none">
           <button
             type="button"
+            disabled={isLoading}
             onClick={() => {
               const form = document.querySelector('form');
               if (form) form.requestSubmit();
             }}
-            className="w-full py-4 px-6 rounded-xl bg-cta hover:bg-cta-hover text-white font-heading font-semibold text-xl transition-colors duration-200 cursor-pointer flex items-center justify-center gap-3 pointer-events-auto shadow-lg"
+            className="w-full py-4 px-6 rounded-xl bg-cta hover:bg-cta-hover text-white font-heading font-semibold text-xl disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center justify-center gap-3 pointer-events-auto shadow-lg"
           >
-            <svg
-              className="w-6 h-6"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-            </svg>
-            Generate Story
+            {isLoading ? (
+              <>
+                <span
+                  className="inline-block w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin"
+                  aria-hidden="true"
+                />
+                Writing your story...
+              </>
+            ) : (
+              <>
+                <svg
+                  className="w-6 h-6"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                </svg>
+                Generate Story
+              </>
+            )}
           </button>
         </div>
       )}
