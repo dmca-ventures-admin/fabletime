@@ -148,6 +148,20 @@ export default function StoryForm() {
   const [themeValidationWarning, setThemeValidationWarning] = useState('');
   const charValidationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const themeValidationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const submitButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [inlineButtonVisible, setInlineButtonVisible] = useState(false);
+
+  // Hide sticky button when the inline Generate button is visible
+  useEffect(() => {
+    const el = submitButtonRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInlineButtonVisible(entry.isIntersecting),
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Fetch suggestions on mount
   useEffect(() => {
@@ -696,6 +710,7 @@ export default function StoryForm() {
 
           {/* Submit Button */}
           <button
+            ref={submitButtonRef}
             type="submit"
             disabled={isLoading}
             className="w-full py-4 px-6 rounded-xl bg-cta hover:bg-cta-hover text-white font-heading font-semibold text-xl disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center justify-center gap-3"
@@ -726,7 +741,7 @@ export default function StoryForm() {
       </form>
 
       {/* Sticky Generate button — mobile only, hidden once story is showing */}
-      {!story && (
+      {!story && !inlineButtonVisible && (
         <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-4 pb-4 pt-2 bg-gradient-to-t from-[var(--bg-background,_white)] to-transparent pointer-events-none">
           <button
             type="button"
