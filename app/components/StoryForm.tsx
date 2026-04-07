@@ -747,8 +747,13 @@ export default function StoryForm() {
             type="button"
             disabled={isLoading}
             onClick={() => {
-              const form = document.querySelector('form');
-              if (form) form.requestSubmit();
+              const form = document.querySelector('form') as HTMLFormElement | null;
+              if (!form) return;
+              if (form.requestSubmit) {
+                form.requestSubmit();
+              } else {
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+              }
             }}
             className="w-full py-4 px-6 rounded-xl bg-cta hover:bg-cta-hover text-white font-heading font-semibold text-xl disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center justify-center gap-3 pointer-events-auto shadow-lg"
           >
