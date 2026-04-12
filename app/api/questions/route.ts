@@ -1,16 +1,20 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { NextRequest, NextResponse } from 'next/server';
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { NextRequest } from 'next/server';
+import { anthropic } from '@/lib/anthropic';
+import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 20 question generations per minute per IP
+  const ip = getClientIp(request);
+  const { allowed } = checkRateLimit(`questions:${ip}`, 20, 60_000);
+  if (!allowed) {
+    return Response.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const { story, characters, theme } = await request.json();
 
     if (!story || !characters || !theme) {
-      return NextResponse.json(
+      return Response.json(
         { error: 'Missing required fields: story, characters, theme' },
         { status: 400 }
       );
@@ -18,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const characterList = Array.isArray(characters) ? characters.join(', ') : characters;
 
-    const response = await client.messages.create({
+    const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5',
       max_tokens: 512,
       messages: [
@@ -45,23 +49,29 @@ ${story.slice(0, 4000)}`,
     const text =
       response.content[0].type === 'text' ? response.content[0].text : '';
 
-    // Parse the JSON array from the response
     // Strip any markdown code fences if present
     const cleaned = text.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
-    const questions: string[] = JSON.parse(cleaned);
+
+    let questions: string[];
+    try {
+      questions = JSON.parse(cleaned);
+    } catch {
+      console.error('[Q] Failed to parse AI response:', cleaned);
+      return Response.json({ error: 'Failed to generate questions' }, { status: 500 });
+    }
 
     if (!Array.isArray(questions) || questions.length !== 3) {
       console.error('[Q] Unexpected questions format:', text);
-      return NextResponse.json(
+      return Response.json(
         { error: 'Failed to generate questions' },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ questions });
+    return Response.json({ questions });
   } catch (error) {
     console.error('[Q] Error generating questions:', error);
-    return NextResponse.json(
+    return Response.json(
       { error: 'Failed to generate questions' },
       { status: 500 }
     );

@@ -43,12 +43,16 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
   const [questionsError, setQuestionsError] = useState(false);
   const questionsFetchedRef = useRef(false);
 
-  // Reset fetch guard when a new story starts
+  // Reset fetch guard and rating state when a new story starts
   useEffect(() => {
     if (isLoading) {
       questionsFetchedRef.current = false;
       setQuestions([]);
       setQuestionsError(false);
+      setSelectedRating(0);
+      setHoveredRating(0);
+      setFeedbackText('');
+      setSubmitError('');
     }
   }, [isLoading]);
 
@@ -131,11 +135,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
 
   const showRatingForm = !isLoading && story && storyId && !hasRated;
   const showThankYou = !isLoading && story && storyId && hasRated;
-  const showStartOver = !isLoading && story;
-
-  const handleStartOver = () => {
-    window.location.href = window.location.pathname;
-  };
+  const showActions = !isLoading && story;
 
   const handleGenerateAnother = () => {
     if (onGenerateAnother) {
@@ -347,9 +347,8 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
       )}
 
       {/* Post-story actions */}
-      {showStartOver && (
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-          {/* Primary: generate another with same settings */}
+      {showActions && (
+        <div className="mt-6 flex items-center justify-center">
           <button
             type="button"
             onClick={handleGenerateAnother}
@@ -364,27 +363,6 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
               <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
             </svg>
             Generate another story
-          </button>
-          {/* Secondary: full reset */}
-          <button
-            type="button"
-            onClick={handleStartOver}
-            className="inline-flex items-center gap-2 py-2.5 px-6 rounded-xl border border-[var(--border-card)] bg-[var(--surface-card)] text-secondary hover:text-primary hover:border-primary font-heading font-semibold text-base transition-colors duration-200 cursor-pointer"
-          >
-            <svg
-              className="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M1 4v6h6" />
-              <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
-            </svg>
-            Start over
           </button>
         </div>
       )}

@@ -1,16 +1,20 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { NextRequest, NextResponse } from 'next/server';
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { NextRequest } from 'next/server';
+import { anthropic } from '@/lib/anthropic';
+import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 30 validations per minute per IP
+  const ip = getClientIp(request);
+  const { allowed } = checkRateLimit(`validate:${ip}`, 30, 60_000);
+  if (!allowed) {
+    return Response.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const { value, type } = await request.json();
 
     if (!value || !type || !['character', 'theme'].includes(type)) {
-      return NextResponse.json(
+      return Response.json(
         { error: 'Missing required fields: value, type (character|theme)' },
         { status: 400 }
       );
@@ -18,10 +22,10 @@ export async function POST(request: NextRequest) {
 
     const trimmed = value.trim();
     if (!trimmed || trimmed.length > 50) {
-      return NextResponse.json({ valid: true, suggestion: null });
+      return Response.json({ valid: true, suggestion: null });
     }
 
-    const response = await client.messages.create({
+    const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5',
       max_tokens: 128,
       messages: [
@@ -47,15 +51,23 @@ If nonsensical/gibberish: {"valid": false, "suggestion": null}`,
       response.content[0].type === 'text' ? response.content[0].text : '';
 
     const cleaned = text.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
-    const result = JSON.parse(cleaned);
 
-    return NextResponse.json({
+    let result: { valid: boolean; suggestion: string | null };
+    try {
+      result = JSON.parse(cleaned);
+    } catch {
+      console.error('[V] Failed to parse AI response:', cleaned);
+      // Fail open — don't block the user on a parse error
+      return Response.json({ valid: true, suggestion: null });
+    }
+
+    return Response.json({
       valid: !!result.valid,
       suggestion: result.suggestion || null,
     });
   } catch (error) {
     console.error('[V] Error validating input:', error);
     // Fail open — don't block the user
-    return NextResponse.json({ valid: true, suggestion: null });
+    return Response.json({ valid: true, suggestion: null });
   }
 }

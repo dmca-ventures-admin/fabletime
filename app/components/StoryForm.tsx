@@ -2,96 +2,18 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import StoryDisplay from './StoryDisplay';
+import GenerateButton from './GenerateButton';
+import {
+  CHARACTER_EMOJI,
+  DEFAULT_CHARACTER_EMOJI,
+  THEME_EMOJI,
+  DEFAULT_THEME_EMOJI,
+  getCharacterEmoji,
+  getThemeEmoji,
+} from '@/lib/constants';
 
 const MAX_CHARACTERS = 3;
 const MAX_WORDS_PER_ENTRY = 3;
-
-/** Emoji lookup for known characters — custom/unknown entries get the default */
-const CHARACTER_EMOJI: Record<string, string> = {
-  fox: '🦊',
-  bear: '🐻',
-  wizard: '🧙',
-  knight: '🛡️',
-  scientist: '🔬',
-  mermaid: '🧜',
-  dragon: '🐉',
-  princess: '👸',
-  prince: '🤴',
-  pirate: '🏴‍☠️',
-  robot: '🤖',
-  cat: '🐱',
-  dog: '🐶',
-  owl: '🦉',
-  bunny: '🐰',
-  rabbit: '🐇',
-  unicorn: '🦄',
-  dinosaur: '🦕',
-  fairy: '🧚',
-  astronaut: '🧑‍🚀',
-  monkey: '🐒',
-  lion: '🦁',
-  elephant: '🐘',
-  penguin: '🐧',
-  fish: '🐟',
-  turtle: '🐢',
-  butterfly: '🦋',
-  frog: '🐸',
-  mouse: '🐭',
-  bird: '🐦',
-  martian: '👽',
-  wolf: '🐺',
-  horse: '🐴',
-  panda: '🐼',
-  shark: '🦈',
-  bee: '🐝',
-  witch: '🧙‍♀️',
-  superhero: '🦸',
-  messi: '⚽',
-};
-const DEFAULT_CHARACTER_EMOJI = '⭐';
-
-/** Emoji lookup for known themes — custom/unknown entries get the default */
-const THEME_EMOJI: Record<string, string> = {
-  kindness: '🤝',
-  courage: '⚡',
-  empathy: '💛',
-  vocabulary: '📚',
-  friendship: '👫',
-  honesty: '💎',
-  creativity: '🎨',
-  patience: '🧘',
-  sharing: '🤲',
-  teamwork: '🫂',
-  curiosity: '🔍',
-  gratitude: '🙏',
-  respect: '🌟',
-  perseverance: '💪',
-  responsibility: '🏅',
-};
-const DEFAULT_THEME_EMOJI = '💡';
-
-/** Get the emoji for a character name (case-insensitive lookup, falls back to word matching) */
-function getCharacterEmoji(name: string): string {
-  const key = name.toLowerCase().trim();
-  if (CHARACTER_EMOJI[key]) return CHARACTER_EMOJI[key];
-  // Try matching any word in the name (e.g. "Little Wizard" → wizard → 🧙)
-  const words = key.split(/\s+/);
-  for (const word of words) {
-    if (CHARACTER_EMOJI[word]) return CHARACTER_EMOJI[word];
-  }
-  return DEFAULT_CHARACTER_EMOJI;
-}
-
-/** Get the emoji for a theme name (case-insensitive lookup, falls back to word matching) */
-function getThemeEmoji(name: string): string {
-  const key = name.toLowerCase().trim();
-  if (THEME_EMOJI[key]) return THEME_EMOJI[key];
-  const words = key.split(/\s+/);
-  for (const word of words) {
-    if (THEME_EMOJI[word]) return THEME_EMOJI[word];
-  }
-  return DEFAULT_THEME_EMOJI;
-}
 
 const lengths = [
   { value: 'short', label: 'Short', sub: '~300 words' },
@@ -709,43 +631,21 @@ export default function StoryForm() {
           </fieldset>
 
           {/* Submit Button */}
-          <button
+          <GenerateButton
             ref={submitButtonRef}
+            isLoading={isLoading}
             type="submit"
-            disabled={isLoading}
-            className="w-full py-4 px-6 rounded-xl bg-cta hover:bg-cta-hover text-white font-heading font-semibold text-xl disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center justify-center gap-3"
-          >
-            {isLoading ? (
-              <>
-                <span
-                  className="inline-block w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin"
-                  aria-hidden="true"
-                />
-                Writing your story...
-              </>
-            ) : (
-              <>
-                <svg
-                  className="w-6 h-6"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-                </svg>
-                Generate Story
-              </>
-            )}
-          </button>
+            className="w-full"
+          />
         </div>
       </form>
 
       {/* Sticky Generate button — mobile only, hidden once story is showing */}
       {!story && !inlineButtonVisible && (
         <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-4 pb-4 pt-2 bg-gradient-to-t from-[var(--bg-background,_white)] to-transparent pointer-events-none">
-          <button
+          <GenerateButton
             type="button"
-            disabled={isLoading}
+            isLoading={isLoading}
             onClick={() => {
               const form = document.querySelector('form') as HTMLFormElement | null;
               if (!form) return;
@@ -755,30 +655,8 @@ export default function StoryForm() {
                 form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
               }
             }}
-            className="w-full py-4 px-6 rounded-xl bg-cta hover:bg-cta-hover text-white font-heading font-semibold text-xl disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center justify-center gap-3 pointer-events-auto shadow-lg"
-          >
-            {isLoading ? (
-              <>
-                <span
-                  className="inline-block w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin"
-                  aria-hidden="true"
-                />
-                Writing your story...
-              </>
-            ) : (
-              <>
-                <svg
-                  className="w-6 h-6"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-                </svg>
-                Generate Story
-              </>
-            )}
-          </button>
+            className="w-full pointer-events-auto shadow-lg"
+          />
         </div>
       )}
 

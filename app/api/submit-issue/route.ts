@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO_OWNER = 'dmca-ventures-admin';
@@ -9,21 +10,45 @@ const LABEL_CONFIG = {
   feedback: { name: 'feedback', color: '0075ca', emoji: '💬', title: 'User Feedback' },
 };
 
+const MAX_MESSAGE_LENGTH = 5000;
+const MAX_EMAIL_LENGTH = 255;
+
 export async function POST(request: NextRequest) {
+  // Rate limit: 5 submissions per minute per IP to prevent spam
+  const ip = getClientIp(request);
+  const { allowed } = checkRateLimit(`submit-issue:${ip}`, 5, 60_000);
+  if (!allowed) {
+    return Response.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const { type, email, message } = await request.json();
 
     if (!message?.trim()) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+      return Response.json({ error: 'Message is required' }, { status: 400 });
+    }
+
+    if (message.trim().length > MAX_MESSAGE_LENGTH) {
+      return Response.json(
+        { error: `Message must be ${MAX_MESSAGE_LENGTH} characters or fewer` },
+        { status: 400 }
+      );
+    }
+
+    if (email && email.trim().length > MAX_EMAIL_LENGTH) {
+      return Response.json(
+        { error: `Email must be ${MAX_EMAIL_LENGTH} characters or fewer` },
+        { status: 400 }
+      );
     }
 
     if (type !== 'bug' && type !== 'feedback') {
-      return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+      return Response.json({ error: 'Invalid type' }, { status: 400 });
     }
 
     if (!GITHUB_TOKEN) {
       console.error('GITHUB_TOKEN not set');
-      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
+      return Response.json({ error: 'Server misconfiguration' }, { status: 500 });
     }
 
     const cfg = LABEL_CONFIG[type as 'bug' | 'feedback'];
@@ -41,10 +66,10 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({ name: cfg.name, color: cfg.color }),
     });
 
+    // Email is intentionally omitted from the issue body to protect user privacy
     const body = [
       `**Type:** ${cfg.title}`,
       `**Submitted:** ${new Date().toUTCString()}`,
-      `**Email:** ${email?.trim() || 'Not provided'}`,
       '',
       '---',
       '',
@@ -67,13 +92,13 @@ export async function POST(request: NextRequest) {
     if (!res.ok) {
       const err = await res.json();
       console.error('GitHub API error:', err);
-      return NextResponse.json({ error: 'Failed to create issue' }, { status: 502 });
+      return Response.json({ error: 'Failed to create issue' }, { status: 502 });
     }
 
     const issue = await res.json();
-    return NextResponse.json({ success: true, issueNumber: issue.number });
+    return Response.json({ success: true, issueNumber: issue.number });
   } catch (err) {
     console.error('submit-issue error:', err);
-    return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
+    return Response.json({ error: 'Unexpected error' }, { status: 500 });
   }
 }
