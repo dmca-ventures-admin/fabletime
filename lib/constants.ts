@@ -74,6 +74,18 @@ export const CHARACTER_EMOJI: Record<string, string> = {
   lobster: '🦞',
   snail: '🐌',
   ladybug: '🐞',
+  chick: '🐣',
+  seal: '🦭',
+  seastar: '⭐',
+  'sea star': '⭐',
+  duck: '🦆',
+  duckling: '🐥',
+  whale: '🐳',
+  dolphin: '🐬',
+  shrimp: '🦐',
+  jellyfish: '🪼',
+  seahorse: '🐠',
+  starfish: '⭐',
 };
 export const DEFAULT_CHARACTER_EMOJI = '⭐';
 
