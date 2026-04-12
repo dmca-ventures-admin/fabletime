@@ -4,9 +4,10 @@ import { isChildFriendly } from '@/lib/content-filter';
 /**
  * GET /api/suggestions
  *
- * Returns top-9 characters and top-8 themes from the `custom_entries`
+ * Returns top-50 characters and top-50 themes from the `custom_entries`
  * table, ordered by usage_count DESC, filtered to child-friendly entries
- * only.
+ * only. The client randomly samples 9 characters and 8 themes to display
+ * on each page load, and uses the full 50 for autocomplete filtering.
  *
  * Entries with `child_friendly = null` are classified lazily in the
  * background and cached in the DB column — the response is returned
@@ -15,13 +16,14 @@ import { isChildFriendly } from '@/lib/content-filter';
  */
 export async function GET() {
   try {
-    // Fetch top 20 per type to account for entries that may be filtered out
+    // Fetch top 100 per type to account for entries that may be filtered out,
+    // so we can reliably return up to 50 child-friendly entries.
     const { data: characterRows, error: charError } = await supabase
       .from('custom_entries')
       .select('id, value, child_friendly')
       .eq('type', 'character')
       .order('usage_count', { ascending: false })
-      .limit(20);
+      .limit(100);
 
     if (charError) {
       console.error('[S03] Failed to fetch character suggestions:', charError);
@@ -33,7 +35,7 @@ export async function GET() {
       .select('id, value, child_friendly')
       .eq('type', 'theme')
       .order('usage_count', { ascending: false })
-      .limit(20);
+      .limit(100);
 
     if (themeError) {
       console.error('[S03] Failed to fetch theme suggestions:', themeError);
@@ -45,12 +47,12 @@ export async function GET() {
     // in the background so they appear on the next request.
     const characters = (characterRows ?? [])
       .filter((row) => row.child_friendly === true)
-      .slice(0, 9)
+      .slice(0, 50)
       .map((row) => row.value);
 
     const themes = (themeRows ?? [])
       .filter((row) => row.child_friendly === true)
-      .slice(0, 8)
+      .slice(0, 50)
       .map((row) => row.value);
 
     // Kick off background classification for unchecked entries — do not await.

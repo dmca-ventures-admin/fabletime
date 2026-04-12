@@ -40,10 +40,13 @@ function exceedsMaxWords(entry: string): boolean {
 }
 
 export default function StoryForm() {
-  // Suggestion state
+  // Suggestion state — full 50 from API (used for autocomplete)
   const [suggestions, setSuggestions] = useState<Suggestions>({ characters: [], themes: [] });
   const [suggestionsLoading, setSuggestionsLoading] = useState(true);
   const [suggestionsError, setSuggestionsError] = useState(false);
+  // Randomly sampled display lists (9 chars, 8 themes) — set once on mount
+  const [displayedCharacters, setDisplayedCharacters] = useState<string[]>([]);
+  const [displayedThemes, setDisplayedThemes] = useState<string[]>([]);
 
   // Selection state
   const [selectedCharacters, setSelectedCharacters] = useState<Set<string>>(new Set());
@@ -56,6 +59,12 @@ export default function StoryForm() {
   const [customThemeInput, setCustomThemeInput] = useState('');
   const [customCharacterError, setCustomCharacterError] = useState('');
   const [customThemeError, setCustomThemeError] = useState('');
+  // Autocomplete dropdown visibility
+  const [showCharDropdown, setShowCharDropdown] = useState(false);
+  const [showThemeDropdown, setShowThemeDropdown] = useState(false);
+  // Refs for outside-click detection
+  const charInputWrapperRef = useRef<HTMLDivElement>(null);
+  const themeInputWrapperRef = useRef<HTMLDivElement>(null);
 
   // Form state
   const [story, setStory] = useState('');
@@ -97,6 +106,11 @@ export default function StoryForm() {
 
         if (!cancelled) {
           setSuggestions(data);
+          // Randomly sample 9 characters and 8 themes for display on this load
+          const shuffledChars = [...data.characters].sort(() => Math.random() - 0.5);
+          setDisplayedCharacters(shuffledChars.slice(0, 9));
+          const shuffledThemes = [...data.themes].sort(() => Math.random() - 0.5);
+          setDisplayedThemes(shuffledThemes.slice(0, 8));
           setSuggestionsLoading(false);
         }
       } catch (err) {
@@ -172,6 +186,37 @@ export default function StoryForm() {
       if (themeValidationTimer.current) clearTimeout(themeValidationTimer.current);
     };
   }, [customThemeInput, validateInput]);
+
+  // Close autocomplete dropdowns on outside click
+  useEffect(() => {
+    function handleMouseDown(e: MouseEvent) {
+      if (charInputWrapperRef.current && !charInputWrapperRef.current.contains(e.target as Node)) {
+        setShowCharDropdown(false);
+      }
+      if (themeInputWrapperRef.current && !themeInputWrapperRef.current.contains(e.target as Node)) {
+        setShowThemeDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
+  }, []);
+
+  // Autocomplete suggestions derived from the full top-50 lists
+  const charAutocompleteSuggestions = showCharDropdown && customCharacterInput.trim()
+    ? suggestions.characters
+        .filter(
+          (c) =>
+            c.toLowerCase().includes(customCharacterInput.toLowerCase()) &&
+            !selectedCharacters.has(c)
+        )
+        .slice(0, 5)
+    : [];
+
+  const themeAutocompleteSuggestions = showThemeDropdown && customThemeInput.trim()
+    ? suggestions.themes
+        .filter((t) => t.toLowerCase().includes(customThemeInput.toLowerCase()))
+        .slice(0, 5)
+    : [];
 
   // Derived counts
   const parsedCustomCharacters = parseCustomCharacters(customCharacterInput);
@@ -352,7 +397,7 @@ export default function StoryForm() {
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {(() => {
                   const usedCharEmojis = new Set<string>();
-                  return suggestions.characters.map((name) => {
+                  return displayedCharacters.map((name) => {
                     const isSelected = selectedCharacters.has(name);
                     const isDisabled = isLoading || (!isSelected && maxReached);
                     const emoji = getCharacterEmoji(name);
@@ -394,15 +439,21 @@ export default function StoryForm() {
               </div>
             )}
 
-            {/* Custom character input */}
-            <div>
+            {/* Custom character input with autocomplete */}
+            <div ref={charInputWrapperRef} className="relative">
               <input
                 type="text"
                 value={customCharacterInput}
-                onChange={(e) => handleCustomCharacterChange(e.target.value)}
+                onChange={(e) => {
+                  handleCustomCharacterChange(e.target.value);
+                  setShowCharDropdown(true);
+                }}
+                onFocus={() => setShowCharDropdown(true)}
                 disabled={isLoading}
                 placeholder="Or type custom characters (comma-separated)..."
                 aria-label="Custom characters"
+                aria-autocomplete="list"
+                aria-expanded={charAutocompleteSuggestions.length > 0}
                 aria-invalid={!!customCharacterError || customWouldExceedMax}
                 aria-describedby={
                   customCharacterError
@@ -417,6 +468,33 @@ export default function StoryForm() {
                     : 'border-[var(--border-subtle)]'
                 }`}
               />
+              {charAutocompleteSuggestions.length > 0 && (
+                <ul
+                  role="listbox"
+                  aria-label="Character suggestions"
+                  className="absolute z-10 left-0 right-0 top-full mt-1 bg-[var(--surface-card)] border border-[var(--border-card)] rounded-xl shadow-lg overflow-hidden"
+                >
+                  {charAutocompleteSuggestions.map((name) => (
+                    <li key={name} role="option" aria-selected={false}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => {
+                          // Prevent input blur so the click registers
+                          e.preventDefault();
+                        }}
+                        onClick={() => {
+                          toggleCharacter(name);
+                          setCustomCharacterInput('');
+                          setShowCharDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-chip-active)] transition-colors duration-150"
+                      >
+                        {name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
               {customCharacterError && (
                 <p id="custom-character-error" className="text-xs text-red-500 mt-1" role="alert">
                   {customCharacterError}
@@ -500,7 +578,7 @@ export default function StoryForm() {
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {(() => {
                   const usedThemeEmojis = new Set<string>();
-                  return suggestions.themes.map((name) => {
+                  return displayedThemes.map((name) => {
                     const isSelected = selectedTheme === name && !customThemeInput.trim();
                     const emoji = getThemeEmoji(name);
                     const displayEmoji = usedThemeEmojis.has(emoji) ? DEFAULT_THEME_EMOJI : emoji;
@@ -537,21 +615,54 @@ export default function StoryForm() {
               </div>
             )}
 
-            {/* Custom theme input */}
-            <div>
+            {/* Custom theme input with autocomplete */}
+            <div ref={themeInputWrapperRef} className="relative">
               <input
                 type="text"
                 value={customThemeInput}
-                onChange={(e) => handleCustomThemeChange(e.target.value)}
+                onChange={(e) => {
+                  handleCustomThemeChange(e.target.value);
+                  setShowThemeDropdown(true);
+                }}
+                onFocus={() => setShowThemeDropdown(true)}
                 disabled={isLoading}
                 placeholder="Or type a custom theme..."
                 aria-label="Custom theme"
+                aria-autocomplete="list"
+                aria-expanded={themeAutocompleteSuggestions.length > 0}
                 aria-invalid={!!customThemeError}
                 aria-describedby={customThemeError ? 'custom-theme-error' : undefined}
                 className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] focus:outline-none focus:ring-2 focus:ring-secondary/60 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
                   customThemeError ? 'border-red-400' : 'border-[var(--border-subtle)]'
                 }`}
               />
+              {themeAutocompleteSuggestions.length > 0 && (
+                <ul
+                  role="listbox"
+                  aria-label="Theme suggestions"
+                  className="absolute z-10 left-0 right-0 top-full mt-1 bg-[var(--surface-card)] border border-[var(--border-card)] rounded-xl shadow-lg overflow-hidden"
+                >
+                  {themeAutocompleteSuggestions.map((name) => (
+                    <li key={name} role="option" aria-selected={false}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                        }}
+                        onClick={() => {
+                          setSelectedTheme(name);
+                          setCustomThemeInput('');
+                          setCustomThemeError('');
+                          setShowThemeDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-chip-active)] transition-colors duration-150"
+                      >
+                        {name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
               {customThemeError && (
                 <p id="custom-theme-error" className="text-xs text-red-500 mt-1" role="alert">
                   {customThemeError}
