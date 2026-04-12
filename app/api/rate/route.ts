@@ -1,15 +1,25 @@
 import { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 20 ratings per minute per IP
+  const ip = getClientIp(request);
+  const { allowed } = checkRateLimit(`rate:${ip}`, 20, 60_000);
+  if (!allowed) {
+    return Response.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const body = await request.json();
     const { story_id, stars, feedback } = body;
 
-    // Validate story_id: must be a non-empty string
-    if (!story_id || typeof story_id !== 'string' || story_id.trim().length === 0) {
+    // Validate story_id: must be a non-empty UUID string
+    if (!story_id || typeof story_id !== 'string' || !UUID_RE.test(story_id)) {
       return Response.json(
-        { error: 'story_id is required and must be a non-empty string' },
+        { error: 'story_id must be a valid UUID' },
         { status: 400 }
       );
     }

@@ -51,7 +51,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 | `GITHUB_TOKEN` | Yes | Powers feedback/bug report submission to GitHub Issues |
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
 | `SUPABASE_ANON_KEY` | Yes | Supabase anon key |
-| `SUPABASE_ACCESS_TOKEN` | Optional | For running migrations via Supabase CLI |
+| `SUPABASE_ACCESS_TOKEN` | Optional | For applying schema changes via the Supabase Management API (see Knowledge Base in `.gsd/`) |
 
 ## Project Structure
 
@@ -65,15 +65,23 @@ app/
 ├── components/
 │   ├── StoryForm.tsx           # Main form — characters, length, theme, funniness picker
 │   ├── StoryDisplay.tsx        # Streamed story renderer + discussion questions + rating
+│   ├── GenerateButton.tsx      # Shared generate/submit button (inline + sticky mobile)
 │   ├── ThemeToggle.tsx         # Light/Dark mode toggle
 │   └── IssueForm.tsx           # Shared feedback/bug form
 └── api/
     ├── generate/route.ts       # POST — streams AI-generated story, saves to Supabase
     ├── questions/route.ts      # POST — generates 3 discussion questions via Claude Haiku
     ├── rate/route.ts           # POST — saves star rating + feedback to Supabase
-    ├── validate/route.ts       # POST — validates custom character/theme inputs
+    ├── validate/route.ts       # POST — AI validates custom character/theme inputs (fail-open)
     ├── suggestions/route.ts    # GET — returns top 9 characters and top 8 themes from DB
     └── submit-issue/route.ts   # POST — creates GitHub Issue for feedback/bug reports
+
+lib/
+├── anthropic.ts                # Shared Anthropic client singleton
+├── constants.ts                # CHARACTER_EMOJI, THEME_EMOJI maps and emoji helper functions
+├── content-filter.ts           # isChildFriendly() — Claude Haiku classifier for custom entries
+├── ratelimit.ts                # In-memory rate limiter (per-IP, per-route)
+└── supabase.ts                 # Shared Supabase client
 ```
 
 ## Database Schema
@@ -94,6 +102,10 @@ id, story_id (FK), stars, feedback, created_at, read
 ```sql
 id, type (character|theme), value, usage_count, created_at, child_friendly
 ```
+
+### Row Level Security
+
+RLS is intentionally **disabled** on all three tables (`stories`, `ratings`, `custom_entries`). The app uses an anonymous, server-side Supabase client — there are no authenticated users, so RLS rules would have no effect. All access is gated through the Next.js API routes; the Supabase anon key is only used server-side and is never exposed to the browser. This is recorded as decision D003 in `.gsd/DECISIONS.md`.
 
 ## Content Safety
 

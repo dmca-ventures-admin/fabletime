@@ -1,10 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
+import { anthropic } from '@/lib/anthropic';
 import { supabase } from '@/lib/supabase';
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 
 const lengthDescriptions: Record<string, string> = {
   short: '300-400 words',
@@ -21,6 +18,13 @@ const funninessInstructions: Record<number, string> = {
 };
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 10 generations per minute per IP
+  const ip = getClientIp(request);
+  const { allowed } = checkRateLimit(`generate:${ip}`, 10, 60_000);
+  if (!allowed) {
+    return new Response('Too many requests', { status: 429 });
+  }
+
   try {
     const { characters, length, theme, funninessLevel } = await request.json();
 
@@ -105,7 +109,7 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
         try {
           let fullResponse = '';
 
-          const anthropicStream = client.messages.stream({
+          const anthropicStream = anthropic.messages.stream({
             model: 'claude-opus-4-20250514',
             max_tokens: 2048,
             messages: [{ role: 'user', content: prompt }],

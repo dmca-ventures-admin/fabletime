@@ -1,8 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { anthropic } from '@/lib/anthropic';
 
 /**
  * Classifies whether the given text is appropriate as a character name or
@@ -17,7 +13,7 @@ const client = new Anthropic({
  */
 export async function isChildFriendly(text: string): Promise<boolean> {
   try {
-    const response = await client.messages.create({
+    const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5',
       max_tokens: 3,
       system:

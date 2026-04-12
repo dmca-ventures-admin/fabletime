@@ -8,8 +8,10 @@ import { isChildFriendly } from '@/lib/content-filter';
  * table, ordered by usage_count DESC, filtered to child-friendly entries
  * only.
  *
- * Entries with `child_friendly = null` are lazily classified on first
- * request and the result is cached in the DB column.
+ * Entries with `child_friendly = null` are classified lazily in the
+ * background and cached in the DB column — the response is returned
+ * immediately using already-classified entries so classification never
+ * blocks the caller.
  */
 export async function GET() {
   try {
@@ -38,33 +40,9 @@ export async function GET() {
       return Response.json({ characters: [], themes: [] });
     }
 
-    // For entries with child_friendly = null, classify and cache the result
-    const allRows = [...(characterRows ?? []), ...(themeRows ?? [])];
-    const uncheckedRows = allRows.filter((row) => row.child_friendly === null);
-
-    if (uncheckedRows.length > 0) {
-      await Promise.all(
-        uncheckedRows.map(async (row) => {
-          const isFriendly = await isChildFriendly(row.value);
-          row.child_friendly = isFriendly;
-
-          const { error: updateError } = await supabase
-            .from('custom_entries')
-            .update({ child_friendly: isFriendly })
-            .eq('id', row.id);
-
-          if (updateError) {
-            console.error(
-              '[S03] Failed to cache child_friendly for entry:',
-              row.value,
-              updateError
-            );
-          }
-        })
-      );
-    }
-
-    // Filter to child-friendly only, take top 9 characters and top 8 themes
+    // Filter to already-classified child-friendly entries for the immediate response.
+    // Unclassified entries (child_friendly = null) are classified asynchronously
+    // in the background so they appear on the next request.
     const characters = (characterRows ?? [])
       .filter((row) => row.child_friendly === true)
       .slice(0, 9)
@@ -74,6 +52,30 @@ export async function GET() {
       .filter((row) => row.child_friendly === true)
       .slice(0, 8)
       .map((row) => row.value);
+
+    // Kick off background classification for unchecked entries — do not await.
+    const allRows = [...(characterRows ?? []), ...(themeRows ?? [])];
+    const uncheckedRows = allRows.filter((row) => row.child_friendly === null);
+    if (uncheckedRows.length > 0) {
+      Promise.all(
+        uncheckedRows.map(async (row) => {
+          const isFriendly = await isChildFriendly(row.value);
+          const { error: updateError } = await supabase
+            .from('custom_entries')
+            .update({ child_friendly: isFriendly })
+            .eq('id', row.id);
+          if (updateError) {
+            console.error(
+              '[S03] Failed to cache child_friendly for entry:',
+              row.value,
+              updateError
+            );
+          }
+        })
+      ).catch((err) => {
+        console.error('[S03] Background classification error:', err);
+      });
+    }
 
     return Response.json({ characters, themes });
   } catch (error) {
