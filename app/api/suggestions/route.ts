@@ -20,7 +20,7 @@ export async function GET() {
     // so we can reliably return up to 50 child-friendly entries.
     const { data: characterRows, error: charError } = await supabase
       .from('custom_entries')
-      .select('id, value, child_friendly')
+      .select('id, value, child_friendly, emoji')
       .eq('type', 'character')
       .eq('excluded', false)
       .order('usage_count', { ascending: false })
@@ -33,7 +33,7 @@ export async function GET() {
 
     const { data: themeRows, error: themeError } = await supabase
       .from('custom_entries')
-      .select('id, value, child_friendly')
+      .select('id, value, child_friendly, emoji')
       .eq('type', 'theme')
       .eq('excluded', false)
       .order('usage_count', { ascending: false })
@@ -50,12 +50,12 @@ export async function GET() {
     const characters = (characterRows ?? [])
       .filter((row) => row.child_friendly === true)
       .slice(0, 50)
-      .map((row) => row.value);
+      .map((row) => ({ value: row.value, emoji: row.emoji ?? undefined }));
 
     const themes = (themeRows ?? [])
       .filter((row) => row.child_friendly === true)
       .slice(0, 50)
-      .map((row) => row.value);
+      .map((row) => ({ value: row.value, emoji: row.emoji ?? undefined }));
 
     // Kick off background classification for unchecked entries — do not await.
     const allRows = [...(characterRows ?? []), ...(themeRows ?? [])];

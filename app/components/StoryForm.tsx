@@ -23,9 +23,14 @@ const lengths = [
   { value: 'long', label: 'Long', sub: '~800 words' },
 ];
 
+interface SuggestionEntry {
+  value: string;
+  emoji?: string;
+}
+
 interface Suggestions {
-  characters: string[];
-  themes: string[];
+  characters: SuggestionEntry[];
+  themes: SuggestionEntry[];
 }
 
 /** Parse comma-separated input into trimmed, non-empty entries */
@@ -47,8 +52,8 @@ export default function StoryForm() {
   const [suggestionsLoading, setSuggestionsLoading] = useState(true);
   const [suggestionsError, setSuggestionsError] = useState(false);
   // Randomly sampled display lists (9 chars, 8 themes) — set once on mount
-  const [displayedCharacters, setDisplayedCharacters] = useState<string[]>([]);
-  const [displayedThemes, setDisplayedThemes] = useState<string[]>([]);
+  const [displayedCharacters, setDisplayedCharacters] = useState<SuggestionEntry[]>([]);
+  const [displayedThemes, setDisplayedThemes] = useState<SuggestionEntry[]>([]);
 
   // Selection state
   const [selectedCharacters, setSelectedCharacters] = useState<Set<string>>(new Set());
@@ -208,15 +213,15 @@ export default function StoryForm() {
     ? suggestions.characters
         .filter(
           (c) =>
-            c.toLowerCase().includes(customCharacterInput.toLowerCase()) &&
-            !selectedCharacters.has(c)
+            c.value.toLowerCase().includes(customCharacterInput.toLowerCase()) &&
+            !selectedCharacters.has(c.value)
         )
         .slice(0, 5)
     : [];
 
   const themeAutocompleteSuggestions = showThemeDropdown && customThemeInput.trim()
     ? suggestions.themes
-        .filter((t) => t.toLowerCase().includes(customThemeInput.toLowerCase()))
+        .filter((t) => t.value.toLowerCase().includes(customThemeInput.toLowerCase()))
         .slice(0, 5)
     : [];
 
@@ -400,10 +405,10 @@ export default function StoryForm() {
                 {(() => {
                   const usedCharEmojis = new Set<string>();
                   let charPoolIdx = 0;
-                  return displayedCharacters.map((name) => {
-                    const isSelected = selectedCharacters.has(name);
+                  return displayedCharacters.map((entry) => {
+                    const isSelected = selectedCharacters.has(entry.value);
                     const isDisabled = isLoading || (!isSelected && maxReached);
-                    const emoji = getCharacterEmoji(name);
+                    const emoji = entry.emoji || getCharacterEmoji(entry.value);
                     let displayEmoji = emoji;
                     if (usedCharEmojis.has(displayEmoji)) {
                       while (charPoolIdx < CHARACTER_FALLBACK_POOL.length) {
@@ -419,9 +424,9 @@ export default function StoryForm() {
 
                     return (
                       <button
-                        key={name}
+                        key={entry.value}
                         type="button"
-                        onClick={() => toggleCharacter(name)}
+                        onClick={() => toggleCharacter(entry.value)}
                         disabled={isDisabled}
                         aria-pressed={isSelected}
                         className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -431,9 +436,7 @@ export default function StoryForm() {
                         }`}
                       >
                         <span
-                          className={`text-2xl leading-none ${
-                            isSelected ? '' : ''
-                          }`}
+                          className="text-2xl leading-none"
                           aria-hidden="true"
                         >
                           {displayEmoji}
@@ -443,7 +446,7 @@ export default function StoryForm() {
                             isSelected ? 'text-white' : 'text-foreground'
                           }`}
                         >
-                          {name}
+                          {entry.value}
                         </span>
                       </button>
                     );
@@ -487,8 +490,8 @@ export default function StoryForm() {
                   aria-label="Character suggestions"
                   className="absolute z-10 left-0 right-0 top-full mt-1 bg-[var(--surface-card)] border border-[var(--border-card)] rounded-xl shadow-lg overflow-hidden"
                 >
-                  {charAutocompleteSuggestions.map((name) => (
-                    <li key={name} role="option" aria-selected={false}>
+                  {charAutocompleteSuggestions.map((entry) => (
+                    <li key={entry.value} role="option" aria-selected={false}>
                       <button
                         type="button"
                         onMouseDown={(e) => {
@@ -496,13 +499,13 @@ export default function StoryForm() {
                           e.preventDefault();
                         }}
                         onClick={() => {
-                          toggleCharacter(name);
+                          toggleCharacter(entry.value);
                           setCustomCharacterInput('');
                           setShowCharDropdown(false);
                         }}
                         className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-chip-active)] transition-colors duration-150"
                       >
-                        {name}
+                        {entry.value}
                       </button>
                     </li>
                   ))}
@@ -592,9 +595,9 @@ export default function StoryForm() {
                 {(() => {
                   const usedThemeEmojis = new Set<string>();
                   let themePoolIdx = 0;
-                  return displayedThemes.map((name) => {
-                    const isSelected = selectedTheme === name && !customThemeInput.trim();
-                    const emoji = getThemeEmoji(name);
+                  return displayedThemes.map((entry) => {
+                    const isSelected = selectedTheme === entry.value && !customThemeInput.trim();
+                    const emoji = entry.emoji || getThemeEmoji(entry.value);
                     let displayEmoji = emoji;
                     if (usedThemeEmojis.has(displayEmoji)) {
                       while (themePoolIdx < THEME_FALLBACK_POOL.length) {
@@ -610,11 +613,11 @@ export default function StoryForm() {
 
                     return (
                       <button
-                        key={name}
+                        key={entry.value}
                         type="button"
                         onClick={() => {
                           if (!isLoading) {
-                            setSelectedTheme(name);
+                            setSelectedTheme(entry.value);
                             // Clear custom theme when selecting a suggestion
                             setCustomThemeInput('');
                             setCustomThemeError('');
@@ -631,7 +634,7 @@ export default function StoryForm() {
                         <span className="text-lg leading-none" aria-hidden="true">
                           {displayEmoji}
                         </span>
-                        {name}
+                        {entry.value}
                       </button>
                     );
                   });
@@ -666,22 +669,22 @@ export default function StoryForm() {
                   aria-label="Theme suggestions"
                   className="absolute z-10 left-0 right-0 top-full mt-1 bg-[var(--surface-card)] border border-[var(--border-card)] rounded-xl shadow-lg overflow-hidden"
                 >
-                  {themeAutocompleteSuggestions.map((name) => (
-                    <li key={name} role="option" aria-selected={false}>
+                  {themeAutocompleteSuggestions.map((entry) => (
+                    <li key={entry.value} role="option" aria-selected={false}>
                       <button
                         type="button"
                         onMouseDown={(e) => {
                           e.preventDefault();
                         }}
                         onClick={() => {
-                          setSelectedTheme(name);
+                          setSelectedTheme(entry.value);
                           setCustomThemeInput('');
                           setCustomThemeError('');
                           setShowThemeDropdown(false);
                         }}
                         className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-chip-active)] transition-colors duration-150"
                       >
-                        {name}
+                        {entry.value}
                       </button>
                     </li>
                   ))}
