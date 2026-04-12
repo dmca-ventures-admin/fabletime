@@ -22,6 +22,7 @@ export async function GET() {
       .from('custom_entries')
       .select('id, value, child_friendly')
       .eq('type', 'character')
+      .eq('excluded', false)
       .order('usage_count', { ascending: false })
       .limit(100);
 
@@ -34,6 +35,7 @@ export async function GET() {
       .from('custom_entries')
       .select('id, value, child_friendly')
       .eq('type', 'theme')
+      .eq('excluded', false)
       .order('usage_count', { ascending: false })
       .limit(100);
 

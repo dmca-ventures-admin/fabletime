@@ -6,8 +6,10 @@ import GenerateButton from './GenerateButton';
 import {
   CHARACTER_EMOJI,
   DEFAULT_CHARACTER_EMOJI,
+  CHARACTER_FALLBACK_POOL,
   THEME_EMOJI,
   DEFAULT_THEME_EMOJI,
+  THEME_FALLBACK_POOL,
   getCharacterEmoji,
   getThemeEmoji,
 } from '@/lib/constants';
@@ -397,11 +399,22 @@ export default function StoryForm() {
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {(() => {
                   const usedCharEmojis = new Set<string>();
+                  let charPoolIdx = 0;
                   return displayedCharacters.map((name) => {
                     const isSelected = selectedCharacters.has(name);
                     const isDisabled = isLoading || (!isSelected && maxReached);
                     const emoji = getCharacterEmoji(name);
-                    const displayEmoji = usedCharEmojis.has(emoji) ? DEFAULT_CHARACTER_EMOJI : emoji;
+                    let displayEmoji = emoji;
+                    if (usedCharEmojis.has(displayEmoji)) {
+                      while (charPoolIdx < CHARACTER_FALLBACK_POOL.length) {
+                        const candidate = CHARACTER_FALLBACK_POOL[charPoolIdx++];
+                        if (!usedCharEmojis.has(candidate)) {
+                          displayEmoji = candidate;
+                          break;
+                        }
+                      }
+                      if (usedCharEmojis.has(displayEmoji)) displayEmoji = DEFAULT_CHARACTER_EMOJI;
+                    }
                     usedCharEmojis.add(displayEmoji);
 
                     return (
@@ -578,10 +591,21 @@ export default function StoryForm() {
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {(() => {
                   const usedThemeEmojis = new Set<string>();
+                  let themePoolIdx = 0;
                   return displayedThemes.map((name) => {
                     const isSelected = selectedTheme === name && !customThemeInput.trim();
                     const emoji = getThemeEmoji(name);
-                    const displayEmoji = usedThemeEmojis.has(emoji) ? DEFAULT_THEME_EMOJI : emoji;
+                    let displayEmoji = emoji;
+                    if (usedThemeEmojis.has(displayEmoji)) {
+                      while (themePoolIdx < THEME_FALLBACK_POOL.length) {
+                        const candidate = THEME_FALLBACK_POOL[themePoolIdx++];
+                        if (!usedThemeEmojis.has(candidate)) {
+                          displayEmoji = candidate;
+                          break;
+                        }
+                      }
+                      if (usedThemeEmojis.has(displayEmoji)) displayEmoji = DEFAULT_THEME_EMOJI;
+                    }
                     usedThemeEmojis.add(displayEmoji);
 
                     return (
