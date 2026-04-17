@@ -20,7 +20,7 @@ Fabletime is an AI-powered children's story generator designed for **parents to 
 
 - **Framework:** Next.js 16 (App Router)
 - **UI:** React 19, Tailwind CSS 4, Claymorphism design system
-- **AI:** Anthropic Claude Opus (story generation), Claude Haiku (discussion questions, input validation)
+- **AI:** Anthropic Claude Opus 4 (story generation), Claude Haiku 4.5 (discussion questions, input validation, emoji assignment)
 - **Database:** Supabase (Postgres) — stories, ratings, custom entries
 - **Fonts:** Fredoka (headings), Nunito (body)
 - **Analytics:** Vercel Analytics + Speed Insights
@@ -73,7 +73,7 @@ app/
     ├── questions/route.ts      # POST — generates 3 discussion questions via Claude Haiku
     ├── rate/route.ts           # POST — saves star rating + feedback to Supabase
     ├── validate/route.ts       # POST — AI validates custom character/theme inputs (fail-open)
-    ├── suggestions/route.ts    # GET — returns top 9 characters and top 8 themes from DB
+    ├── suggestions/route.ts    # GET — returns top-50 characters and themes; client randomly samples 9/8 for display, uses full 50 for autocomplete
     └── submit-issue/route.ts   # POST — creates GitHub Issue for feedback/bug reports
 
 lib/
@@ -100,7 +100,7 @@ id, story_id (FK), stars, feedback, created_at, read
 
 **`custom_entries`** — tracks character/theme usage for suggestions
 ```sql
-id, type (character|theme), value, usage_count, created_at, child_friendly
+id, type (character|theme), value, usage_count, created_at, child_friendly, emoji, excluded
 ```
 
 ### Row Level Security

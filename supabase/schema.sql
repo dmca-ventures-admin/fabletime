@@ -3,13 +3,14 @@
 
 -- Stories table: persists every generated story with metadata
 CREATE TABLE IF NOT EXISTS stories (
-  id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  characters TEXT[]      NOT NULL,
-  theme      TEXT        NOT NULL,
-  length     TEXT        NOT NULL,
-  prompt     TEXT        NOT NULL,
-  response   TEXT        NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  characters      TEXT[]      NOT NULL,
+  theme           TEXT        NOT NULL,
+  length          TEXT        NOT NULL,
+  prompt          TEXT        NOT NULL,
+  response        TEXT        NOT NULL,
+  funniness_level INTEGER     NOT NULL DEFAULT 2,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Ratings table: user feedback on stories (1-5 stars + optional text)
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS ratings (
   story_id   UUID        NOT NULL REFERENCES stories(id),
   stars      INTEGER     NOT NULL CHECK (stars >= 1 AND stars <= 5),
   feedback   TEXT,
+  read       BOOLEAN     NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -28,6 +30,8 @@ CREATE TABLE IF NOT EXISTS custom_entries (
   value          TEXT        NOT NULL,
   usage_count    INTEGER     NOT NULL DEFAULT 1,
   child_friendly BOOLEAN     DEFAULT NULL,
+  emoji          TEXT        DEFAULT NULL,
+  excluded       BOOLEAN     NOT NULL DEFAULT false,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (type, value)
 );
