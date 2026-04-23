@@ -222,6 +222,23 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
         </div>
       </div>
 
+      {/* Story Illustration — appears after story, before discussion questions */}
+      {!isLoading && story && (imageLoading || imageUrl) && (
+        <div className="mt-4">
+          {imageLoading && (
+            <div className="w-full aspect-square rounded-2xl border border-[var(--border-card)] bg-[var(--surface-chip-inactive)] animate-pulse" />
+          )}
+          {imageUrl && !imageLoading && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageUrl}
+              alt="Story illustration"
+              className="w-full rounded-2xl border border-[var(--border-card)] shadow-sm"
+            />
+          )}
+        </div>
+      )}
+
       {/* Discussion Questions */}
       {!isLoading && story && (questionsLoading || questions.length > 0 || questionsError) && (
         <div className="mt-4 bg-[var(--surface-card)] rounded-2xl border border-[var(--border-card)] shadow-sm p-6 md:p-8">
@@ -372,23 +389,6 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
             Thanks for your feedback!
             <span aria-hidden="true">⭐</span>
           </p>
-        </div>
-      )}
-
-      {/* Story Illustration — appears after discussion questions */}
-      {!isLoading && story && (imageLoading || imageUrl) && (
-        <div className="mt-4">
-          {imageLoading && (
-            <div className="w-full aspect-square rounded-2xl border border-[var(--border-card)] bg-[var(--surface-chip-inactive)] animate-pulse" />
-          )}
-          {imageUrl && !imageLoading && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={imageUrl}
-              alt="Story illustration"
-              className="w-full rounded-2xl border border-[var(--border-card)] shadow-sm"
-            />
-          )}
         </div>
       )}
 
