@@ -65,6 +65,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
   }, [isLoading]);
 
   // Fetch story image once story finishes streaming
+  const charactersKey = characters.join(',');
   useEffect(() => {
     if (isLoading || !story || imageFetchedRef.current) return;
     if (!characters.length || !theme) return;
@@ -81,7 +82,8 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
       .catch(() => { /* fail silently — image is non-critical */ })
       .finally(() => { if (!cancelled) setImageLoading(false); });
     return () => { cancelled = true; };
-  }, [story, isLoading, characters, theme]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [story, isLoading, charactersKey, theme]);
 
   // Fetch discussion questions once the story finishes streaming
   useEffect(() => {
