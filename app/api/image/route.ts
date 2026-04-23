@@ -7,7 +7,7 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { characters, theme } = await request.json();
+    const { characters, theme, story } = await request.json();
 
     if (!characters || !Array.isArray(characters) || characters.length === 0 || !theme) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -17,7 +17,23 @@ export async function POST(request: NextRequest) {
       ? `a ${characters[0]}`
       : characters.slice(0, -1).map((c: string) => `a ${c}`).join(', ') + ` and a ${characters[characters.length - 1]}`;
 
-    const prompt = `Cartoon illustration for a children's picture book. Characters: ${characterDesc}. The scene captures a warm, imaginative moment related to the theme of ${theme}. Style: friendly, colourful, hand-drawn cartoon with soft lines and rounded shapes, suitable for children aged 4-8. Bright, cheerful colours. No text, no words, no letters anywhere in the image.`;
+    // Use the story to extract the key emotional/learning moment for the illustration
+    const storyContext = story ? story.slice(0, 1500) : '';
+
+    const prompt = `You are illustrating a children's picture book. Create a single vivid cartoon scene that captures the key emotional turning point or central lesson from this story.
+
+Characters: ${characterDesc}
+Theme: ${theme}
+Story excerpt: ${storyContext}
+
+The illustration should:
+- Show the most meaningful or dramatic moment from the story (the resolution, the "aha" moment, or the heart of the theme)
+- Feel emotionally resonant and specific to THIS story, not generic
+- Be in a warm, expressive cartoon style with bold colours and clear storytelling
+- Be suitable for children aged 4-8
+- Have no text, words, or letters anywhere in the image
+
+Make it feel like the cover illustration of a picture book — something a child would want to stop and look at.`;
 
     const response = await openai.images.generate({
       model: 'dall-e-3',

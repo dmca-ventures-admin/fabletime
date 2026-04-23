@@ -75,7 +75,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
     fetch('/api/image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ characters, theme }),
+      body: JSON.stringify({ characters, theme, story }),
     })
       .then((res) => res.json())
       .then((data) => { if (!cancelled && data.url) setImageUrl(data.url); })
