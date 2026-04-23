@@ -43,18 +43,45 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
   const [questionsError, setQuestionsError] = useState(false);
   const questionsFetchedRef = useRef(false);
 
+  // Story image state
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
+  const imageFetchedRef = useRef(false);
+
   // Reset fetch guard and rating state when a new story starts
   useEffect(() => {
     if (isLoading) {
       questionsFetchedRef.current = false;
+      imageFetchedRef.current = false;
       setQuestions([]);
       setQuestionsError(false);
+      setImageUrl(null);
+      setImageLoading(false);
       setSelectedRating(0);
       setHoveredRating(0);
       setFeedbackText('');
       setSubmitError('');
     }
   }, [isLoading]);
+
+  // Fetch story image once story finishes streaming
+  useEffect(() => {
+    if (isLoading || !story || imageFetchedRef.current) return;
+    if (!characters.length || !theme) return;
+    imageFetchedRef.current = true;
+    let cancelled = false;
+    setImageLoading(true);
+    fetch('/api/image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ characters, theme }),
+    })
+      .then((res) => res.json())
+      .then((data) => { if (!cancelled && data.url) setImageUrl(data.url); })
+      .catch(() => { /* fail silently — image is non-critical */ })
+      .finally(() => { if (!cancelled) setImageLoading(false); });
+    return () => { cancelled = true; };
+  }, [story, isLoading, characters, theme]);
 
   // Fetch discussion questions once the story finishes streaming
   useEffect(() => {
@@ -147,6 +174,23 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
 
   return (
     <div className="mt-8 w-full max-w-2xl mx-auto">
+      {/* Story Illustration */}
+      {!isLoading && story && (
+        <div className="mb-4">
+          {imageLoading && (
+            <div className="w-full aspect-square rounded-2xl border border-[var(--border-card)] bg-[var(--surface-chip-inactive)] animate-pulse" />
+          )}
+          {imageUrl && !imageLoading && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageUrl}
+              alt="Story illustration"
+              className="w-full rounded-2xl border border-[var(--border-card)] shadow-sm"
+            />
+          )}
+        </div>
+      )}
+
       {/* Story Card */}
       <div className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border-card)] shadow-sm p-6 md:p-10">
         <div className="flex items-center gap-3 mb-7">
