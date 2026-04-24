@@ -67,14 +67,16 @@ export async function POST(request: NextRequest) {
 
     console.log(`[IMG] Selected style ${styleNum}: ${styleDesc}`);
 
-    const prompt = `${styleDesc}. 
+    const prompt = `IMPORTANT: This image must contain absolutely NO text, NO words, NO letters, NO numbers, NO signs, NO labels of any kind. Pure illustration only.
+
+${styleDesc}.
 
 Illustrate the key emotional moment from this children's story:
 Characters: ${characterDesc}
 Theme: ${theme}
 Scene: ${storyContext.slice(0, 600)}
 
-Show the most meaningful or dramatic moment — the resolution, the heartfelt connection, or the central lesson in action. Make it feel like the perfect picture book illustration — something a child would want to stop and look at. No text, no words, no letters anywhere in the image.`;
+Show the most meaningful or dramatic moment — the resolution, the heartfelt connection, or the central lesson in action. Make it feel like the perfect picture book illustration. ZERO text of any kind in the image.`;
 
     const response = await openai.images.generate({
       model: 'dall-e-3',
