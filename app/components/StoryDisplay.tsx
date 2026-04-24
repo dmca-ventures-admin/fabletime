@@ -64,26 +64,27 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
     }
   }, [isLoading]);
 
-  // Fetch story image once story finishes streaming
-  const charactersKey = characters.join(',');
+  // Fetch story image once story finishes streaming (trigger on isLoading→false)
   useEffect(() => {
     if (isLoading || !story || imageFetchedRef.current) return;
     if (!characters.length || !theme) return;
     imageFetchedRef.current = true;
     let cancelled = false;
     setImageLoading(true);
+    const storySnapshot = story;
+    const charactersSnapshot = [...characters];
     fetch('/api/image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ characters, theme, story }),
+      body: JSON.stringify({ characters: charactersSnapshot, theme, story: storySnapshot }),
     })
       .then((res) => res.json())
       .then((data) => { if (!cancelled && data.url) setImageUrl(data.url); })
-      .catch(() => { /* fail silently — image is non-critical */ })
+      .catch((err) => { console.error('[IMG] client fetch error:', err); })
       .finally(() => { if (!cancelled) setImageLoading(false); });
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [story, isLoading, charactersKey, theme]);
+  }, [isLoading]);
 
   // Fetch discussion questions once the story finishes streaming
   useEffect(() => {
