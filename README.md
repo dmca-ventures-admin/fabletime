@@ -11,16 +11,17 @@ Fabletime is an AI-powered children's story generator designed for **parents to 
 3. **Choose a learning theme** — Pick from the top 8 most popular themes or enter your own (e.g. Kindness, Courage, Friendship)
 4. **Set the funniness level** — Slider from 😐 to 🤣 (5 levels, default: "A little funny")
 5. **Generate** — Claude Opus streams a unique story with character flaws, a failure beat, and the theme woven in naturally
-6. **Read aloud** — The parent reads the story to their child
-7. **Discuss** — Three AI-generated discussion questions appear after the story
-8. **Rate** — Optional 5-star rating + feedback saved to the database
-9. **Generate another** — Keep the same settings and generate a fresh story instantly
+6. **Illustration** — A unique cartoon illustration is generated via DALL-E 3 (style chosen by Claude Haiku to match the story's tone) and appears between the story and discussion questions
+7. **Read aloud** — The parent reads the story to their child
+8. **Discuss** — Three AI-generated discussion questions appear after the story
+9. **Rate** — Optional 5-star rating + feedback saved to the database
+10. **Generate another** — Keep the same settings and generate a fresh story instantly
 
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router)
 - **UI:** React 19, Tailwind CSS 4, Claymorphism design system
-- **AI:** Anthropic Claude Opus 4 (story generation), Claude Haiku 4.5 (discussion questions, input validation, emoji assignment)
+- **AI:** Anthropic Claude Opus 4 (story generation), Claude Haiku 4.5 (discussion questions, input validation, illustration style selection, emoji assignment), OpenAI DALL-E 3 (story illustrations)
 - **Database:** Supabase (Postgres) — stories, ratings, custom entries
 - **Fonts:** Fredoka (headings), Nunito (body)
 - **Analytics:** Vercel Analytics + Speed Insights
@@ -47,7 +48,8 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 | Variable | Required | Description |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Yes | Powers story generation, discussion questions, and input validation |
+| `ANTHROPIC_API_KEY` | Yes | Powers story generation, discussion questions, input validation, and illustration style selection |
+| `OPENAI_API_KEY` | Yes | Powers DALL-E 3 story illustration generation |
 | `GITHUB_TOKEN` | Yes | Powers feedback/bug report submission to GitHub Issues |
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
 | `SUPABASE_ANON_KEY` | Yes | Supabase anon key |
@@ -70,6 +72,7 @@ app/
 │   └── IssueForm.tsx           # Shared feedback/bug form
 └── api/
     ├── generate/route.ts       # POST — streams AI-generated story, saves to Supabase
+    ├── image/route.ts          # POST — generates DALL-E 3 cartoon illustration for a story
     ├── questions/route.ts      # POST — generates 3 discussion questions via Claude Haiku
     ├── rate/route.ts           # POST — saves star rating + feedback to Supabase
     ├── validate/route.ts       # POST — AI validates custom character/theme inputs (fail-open)
