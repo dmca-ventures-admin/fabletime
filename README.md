@@ -7,7 +7,7 @@ Fabletime is an AI-powered children's story generator designed for **parents to 
 ## How It Works
 
 1. **Pick your heroes** — Choose up to 3 characters from the top suggestions (dynamically ranked by popularity) or type your own
-2. **Set the length** — Short (~300 words), Medium (~500 words), or Long (~800 words)
+2. **Set the length** — Short (300–400 words), Medium (500–700 words), or Long (800–1000 words)
 3. **Choose a learning theme** — Pick from the top 8 most popular themes or enter your own (e.g. Kindness, Courage, Friendship)
 4. **Set the funniness level** — Slider from 😐 to 🤣 (5 levels, default: "A little funny")
 5. **Generate** — Claude Opus streams a unique story with character flaws, a failure beat, and the theme woven in naturally
@@ -116,12 +116,11 @@ All generated stories include explicit child-safety guardrails. Custom character
 
 ## Deployment
 
-```bash
-# Preview deployment
-vercel
+Deployments are handled automatically by Vercel's GitHub integration:
 
-# Production deployment
-vercel --prod
-```
+- **Production:** merge to `main` and push — Vercel deploys to [fabletime.co](https://fabletime.co) automatically
+- **Preview:** push any feature branch — Vercel creates a preview deployment (SSO-gated; access via a browser logged into Vercel)
+
+> **Note:** `vercel --prod` via the CLI does not work on the Hobby plan when the local git committer email doesn't match the Vercel account. Use the git push workflow above instead.
 
 Production is live at [fabletime.co](https://fabletime.co).

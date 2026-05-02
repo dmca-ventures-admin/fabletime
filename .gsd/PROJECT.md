@@ -47,7 +47,7 @@ See `.gsd/REQUIREMENTS.md` for the explicit capability contract, requirement sta
 ## Open Issues / Next Steps
 
 ### Active bugs to verify
-- **Rating "failed to save" on production** — Rating endpoint retries 3x with 2s delay on FK violation (story not persisted yet when rating arrives). Latest fix deployed but user reported it still failing. May need: (a) more retry time, or (b) architectural fix to insert placeholder story row before streaming begins. Check Vercel function logs for `[S02]` prefix errors.
+- **Rating "failed to save" on production** — Implemented two-pronged fix: (1) `generate/route.ts` now inserts a placeholder story row with `response: ''` *before* streaming begins, so the FK target exists immediately; (2) rate endpoint still retries 3x with 2s delay as a safety net. Monitor Vercel logs for `[S02]` prefix errors to confirm resolved.
 
 ### GitHub issues in-progress
 - #7 Custom Characters and Themes — code complete, deployed
