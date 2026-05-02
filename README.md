@@ -10,7 +10,7 @@ Fabletime is an AI-powered children's story generator designed for **parents to 
 2. **Set the length** — Short (300–400 words), Medium (500–700 words), or Long (800–1000 words)
 3. **Choose a learning theme** — Pick from the top 8 most popular themes or enter your own (e.g. Kindness, Courage, Friendship)
 4. **Set the funniness level** — Slider from 😐 to 🤣 (5 levels, default: "A little funny")
-5. **Generate** — Claude Opus streams a unique story with character flaws, a failure beat, and the theme woven in naturally
+5. **Generate** — Claude Opus 4 streams a unique story with character flaws, a failure beat, and the theme woven in naturally
 6. **Illustration** — A unique cartoon illustration is generated via DALL-E 3 (style chosen by Claude Haiku to match the story's tone) and appears between the story and discussion questions
 7. **Read aloud** — The parent reads the story to their child
 8. **Discuss** — Three AI-generated discussion questions appear after the story
@@ -71,18 +71,18 @@ app/
 │   ├── ThemeToggle.tsx         # Light/Dark mode toggle
 │   └── IssueForm.tsx           # Shared feedback/bug form
 └── api/
-    ├── generate/route.ts       # POST — streams AI-generated story, saves to Supabase
-    ├── image/route.ts          # POST — generates DALL-E 3 cartoon illustration for a story
-    ├── questions/route.ts      # POST — generates 3 discussion questions via Claude Haiku
-    ├── rate/route.ts           # POST — saves star rating + feedback to Supabase
-    ├── validate/route.ts       # POST — AI validates custom character/theme inputs (fail-open)
-    ├── suggestions/route.ts    # GET — returns top-50 characters and themes; client randomly samples 9/8 for display, uses full 50 for autocomplete
-    └── submit-issue/route.ts   # POST — creates GitHub Issue for feedback/bug reports
+    ├── generate/route.ts       # POST — streams AI-generated story, saves to Supabase (10 req/min)
+    ├── image/route.ts          # POST — generates DALL-E 3 cartoon illustration for a story (5 req/min)
+    ├── questions/route.ts      # POST — generates 3 discussion questions via Claude Haiku (20 req/min)
+    ├── rate/route.ts           # POST — saves star rating + feedback to Supabase (20 req/min)
+    ├── validate/route.ts       # POST — AI validates custom character/theme inputs, fail-open (30 req/min)
+    ├── suggestions/route.ts    # GET — returns top-50 characters and themes; client randomly samples 9/8 for display, uses full 50 for autocomplete (30 req/min)
+    └── submit-issue/route.ts   # POST — creates GitHub Issue for feedback/bug reports (5 req/min)
 
 lib/
 ├── anthropic.ts                # Shared Anthropic client singleton
 ├── constants.ts                # CHARACTER_EMOJI, THEME_EMOJI maps and emoji helper functions
-├── content-filter.ts           # isChildFriendly() — Claude Haiku classifier for custom entries
+├── content-filter.ts           # isChildFriendly() — Claude Haiku classifier for custom entries (fail-closed)
 ├── ratelimit.ts                # In-memory rate limiter (per-IP, per-route)
 └── supabase.ts                 # Shared Supabase client
 ```
