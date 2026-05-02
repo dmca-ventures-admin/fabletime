@@ -1,5 +1,7 @@
+import { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { isChildFriendly } from '@/lib/content-filter';
+import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 
 /**
  * GET /api/suggestions
@@ -14,7 +16,13 @@ import { isChildFriendly } from '@/lib/content-filter';
  * immediately using already-classified entries so classification never
  * blocks the caller.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Rate limit: 30 requests per minute per IP
+  const ip = getClientIp(request);
+  const { allowed } = checkRateLimit(`suggestions:${ip}`, 30, 60_000);
+  if (!allowed) {
+    return Response.json({ error: 'Too many requests' }, { status: 429 });
+  }
   try {
     // Fetch top 100 per type to account for entries that may be filtered out,
     // so we can reliably return up to 50 child-friendly entries.

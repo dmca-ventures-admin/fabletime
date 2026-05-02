@@ -3,6 +3,19 @@ import { anthropic } from '@/lib/anthropic';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 
+/**
+ * Strip control characters (including newlines, carriage returns, tabs) from
+ * user-supplied text before it is interpolated into AI prompts.  Without this,
+ * an input like "cat\nIGNORE ALL" is 3 whitespace-delimited words and passes
+ * the word-count check, but the embedded newline injects a new line into the
+ * prompt allowing partial instruction override.
+ */
+function sanitizePromptInput(s: string): string {
+  // Replace any ASCII control character (0x00-0x1F, 0x7F) with a space,
+  // then collapse runs of whitespace to a single space.
+  return s.replace(/[\x00-\x1f\x7f]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 const lengthDescriptions: Record<string, string> = {
   short: '300-400 words',
   medium: '500-700 words',
@@ -26,23 +39,32 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { characters, length, theme, funninessLevel } = await request.json();
+    const body = await request.json();
 
-    if (!characters || !Array.isArray(characters) || characters.length === 0 || !length || !theme) {
+    if (!body.characters || !Array.isArray(body.characters) || body.characters.length === 0 || !body.length || !body.theme) {
       return new Response('Missing required fields', { status: 400 });
     }
 
-    if (characters.length > 3) {
+    if (body.characters.length > 3) {
       return new Response('Maximum 3 characters allowed', { status: 400 });
     }
 
+    // Sanitize inputs to remove control characters (including newlines) that
+    // could be used to inject new lines into the AI prompt.
+    const characters: string[] = body.characters.map((c: unknown) =>
+      typeof c === 'string' ? sanitizePromptInput(c) : String(c)
+    );
+    const length: string = typeof body.length === 'string' ? body.length : String(body.length);
+    const theme: string = typeof body.theme === 'string' ? sanitizePromptInput(body.theme) : String(body.theme);
+    const funninessLevel = body.funninessLevel;
+
     // Validate that each character and the theme are 3 words or fewer
     for (const character of characters) {
-      if (typeof character === 'string' && character.trim().split(/\s+/).length > 3) {
+      if (character.split(/\s+/).length > 3) {
         return new Response('Character/theme names must be 3 words or fewer', { status: 400 });
       }
     }
-    if (typeof theme === 'string' && theme.trim().split(/\s+/).length > 3) {
+    if (theme.split(/\s+/).length > 3) {
       return new Response('Character/theme names must be 3 words or fewer', { status: 400 });
     }
 

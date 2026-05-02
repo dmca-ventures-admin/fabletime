@@ -20,7 +20,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const characterList = Array.isArray(characters) ? characters.join(', ') : characters;
+    if (typeof story !== 'string') {
+      return Response.json({ error: 'story must be a string' }, { status: 400 });
+    }
+    if (story.length > 10000) {
+      return Response.json({ error: 'story must be 10000 characters or fewer' }, { status: 400 });
+    }
+    if (!Array.isArray(characters) || characters.some((c) => typeof c !== 'string')) {
+      return Response.json({ error: 'characters must be an array of strings' }, { status: 400 });
+    }
+    if (typeof theme !== 'string') {
+      return Response.json({ error: 'theme must be a string' }, { status: 400 });
+    }
+
+    const characterList = characters.join(', ');
 
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5',

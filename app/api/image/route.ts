@@ -1,9 +1,14 @@
 import OpenAI from 'openai';
-import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
+import { anthropic } from '@/lib/anthropic';
+import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+/** Strip control characters (including newlines) from prompt-bound user input. */
+function sanitizePromptInput(s: string): string {
+  return s.replace(/[\x00-\x1f\x7f]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
 
 const STYLES: Record<number, string> = {
   1: 'Whimsical watercolor illustration suitable for a children\'s book',
@@ -48,18 +53,33 @@ Story excerpt: ${storyExcerpt.slice(0, 800)}`,
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const { characters, theme, story } = await request.json();
+  // Rate limit: 5 image generations per minute per IP (DALL-E 3 costs ~$0.04/call)
+  const ip = getClientIp(request);
+  const { allowed } = checkRateLimit(`image:${ip}`, 5, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
 
-    if (!characters || !Array.isArray(characters) || characters.length === 0 || !theme) {
+  try {
+    const body = await request.json();
+
+    if (!body.characters || !Array.isArray(body.characters) || body.characters.length === 0 || !body.theme) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    // Sanitize all user-supplied text before interpolating into AI prompts.
+    const characters: string[] = body.characters.map((c: unknown) =>
+      sanitizePromptInput(typeof c === 'string' ? c : String(c))
+    );
+    const theme: string = sanitizePromptInput(typeof body.theme === 'string' ? body.theme : String(body.theme));
+    // Story is AI-generated but originates from a user session; sanitize as a precaution.
+    const storyContext: string = body.story
+      ? sanitizePromptInput(body.story).slice(0, 1500)
+      : '';
 
     const characterDesc = characters.length === 1
       ? `a ${characters[0]}`
       : characters.slice(0, -1).map((c: string) => `a ${c}`).join(', ') + ` and a ${characters[characters.length - 1]}`;
-
-    const storyContext = story ? story.slice(0, 1500) : '';
 
     // Select the best illustration style for this story
     const styleNum = await selectStyle(characters, theme, storyContext);

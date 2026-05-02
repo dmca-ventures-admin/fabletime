@@ -39,12 +39,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate feedback: optional, but if provided must be a string
-    if (feedback !== undefined && feedback !== null && typeof feedback !== 'string') {
-      return Response.json(
-        { error: 'feedback must be a string if provided' },
-        { status: 400 }
-      );
+    // Validate feedback: optional, but if provided must be a string within max length
+    if (feedback !== undefined && feedback !== null) {
+      if (typeof feedback !== 'string') {
+        return Response.json(
+          { error: 'feedback must be a string if provided' },
+          { status: 400 }
+        );
+      }
+      if (feedback.length > 5000) {
+        return Response.json(
+          { error: 'feedback must be 5000 characters or fewer' },
+          { status: 400 }
+        );
+      }
     }
 
     // Insert into Supabase ratings table
