@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { anthropic } from '@/lib/anthropic';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
+import { logApiCall } from '@/lib/cost-logger';
 
 /**
  * Strip control characters (including newlines, carriage returns, tabs) from
@@ -131,6 +132,7 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
         try {
           let fullResponse = '';
 
+          const streamStart = Date.now();
           const anthropicStream = anthropic.messages.stream({
             model: 'claude-opus-4-20250514',
             max_tokens: 2048,
@@ -146,6 +148,14 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
               fullResponse += chunk.delta.text;
             }
           }
+          const finalMsg = await anthropicStream.finalMessage();
+          logApiCall({
+            endpoint: '/api/generate',
+            model: 'claude-opus-4-20250514',
+            usage: finalMsg.usage,
+            durationMs: Date.now() - streamStart,
+            meta: { storyId, characters, theme, length },
+          });
           controller.close();
 
           // Update the placeholder with the full story response
@@ -196,6 +206,7 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
                   .single();
 
                 if (entryData && entryData.emoji === null) {
+                  const t0emoji = Date.now();
                   const msg = await anthropic.messages.create({
                     model: 'claude-haiku-4-5',
                     max_tokens: 10,
@@ -204,6 +215,7 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
                       content: `What is the single best emoji for '${entry.value}' as a children's story character or theme? Reply with ONLY the emoji character, nothing else.`,
                     }],
                   });
+                  logApiCall({ endpoint: '/api/generate#emoji', model: 'claude-haiku-4-5', usage: msg.usage, durationMs: Date.now() - t0emoji, meta: { entry } });
                   const emoji =
                     msg.content[0]?.type === 'text' ? msg.content[0].text.trim() : null;
                   if (emoji) {
