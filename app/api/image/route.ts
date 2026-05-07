@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { anthropic } from '@/lib/anthropic';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';
+import { MODELS } from '@/lib/models';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -25,7 +26,7 @@ async function selectStyle(characters: string[], theme: string, storyExcerpt: st
   try {
     const t0 = Date.now();
     const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5',
+      model: MODELS.fast,
       max_tokens: 10,
       messages: [{
         role: 'user',
@@ -46,7 +47,7 @@ Story excerpt: ${storyExcerpt.slice(0, 800)}`,
       }],
     });
 
-    logApiCall({ endpoint: '/api/image#selectStyle', model: 'claude-haiku-4-5', usage: response.usage, durationMs: Date.now() - t0 });
+    logApiCall({ endpoint: '/api/image#selectStyle', model: MODELS.fast, usage: response.usage, durationMs: Date.now() - t0 });
     const text = response.content[0].type === 'text' ? response.content[0].text.trim() : '1';
     const num = parseInt(text.match(/[1-7]/)?.[0] || '1', 10);
     return STYLES[num] ? num : 1;

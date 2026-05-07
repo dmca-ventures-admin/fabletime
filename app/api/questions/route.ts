@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { anthropic } from '@/lib/anthropic';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';
+import { MODELS } from '@/lib/models';
 
 export async function POST(request: NextRequest) {
   // Rate limit: 20 question generations per minute per IP
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const t0 = Date.now();
     const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5',
+      model: MODELS.fast,
       max_tokens: 512,
       messages: [
         {
@@ -61,7 +62,7 @@ ${story.slice(0, 4000)}`,
       ],
     });
 
-    logApiCall({ endpoint: '/api/questions', model: 'claude-haiku-4-5', usage: response.usage, durationMs: Date.now() - t0 });
+    logApiCall({ endpoint: '/api/questions', model: MODELS.fast, usage: response.usage, durationMs: Date.now() - t0 });
     const text =
       response.content[0].type === 'text' ? response.content[0].text : '';
 

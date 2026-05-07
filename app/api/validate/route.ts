@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { anthropic } from '@/lib/anthropic';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';
+import { MODELS } from '@/lib/models';
 
 export async function POST(request: NextRequest) {
   // Rate limit: 30 validations per minute per IP
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     const t0 = Date.now();
     const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5',
+      model: MODELS.fast,
       max_tokens: 128,
       messages: [
         {
@@ -49,7 +50,7 @@ If nonsensical/gibberish: {"valid": false, "suggestion": null}`,
       ],
     });
 
-    logApiCall({ endpoint: '/api/validate', model: 'claude-haiku-4-5', usage: response.usage, durationMs: Date.now() - t0, meta: { type, value: trimmed } });
+    logApiCall({ endpoint: '/api/validate', model: MODELS.fast, usage: response.usage, durationMs: Date.now() - t0, meta: { type, value: trimmed } });
     const text =
       response.content[0].type === 'text' ? response.content[0].text : '';
 

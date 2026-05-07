@@ -3,6 +3,7 @@ import { anthropic } from '@/lib/anthropic';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';
+import { MODELS } from '@/lib/models';
 
 /**
  * Strip control characters (including newlines, carriage returns, tabs) from
@@ -134,7 +135,7 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
 
           const streamStart = Date.now();
           const anthropicStream = anthropic.messages.stream({
-            model: 'claude-opus-4-20250514',
+            model: MODELS.story,
             max_tokens: 2048,
             messages: [{ role: 'user', content: prompt }],
           });
@@ -151,7 +152,7 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
           const finalMsg = await anthropicStream.finalMessage();
           logApiCall({
             endpoint: '/api/generate',
-            model: 'claude-opus-4-20250514',
+            model: MODELS.story,
             usage: finalMsg.usage,
             durationMs: Date.now() - streamStart,
             meta: { storyId, characters, theme, length },
@@ -208,14 +209,14 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
                 if (entryData && entryData.emoji === null) {
                   const t0emoji = Date.now();
                   const msg = await anthropic.messages.create({
-                    model: 'claude-haiku-4-5',
+                    model: MODELS.fast,
                     max_tokens: 10,
                     messages: [{
                       role: 'user',
                       content: `What is the single best emoji for '${entry.value}' as a children's story character or theme? Reply with ONLY the emoji character, nothing else.`,
                     }],
                   });
-                  logApiCall({ endpoint: '/api/generate#emoji', model: 'claude-haiku-4-5', usage: msg.usage, durationMs: Date.now() - t0emoji, meta: { entry } });
+                  logApiCall({ endpoint: '/api/generate#emoji', model: MODELS.fast, usage: msg.usage, durationMs: Date.now() - t0emoji, meta: { entry } });
                   const emoji =
                     msg.content[0]?.type === 'text' ? msg.content[0].text.trim() : null;
                   if (emoji) {

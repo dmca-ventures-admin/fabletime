@@ -1,4 +1,5 @@
 import { anthropic } from '@/lib/anthropic';
+import { MODELS } from '@/lib/models';
 
 /**
  * Classifies whether the given text is appropriate as a character name or
@@ -14,7 +15,7 @@ import { anthropic } from '@/lib/anthropic';
 export async function isChildFriendly(text: string): Promise<boolean> {
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5',
+      model: MODELS.fast,
       max_tokens: 3,
       system:
         'You are a content filter for a children\'s storytelling app (ages 4-8). ' +
