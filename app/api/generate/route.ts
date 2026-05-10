@@ -240,7 +240,13 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
             })();
           }
         } catch (error) {
-          controller.error(error);
+          console.error('[generate] Stream error:', error);
+          // Write error message to stream instead of erroring the controller,
+          // which can cause Next.js to render the 500 page on Vercel.
+          try {
+            controller.enqueue(new TextEncoder().encode(''));
+          } catch { /* ignore */ }
+          controller.close();
         }
       },
     });
@@ -254,7 +260,8 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
       },
     });
   } catch (error) {
-    console.error('Error generating story:', error);
-    return new Response('Failed to generate story', { status: 500 });
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Error generating story:', msg, error);
+    return new Response(`Failed to generate story: ${msg}`, { status: 500 });
   }
 }
