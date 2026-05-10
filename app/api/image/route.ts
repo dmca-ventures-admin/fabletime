@@ -91,7 +91,15 @@ export async function POST(request: NextRequest) {
 
     console.log(`[IMG] Selected style ${styleNum}: ${styleDesc}`);
 
-    const prompt = `IMPORTANT: This image must contain absolutely NO text, NO words, NO letters, NO numbers, NO signs, NO labels of any kind. Pure illustration only.
+    const prompt = `RULE: THIS IMAGE MUST CONTAIN ZERO TEXT.
+RULE: THIS IMAGE MUST CONTAIN ZERO TEXT.
+RULE: THIS IMAGE MUST CONTAIN ZERO TEXT.
+
+VIOLATION: Any text, letter, number, caption, label, sign, title, word, symbol, writing, or typography in the image is a failure. The image will be rejected if it contains ANY readable characters whatsoever.
+
+This is a HARD CONSTRAINT, not a preference. Generate ONLY pure visual illustration with NO textual elements.
+
+---
 
 ${styleDesc}.
 
@@ -100,7 +108,14 @@ Characters: ${characterDesc}
 Theme: ${theme}
 Scene: ${storyContext.slice(0, 600)}
 
-Show the most meaningful or dramatic moment — the resolution, the heartfelt connection, or the central lesson in action. Make it feel like the perfect picture book illustration. ZERO text of any kind in the image.`;
+Show the most meaningful or dramatic moment — the resolution, the heartfelt connection, or the central lesson in action. Make it feel like the perfect picture book illustration.
+
+---
+
+FINAL REMINDER — HARD CONSTRAINT:
+RULE: THIS IMAGE MUST CONTAIN ZERO TEXT.
+VIOLATION: Any text, letter, number, caption, label, sign, or symbol is a failure.
+Generate ONLY pure visual illustration. NO TEXT. NO WORDS. NO LETTERS. NO NUMBERS. NO CAPTIONS. NOTHING READABLE.`;
 
     const response = await openai.images.generate({
       model: 'dall-e-3',
