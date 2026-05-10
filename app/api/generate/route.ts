@@ -108,7 +108,9 @@ Story requirements:
 ${characters.length > 1 ? '- Give each character a distinct personality and role in the story\n- Show the characters working together and supporting each other to overcome the challenge' : ''}
 Make the learning theme of "${theme}" central to how the characters grow and how the story resolves — it should feel woven in naturally, not tacked on.
 
-Write the story directly without any preamble or meta-commentary. Begin with "Once upon a time..." or a creative variation.`;
+Write the story directly without any preamble or meta-commentary. Begin with "Once upon a time..." or a creative variation.
+
+IMPORTANT FORMATTING: Plain text only. No markdown. No # headings, no ** bold, no * italic, no bullet points. Just paragraphs of plain text separated by blank lines, as you would find in a printed children's book.`;
 
     const storyId = crypto.randomUUID();
 
