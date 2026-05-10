@@ -110,7 +110,7 @@ Make the learning theme of "${theme}" central to how the characters grow and how
 
 Write the story directly without any preamble or meta-commentary. Begin with "Once upon a time..." or a creative variation.
 
-IMPORTANT FORMATTING: Plain text only. No markdown. No # headings, no ** bold, no * italic, no bullet points. Just paragraphs of plain text separated by blank lines, as you would find in a printed children's book.`;
+FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story), then a blank line, then plain story paragraphs. No bold, no italic, no emphasis of any kind in the story body. No bullet points, no subheadings.`;
 
     const storyId = crypto.randomUUID();
 

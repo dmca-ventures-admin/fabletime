@@ -179,42 +179,36 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
     <div className="mt-8 w-full max-w-2xl mx-auto">
       {/* Story Card */}
       <div className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border-card)] shadow-sm p-6 md:p-10">
-        <div className="flex items-center gap-3 mb-7">
-          <div className="flex items-center justify-center w-9 h-9 bg-[var(--surface-chip-active)] rounded-xl border border-[var(--border-card)] shrink-0">
-            <svg
-              className="w-5 h-5 text-primary"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <h2 className="font-heading text-xl font-semibold text-primary">Your Story</h2>
-          {isLoading && (
-            <span className="ml-auto inline-flex items-center gap-1.5" aria-label="Story is loading">
-              <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce [animation-delay:-0.3s]" />
-              <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce [animation-delay:-0.15s]" />
-              <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce" />
-            </span>
-          )}
-        </div>
-
         <div className="space-y-5">
-          {story.split('\n').map((paragraph, index) =>
-            paragraph.trim() ? (
+          {story.split('\n').map((paragraph, index) => {
+            const trimmed = paragraph.trim();
+            if (!trimmed) return null;
+            // First line is the title (# Title)
+            if (trimmed.startsWith('# ')) {
+              return (
+                <div key={index} className="flex items-center gap-3 mb-4">
+                  <h1 className="font-heading text-2xl font-bold text-primary">
+                    {trimmed.slice(2)}
+                  </h1>
+                  {isLoading && (
+                    <span className="inline-flex items-center gap-1.5" aria-label="Story is loading">
+                      <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce [animation-delay:-0.3s]" />
+                      <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce [animation-delay:-0.15s]" />
+                      <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce" />
+                    </span>
+                  )}
+                </div>
+              );
+            }
+            return (
               <p
                 key={index}
                 className="text-foreground leading-loose text-base md:text-lg font-serif"
               >
-                {paragraph}
+                {trimmed}
               </p>
-            ) : null,
-          )}
+            );
+          })}
           {isLoading && !story && (
             <p className="text-secondary italic animate-pulse text-lg font-serif">
               Once upon a time...

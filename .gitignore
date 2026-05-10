@@ -41,6 +41,10 @@ yarn-error.log*
 next-env.d.ts
 .bg-shell/
 
+# AI coding tools
+.claude/
+.gsd/
+
 # ── GSD baseline (auto-generated) ──
 Thumbs.db
 *.swp
