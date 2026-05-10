@@ -68,30 +68,41 @@ export async function GET(request: NextRequest) {
       .map((row) => ({ value: row.value, emoji: row.emoji ?? undefined }));
 
     // Kick off background classification for unchecked entries — do not await.
+    // Process in batches of 5 to limit concurrent API calls.
     const allRows = [...(characterRows ?? []), ...(themeRows ?? [])];
     const uncheckedRows = allRows.filter((row) => row.child_friendly === null);
     if (uncheckedRows.length > 0) {
-      Promise.all(
-        uncheckedRows.map(async (row) => {
-          const isFriendly = await isChildFriendly(row.value);
-          const { error: updateError } = await supabase
-            .from('custom_entries')
-            .update({ child_friendly: isFriendly })
-            .eq('id', row.id);
-          if (updateError) {
-            console.error(
-              '[S03] Failed to cache child_friendly for entry:',
-              row.value,
-              updateError
-            );
-          }
-        })
-      ).catch((err) => {
+      (async () => {
+        const BATCH_SIZE = 5;
+        for (let i = 0; i < uncheckedRows.length; i += BATCH_SIZE) {
+          const batch = uncheckedRows.slice(i, i + BATCH_SIZE);
+          await Promise.all(
+            batch.map(async (row) => {
+              const isFriendly = await isChildFriendly(row.value);
+              const { error: updateError } = await supabase
+                .from('custom_entries')
+                .update({ child_friendly: isFriendly })
+                .eq('id', row.id);
+              if (updateError) {
+                console.error(
+                  '[S03] Failed to cache child_friendly for entry:',
+                  row.value,
+                  updateError
+                );
+              }
+            })
+          );
+        }
+      })().catch((err) => {
         console.error('[S03] Background classification error:', err);
       });
     }
 
-    return Response.json({ characters, themes });
+    return Response.json({ characters, themes }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=30',
+      },
+    });
   } catch (error) {
     console.error('[S03] Suggestions endpoint error:', error);
     return Response.json({ characters: [], themes: [] });

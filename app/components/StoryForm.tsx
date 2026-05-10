@@ -61,8 +61,10 @@ export default function StoryForm() {
   const [selectedTheme, setSelectedTheme] = useState('');
   const [funninessLevel, setFunninessLevel] = useState(2);
 
-  // Custom input state
+  // Custom input state — pills are committed entries, input is in-progress typing
+  const [characterPills, setCharacterPills] = useState<string[]>([]);
   const [customCharacterInput, setCustomCharacterInput] = useState('');
+  const [themePills, setThemePills] = useState<string[]>([]);
   const [customThemeInput, setCustomThemeInput] = useState('');
   const [customCharacterError, setCustomCharacterError] = useState('');
   const [customThemeError, setCustomThemeError] = useState('');
@@ -72,6 +74,8 @@ export default function StoryForm() {
   // Refs for outside-click detection
   const charInputWrapperRef = useRef<HTMLDivElement>(null);
   const themeInputWrapperRef = useRef<HTMLDivElement>(null);
+  // Generation ID ref to prevent stale stream writes (#94)
+  const generationIdRef = useRef<number>(0);
 
   // Form state
   const [story, setStory] = useState('');
@@ -214,27 +218,31 @@ export default function StoryForm() {
         .filter(
           (c) =>
             c.value.toLowerCase().includes(customCharacterInput.toLowerCase()) &&
-            !selectedCharacters.has(c.value)
+            !selectedCharacters.has(c.value) &&
+            !characterPills.includes(c.value)
         )
         .slice(0, 5)
     : [];
 
   const themeAutocompleteSuggestions = showThemeDropdown && customThemeInput.trim()
     ? suggestions.themes
-        .filter((t) => t.value.toLowerCase().includes(customThemeInput.toLowerCase()))
+        .filter(
+          (t) =>
+            t.value.toLowerCase().includes(customThemeInput.toLowerCase()) &&
+            !themePills.includes(t.value)
+        )
         .slice(0, 5)
     : [];
 
-  // Derived counts
-  const parsedCustomCharacters = parseCustomCharacters(customCharacterInput);
-  const totalCharacters = selectedCharacters.size + parsedCustomCharacters.length;
+  // Derived counts — pills are committed entries
+  const totalCharacters = selectedCharacters.size + characterPills.length;
   const maxReached = totalCharacters >= MAX_CHARACTERS;
 
-  // Resolve the final theme: custom input takes precedence if non-empty
-  const finalTheme = customThemeInput.trim() || selectedTheme;
+  // Resolve the final theme: pills first, then input, then selected
+  const finalTheme = themePills[0] || customThemeInput.trim() || selectedTheme;
 
-  // Resolve the final characters: merge selected suggestions + custom entries
-  const finalCharacters = [...Array.from(selectedCharacters), ...parsedCustomCharacters];
+  // Resolve the final characters: merge selected suggestions + pills
+  const finalCharacters = [...Array.from(selectedCharacters), ...characterPills];
 
   const toggleCharacter = useCallback((value: string) => {
     if (isLoading) return;
@@ -243,38 +251,101 @@ export default function StoryForm() {
       if (next.has(value)) {
         next.delete(value);
       } else {
-        // Don't allow selecting beyond max
-        if (next.size + parsedCustomCharacters.length >= MAX_CHARACTERS) return prev;
+        // Don't allow selecting beyond max (include pills in count)
+        if (next.size + characterPills.length >= MAX_CHARACTERS) return prev;
         next.add(value);
       }
       return next;
     });
-  }, [isLoading, parsedCustomCharacters.length]);
+  }, [isLoading, characterPills.length]);
+
+  // Add a character pill (from comma or autocomplete selection)
+  const addCharacterPill = useCallback((value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    if (characterPills.includes(trimmed)) return;
+    if (selectedCharacters.has(trimmed)) return;
+    if (selectedCharacters.size + characterPills.length >= MAX_CHARACTERS) return;
+    if (exceedsMaxWords(trimmed)) {
+      setCustomCharacterError(`"${trimmed}" exceeds ${MAX_WORDS_PER_ENTRY} words`);
+      return;
+    }
+    setCharacterPills((prev) => [...prev, trimmed]);
+    setCustomCharacterInput('');
+    setCustomCharacterError('');
+  }, [characterPills, selectedCharacters]);
+
+  // Remove a character pill
+  const removeCharacterPill = useCallback((value: string) => {
+    setCharacterPills((prev) => prev.filter((p) => p !== value));
+  }, []);
+
+  // Add a theme pill (from comma or autocomplete selection)
+  const addThemePill = useCallback((value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    if (themePills.includes(trimmed)) return;
+    if (exceedsMaxWords(trimmed)) {
+      setCustomThemeError(`Theme must be ${MAX_WORDS_PER_ENTRY} words or fewer`);
+      return;
+    }
+    // Only one theme allowed, replace existing
+    setThemePills([trimmed]);
+    setCustomThemeInput('');
+    setCustomThemeError('');
+    setSelectedTheme(''); // Clear grid selection when adding custom pill
+  }, [themePills]);
+
+  // Remove a theme pill
+  const removeThemePill = useCallback((value: string) => {
+    setThemePills((prev) => prev.filter((p) => p !== value));
+  }, []);
 
   const handleCustomCharacterChange = useCallback((value: string) => {
-    setCustomCharacterInput(value);
     setSubmitError('');
 
-    // Validate each entry
-    const entries = parseCustomCharacters(value);
-    const tooLong = entries.find(exceedsMaxWords);
-    if (tooLong) {
-      setCustomCharacterError(`"${tooLong}" exceeds ${MAX_WORDS_PER_ENTRY} words`);
+    // Check for comma — convert preceding text to a pill
+    if (value.endsWith(',')) {
+      const textBeforeComma = value.slice(0, -1).trim();
+      if (textBeforeComma) {
+        addCharacterPill(textBeforeComma);
+      }
+      return;
+    }
+
+    setCustomCharacterInput(value);
+
+    // Validate current input
+    const trimmed = value.trim();
+    if (trimmed && exceedsMaxWords(trimmed)) {
+      setCustomCharacterError(`"${trimmed}" exceeds ${MAX_WORDS_PER_ENTRY} words`);
     } else {
       setCustomCharacterError('');
     }
-  }, []);
+  }, [addCharacterPill]);
 
   const handleCustomThemeChange = useCallback((value: string) => {
-    setCustomThemeInput(value);
     setSubmitError('');
 
-    if (value.trim() && exceedsMaxWords(value)) {
-      setCustomThemeError(`Custom theme must be ${MAX_WORDS_PER_ENTRY} words or fewer`);
+    // Check for comma — convert preceding text to a pill
+    if (value.endsWith(',')) {
+      const textBeforeComma = value.slice(0, -1).trim();
+      if (textBeforeComma) {
+        addThemePill(textBeforeComma);
+      }
+      return;
+    }
+
+    setCustomThemeInput(value);
+
+    // Validate current input
+    const trimmed = value.trim();
+    if (trimmed && exceedsMaxWords(trimmed)) {
+      setCustomThemeError(`Theme must be ${MAX_WORDS_PER_ENTRY} words or fewer`);
     } else {
       setCustomThemeError('');
     }
-  }, []);
+  }, [addThemePill]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -316,6 +387,8 @@ export default function StoryForm() {
     setHasRated(false);
     setIsLoading(true);
 
+    const myGenerationId = ++generationIdRef.current;
+
     try {
       const response = await fetch('/api/generate', {
         method: 'POST',
@@ -340,6 +413,7 @@ export default function StoryForm() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+        if (generationIdRef.current !== myGenerationId) break;
         const text = decoder.decode(value, { stream: true });
         setStory((prev) => prev + text);
       }
@@ -351,10 +425,8 @@ export default function StoryForm() {
     }
   };
 
-  // Determine if custom character input should show a "max reached" warning
-  const customWouldExceedMax =
-    parsedCustomCharacters.length > 0 &&
-    selectedCharacters.size + parsedCustomCharacters.length > MAX_CHARACTERS;
+  // Max already reached — no more characters can be added
+  const customWouldExceedMax = false; // With pills, we prevent adding at the source
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -455,35 +527,74 @@ export default function StoryForm() {
               </div>
             )}
 
-            {/* Custom character input with autocomplete */}
+            {/* Custom character input with pills and autocomplete */}
             <div ref={charInputWrapperRef} className="relative">
-              <input
-                type="text"
-                value={customCharacterInput}
-                onChange={(e) => {
-                  handleCustomCharacterChange(e.target.value);
-                  setShowCharDropdown(true);
-                }}
-                onFocus={() => setShowCharDropdown(true)}
-                disabled={isLoading}
-                placeholder="Or type custom characters (comma-separated)..."
-                aria-label="Custom characters"
-                aria-autocomplete="list"
-                aria-expanded={charAutocompleteSuggestions.length > 0}
-                aria-invalid={!!customCharacterError || customWouldExceedMax}
-                aria-describedby={
+              <div
+                className={`flex flex-wrap items-center gap-1.5 w-full px-3 py-2 rounded-xl border text-sm bg-[var(--surface-input)] transition-colors duration-200 ${
                   customCharacterError
-                    ? 'custom-character-error'
-                    : customWouldExceedMax
-                      ? 'custom-character-max-error'
-                      : undefined
-                }
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] focus:outline-none focus:ring-2 focus:ring-secondary/60 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
-                  customCharacterError || customWouldExceedMax
                     ? 'border-red-400'
-                    : 'border-[var(--border-subtle)]'
-                }`}
-              />
+                    : 'border-[var(--border-subtle)] focus-within:ring-2 focus-within:ring-secondary/60 focus-within:border-secondary'
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => {
+                  const input = charInputWrapperRef.current?.querySelector('input');
+                  input?.focus();
+                }}
+              >
+                {/* Character pills */}
+                {characterPills.map((pill) => (
+                  <span
+                    key={pill}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-medium"
+                  >
+                    {pill}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeCharacterPill(pill);
+                      }}
+                      disabled={isLoading}
+                      className="ml-0.5 p-0.5 rounded hover:bg-primary/20 transition-colors"
+                      aria-label={`Remove ${pill}`}
+                    >
+                      <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 3l6 6M9 3l-6 6" />
+                      </svg>
+                    </button>
+                  </span>
+                ))}
+                {/* Text input */}
+                <input
+                  type="text"
+                  value={customCharacterInput}
+                  onChange={(e) => {
+                    handleCustomCharacterChange(e.target.value);
+                    setShowCharDropdown(true);
+                  }}
+                  onFocus={() => setShowCharDropdown(true)}
+                  onKeyDown={(e) => {
+                    // Backspace on empty input removes last pill
+                    if (e.key === 'Backspace' && !customCharacterInput && characterPills.length > 0) {
+                      removeCharacterPill(characterPills[characterPills.length - 1]);
+                    }
+                    // Enter commits current input as pill
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (customCharacterInput.trim()) {
+                        addCharacterPill(customCharacterInput.trim());
+                      }
+                    }
+                  }}
+                  disabled={isLoading || maxReached}
+                  placeholder={characterPills.length === 0 ? 'Type custom characters...' : maxReached ? '' : 'Add more...'}
+                  aria-label="Custom characters"
+                  aria-autocomplete="list"
+                  aria-expanded={charAutocompleteSuggestions.length > 0}
+                  aria-invalid={!!customCharacterError}
+                  aria-describedby={customCharacterError ? 'custom-character-error' : undefined}
+                  className="flex-1 min-w-[80px] py-0.5 bg-transparent text-foreground placeholder:text-[var(--text-hint)] focus:outline-none disabled:cursor-not-allowed"
+                />
+              </div>
               {charAutocompleteSuggestions.length > 0 && (
                 <ul
                   role="listbox"
@@ -499,8 +610,7 @@ export default function StoryForm() {
                           e.preventDefault();
                         }}
                         onClick={() => {
-                          toggleCharacter(entry.value);
-                          setCustomCharacterInput('');
+                          addCharacterPill(entry.value);
                           setShowCharDropdown(false);
                         }}
                         className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-chip-active)] transition-colors duration-150"
@@ -516,19 +626,14 @@ export default function StoryForm() {
                   {customCharacterError}
                 </p>
               )}
-              {customWouldExceedMax && !customCharacterError && (
-                <p id="custom-character-max-error" className="text-xs text-amber-600 mt-1" role="alert">
-                  Total characters exceed maximum of {MAX_CHARACTERS} — remove some selections or custom entries
-                </p>
-              )}
-              {charValidationWarning && !customCharacterError && !customWouldExceedMax && (
+              {charValidationWarning && !customCharacterError && (
                 <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
                   <span aria-hidden="true">💡</span>
                   {charValidationWarning}
                 </p>
               )}
-              {!customCharacterInput && (
-                <p className="text-xs text-secondary italic mt-1">Add multiple: Pirate, Dragon, Princess</p>
+              {characterPills.length === 0 && !customCharacterInput && (
+                <p className="text-xs text-secondary italic mt-1">Type and press comma or Enter to add</p>
               )}
             </div>
           </fieldset>
@@ -596,7 +701,7 @@ export default function StoryForm() {
                   const usedThemeEmojis = new Set<string>();
                   let themePoolIdx = 0;
                   return displayedThemes.map((entry) => {
-                    const isSelected = selectedTheme === entry.value && !customThemeInput.trim();
+                    const isSelected = selectedTheme === entry.value && themePills.length === 0 && !customThemeInput.trim();
                     const emoji = entry.emoji || getThemeEmoji(entry.value);
                     let displayEmoji = emoji;
                     if (usedThemeEmojis.has(displayEmoji)) {
@@ -618,7 +723,8 @@ export default function StoryForm() {
                         onClick={() => {
                           if (!isLoading) {
                             setSelectedTheme(entry.value);
-                            // Clear custom theme when selecting a suggestion
+                            // Clear custom theme and pills when selecting a suggestion
+                            setThemePills([]);
                             setCustomThemeInput('');
                             setCustomThemeError('');
                           }
@@ -642,27 +748,72 @@ export default function StoryForm() {
               </div>
             )}
 
-            {/* Custom theme input with autocomplete */}
+            {/* Custom theme input with pill and autocomplete */}
             <div ref={themeInputWrapperRef} className="relative">
-              <input
-                type="text"
-                value={customThemeInput}
-                onChange={(e) => {
-                  handleCustomThemeChange(e.target.value);
-                  setShowThemeDropdown(true);
+              <div
+                className={`flex flex-wrap items-center gap-1.5 w-full px-3 py-2 rounded-xl border text-sm bg-[var(--surface-input)] transition-colors duration-200 ${
+                  customThemeError
+                    ? 'border-red-400'
+                    : 'border-[var(--border-subtle)] focus-within:ring-2 focus-within:ring-secondary/60 focus-within:border-secondary'
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => {
+                  const input = themeInputWrapperRef.current?.querySelector('input');
+                  input?.focus();
                 }}
-                onFocus={() => setShowThemeDropdown(true)}
-                disabled={isLoading}
-                placeholder="Or type a custom theme..."
-                aria-label="Custom theme"
-                aria-autocomplete="list"
-                aria-expanded={themeAutocompleteSuggestions.length > 0}
-                aria-invalid={!!customThemeError}
-                aria-describedby={customThemeError ? 'custom-theme-error' : undefined}
-                className={`w-full px-4 py-2.5 rounded-xl border text-sm bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] focus:outline-none focus:ring-2 focus:ring-secondary/60 focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${
-                  customThemeError ? 'border-red-400' : 'border-[var(--border-subtle)]'
-                }`}
-              />
+              >
+                {/* Theme pill (only one allowed) */}
+                {themePills.map((pill) => (
+                  <span
+                    key={pill}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-medium"
+                  >
+                    {pill}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeThemePill(pill);
+                      }}
+                      disabled={isLoading}
+                      className="ml-0.5 p-0.5 rounded hover:bg-primary/20 transition-colors"
+                      aria-label={`Remove ${pill}`}
+                    >
+                      <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 3l6 6M9 3l-6 6" />
+                      </svg>
+                    </button>
+                  </span>
+                ))}
+                {/* Text input — hidden when a pill exists */}
+                {themePills.length === 0 && (
+                  <input
+                    type="text"
+                    value={customThemeInput}
+                    onChange={(e) => {
+                      handleCustomThemeChange(e.target.value);
+                      setShowThemeDropdown(true);
+                    }}
+                    onFocus={() => setShowThemeDropdown(true)}
+                    onKeyDown={(e) => {
+                      // Enter commits current input as pill
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (customThemeInput.trim()) {
+                          addThemePill(customThemeInput.trim());
+                        }
+                      }
+                    }}
+                    disabled={isLoading}
+                    placeholder="Or type a custom theme..."
+                    aria-label="Custom theme"
+                    aria-autocomplete="list"
+                    aria-expanded={themeAutocompleteSuggestions.length > 0}
+                    aria-invalid={!!customThemeError}
+                    aria-describedby={customThemeError ? 'custom-theme-error' : undefined}
+                    className="flex-1 min-w-[80px] py-0.5 bg-transparent text-foreground placeholder:text-[var(--text-hint)] focus:outline-none disabled:cursor-not-allowed"
+                  />
+                )}
+              </div>
               {themeAutocompleteSuggestions.length > 0 && (
                 <ul
                   role="listbox"
@@ -677,9 +828,7 @@ export default function StoryForm() {
                           e.preventDefault();
                         }}
                         onClick={() => {
-                          setSelectedTheme(entry.value);
-                          setCustomThemeInput('');
-                          setCustomThemeError('');
+                          addThemePill(entry.value);
                           setShowThemeDropdown(false);
                         }}
                         className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-chip-active)] transition-colors duration-150"
@@ -701,8 +850,8 @@ export default function StoryForm() {
                   {themeValidationWarning}
                 </p>
               )}
-              {!customThemeInput && (
-                <p className="text-xs text-secondary italic mt-1">Try: Bravery, Honesty, Friendship</p>
+              {themePills.length === 0 && !customThemeInput && (
+                <p className="text-xs text-secondary italic mt-1">Type and press comma or Enter to add</p>
               )}
             </div>
           </fieldset>

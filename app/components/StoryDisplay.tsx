@@ -144,7 +144,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
         }),
       });
 
-      if (response.status === 201) {
+      if (response.ok) {
         // Reset local rating state for next story
         setSelectedRating(0);
         setHoveredRating(0);

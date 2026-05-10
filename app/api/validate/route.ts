@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const trimmed = value.trim();
     if (!trimmed || trimmed.length > 50) {
-      return Response.json({ valid: true, suggestion: null });
+      return Response.json({ valid: false, suggestion: null });
     }
 
     const t0 = Date.now();

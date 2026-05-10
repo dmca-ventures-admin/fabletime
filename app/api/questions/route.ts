@@ -79,13 +79,14 @@ ${story.slice(0, 4000)}`,
       return Response.json({ error: 'Failed to generate questions' }, { status: 500 });
     }
 
-    if (!Array.isArray(questions) || questions.length !== 3) {
+    if (!Array.isArray(questions) || questions.length === 0) {
       console.error('[Q] Unexpected questions format:', text);
       return Response.json(
         { error: 'Failed to generate questions' },
         { status: 500 }
       );
     }
+    questions = questions.slice(0, 3).filter((q): q is string => typeof q === 'string');
 
     return Response.json({ questions });
   } catch (error) {

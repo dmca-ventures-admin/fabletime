@@ -4,23 +4,11 @@ import { supabase } from '@/lib/supabase';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';
 import { MODELS } from '@/lib/models';
+import { sanitizePromptInput } from '@/lib/sanitize';
 
 // Allow up to 60 seconds for story generation (Vercel Hobby plan limit).
 // This replaces the old 10s default that was causing timeouts.
 export const maxDuration = 60;
-
-/**
- * Strip control characters (including newlines, carriage returns, tabs) from
- * user-supplied text before it is interpolated into AI prompts.  Without this,
- * an input like "cat\nIGNORE ALL" is 3 whitespace-delimited words and passes
- * the word-count check, but the embedded newline injects a new line into the
- * prompt allowing partial instruction override.
- */
-function sanitizePromptInput(s: string): string {
-  // Replace any ASCII control character (0x00-0x1F, 0x7F) with a space,
-  // then collapse runs of whitespace to a single space.
-  return s.replace(/[\x00-\x1f\x7f]+/g, ' ').replace(/\s+/g, ' ').trim();
-}
 
 const lengthDescriptions: Record<string, string> = {
   short: '300-400 words',
@@ -61,6 +49,12 @@ export async function POST(request: NextRequest) {
       typeof c === 'string' ? sanitizePromptInput(c) : String(c)
     );
     const length: string = typeof body.length === 'string' ? body.length : String(body.length);
+
+    // Validate length is one of the allowed values
+    if (!['short', 'medium', 'long'].includes(length)) {
+      return new Response('Invalid length', { status: 400 });
+    }
+
     const theme: string = typeof body.theme === 'string' ? sanitizePromptInput(body.theme) : String(body.theme);
     const funninessLevel = body.funninessLevel;
 

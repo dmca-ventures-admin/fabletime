@@ -7,10 +7,7 @@ import { MODELS } from '@/lib/models';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-/** Strip control characters (including newlines) from prompt-bound user input. */
-function sanitizePromptInput(s: string): string {
-  return s.replace(/[\x00-\x1f\x7f]+/g, ' ').replace(/\s+/g, ' ').trim();
-}
+import { sanitizePromptInput } from '@/lib/sanitize';
 
 const STYLES: Record<number, string> = {
   1: 'Whimsical watercolor illustration suitable for a children\'s book',
@@ -91,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`[IMG] Selected style ${styleNum}: ${styleDesc}`);
 
-    const prompt = `IMPORTANT: This image must contain absolutely NO text, NO words, NO letters, NO numbers, NO signs, NO labels of any kind. Pure illustration only.
+    const prompt = `CRITICAL REQUIREMENT: NO TEXT OF ANY KIND. No words, no letters, no numbers, no signs, no labels, no captions, no writing. If the image contains any text it will be rejected. Pure visual illustration only.
 
 ${styleDesc}.
 

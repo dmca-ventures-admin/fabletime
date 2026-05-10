@@ -1,7 +1,7 @@
 # Codebase Map
 
-Generated: 2026-04-23T12:26:29Z | Files: 34 | Described: 0/34
-<!-- gsd:codebase-meta {"generatedAt":"2026-04-23T12:26:29Z","fingerprint":"3afd33d993e5d4184b6566f6d9ac08c8e1da4b77","fileCount":34,"truncated":false} -->
+Generated: 2026-05-10T11:00:55Z | Files: 41 | Described: 0/41
+<!-- gsd:codebase-meta {"generatedAt":"2026-05-10T11:00:55Z","fingerprint":"dd69646a29d30527b4944b15d378929240f659c0","fileCount":41,"truncated":false} -->
 
 ### (root)/
 - `.env.local.example`
@@ -9,12 +9,14 @@ Generated: 2026-04-23T12:26:29Z | Files: 34 | Described: 0/34
 - `AGENTS.md`
 - `CLAUDE.md`
 - `eslint.config.mjs`
+- `GSD_BRIEF.md`
 - `next.config.ts`
 - `package-lock.json`
 - `package.json`
 - `postcss.config.mjs`
 - `README.md`
 - `tsconfig.json`
+- `vercel.json`
 
 ### app/
 - `app/globals.css`
@@ -59,8 +61,16 @@ Generated: 2026-04-23T12:26:29Z | Files: 34 | Described: 0/34
 - `lib/anthropic.ts`
 - `lib/constants.ts`
 - `lib/content-filter.ts`
+- `lib/cost-logger.ts`
+- `lib/models.ts`
 - `lib/ratelimit.ts`
 - `lib/supabase.ts`
+
+### public/
+- `public/.keepalive`
+
+### scripts/
+- `scripts/check-models.ts`
 
 ### supabase/
 - `supabase/schema.sql`
