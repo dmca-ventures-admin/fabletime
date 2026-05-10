@@ -1,7 +1,7 @@
 # Codebase Map
 
-Generated: 2026-05-10T11:00:55Z | Files: 41 | Described: 0/41
-<!-- gsd:codebase-meta {"generatedAt":"2026-05-10T11:00:55Z","fingerprint":"dd69646a29d30527b4944b15d378929240f659c0","fileCount":41,"truncated":false} -->
+Generated: 2026-05-10T11:31:06Z | Files: 43 | Described: 0/43
+<!-- gsd:codebase-meta {"generatedAt":"2026-05-10T11:31:06Z","fingerprint":"b579fd8f1cd152deb209b3666d7a7163be168019","fileCount":43,"truncated":false} -->
 
 ### (root)/
 - `.env.local.example`
@@ -10,6 +10,7 @@ Generated: 2026-05-10T11:00:55Z | Files: 41 | Described: 0/41
 - `CLAUDE.md`
 - `eslint.config.mjs`
 - `GSD_BRIEF.md`
+- `middleware.ts`
 - `next.config.ts`
 - `package-lock.json`
 - `package.json`
@@ -64,6 +65,7 @@ Generated: 2026-05-10T11:00:55Z | Files: 41 | Described: 0/41
 - `lib/cost-logger.ts`
 - `lib/models.ts`
 - `lib/ratelimit.ts`
+- `lib/sanitize.ts`
 - `lib/supabase.ts`
 
 ### public/

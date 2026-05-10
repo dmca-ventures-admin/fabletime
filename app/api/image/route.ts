@@ -10,13 +10,13 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 import { sanitizePromptInput } from '@/lib/sanitize';
 
 const STYLES: Record<number, string> = {
-  1: 'Whimsical watercolor illustration suitable for a children\'s book',
-  2: 'Gentle pencil sketch suitable for a bedtime story',
-  3: 'Bright and colorful digital painting suitable for a children\'s adventure story',
-  4: 'Charming crayon drawing suitable for gentle children\'s stories',
-  5: 'Gentle watercolor painting suitable for a lovely children\'s story',
-  6: 'Whimsical colored pencil drawing suitable for a variety of children\'s stories',
-  7: 'Detailed ink drawing suitable for strong expressive characters',
+  1: 'Whimsical watercolor scene, full-bleed, vivid colours, painterly',
+  2: 'Soft pencil and wash scene, full-bleed, gentle dreamy atmosphere',
+  3: 'Bright vibrant digital art scene, full-bleed, bold colours, dynamic',
+  4: 'Charming crayon art scene, full-bleed, warm and playful',
+  5: 'Delicate watercolour scene, full-bleed, soft pastel tones, cosy',
+  6: 'Coloured pencil scene, full-bleed, warm textures, expressive',
+  7: 'Bold ink and colour scene, full-bleed, strong lines, expressive characters',
 };
 
 async function selectStyle(characters: string[], theme: string, storyExcerpt: string): Promise<number> {
@@ -30,13 +30,13 @@ async function selectStyle(characters: string[], theme: string, storyExcerpt: st
         content: `Given this children's story, which illustration style best fits? Reply with ONLY the number (1-7).
 
 Styles:
-1. Whimsical watercolor illustration
-2. Gentle pencil sketch (bedtime/soothing)
-3. Bright colorful digital painting (adventure/exciting)
-4. Charming crayon drawing (gentle/simple)
-5. Gentle watercolor painting (lovely/cosy)
-6. Whimsical colored pencil drawing (versatile)
-7. Detailed ink drawing (strong/expressive characters)
+1. Whimsical watercolor scene, vivid colours, painterly
+2. Soft pencil and wash scene, gentle dreamy atmosphere
+3. Bright vibrant digital art scene, bold colours, dynamic
+4. Charming crayon art scene, warm and playful
+5. Delicate watercolour scene, soft pastel tones, cosy
+6. Coloured pencil scene, warm textures, expressive
+7. Bold ink and colour scene, strong lines, expressive characters
 
 Characters: ${characters.join(', ')}
 Theme: ${theme}
@@ -88,7 +88,9 @@ export async function POST(request: NextRequest) {
 
     console.log(`[IMG] Selected style ${styleNum}: ${styleDesc}`);
 
-    const prompt = `CRITICAL REQUIREMENT: NO TEXT OF ANY KIND. No words, no letters, no numbers, no signs, no labels, no captions, no writing. If the image contains any text it will be rejected. Pure visual illustration only.
+    const prompt = `RULE: NO TEXT OF ANY KIND IN THIS IMAGE. No words, no letters, no numbers, no signs, no labels, no captions, no writing, no speech bubbles, no caption boxes. VIOLATION of this rule means the image is rejected. Pure visual illustration only.
+
+ADDITIONAL RULE: FULL IMAGE COVERAGE. The scene must fill the ENTIRE image frame edge to edge. No white margins, no page borders, no book page layout, no text columns, no empty white space. The illustration bleeds to all edges with zero borders.
 
 ${styleDesc}.
 
@@ -97,7 +99,9 @@ Characters: ${characterDesc}
 Theme: ${theme}
 Scene: ${storyContext.slice(0, 600)}
 
-Show the most meaningful or dramatic moment — the resolution, the heartfelt connection, or the central lesson in action. Make it feel like the perfect picture book illustration. ZERO text of any kind in the image.`;
+Show the most meaningful or dramatic moment — the resolution, the heartfelt connection, or the central lesson in action. The scene fills the entire frame edge to edge with no margins or borders.
+
+REMINDER: ZERO text of any kind. Full-bleed illustration only.`;
 
     const response = await openai.images.generate({
       model: 'dall-e-3',
