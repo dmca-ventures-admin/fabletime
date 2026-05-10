@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
 import { anthropic } from '@/lib/anthropic';
+
+export const runtime = 'edge';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';

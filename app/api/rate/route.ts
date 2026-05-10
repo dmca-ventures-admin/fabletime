@@ -2,6 +2,8 @@ import { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 
+export const runtime = 'edge';
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(request: NextRequest) {

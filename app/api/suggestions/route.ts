@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { isChildFriendly } from '@/lib/content-filter';
+
+export const runtime = 'edge';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 
 /**
