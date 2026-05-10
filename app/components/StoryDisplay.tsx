@@ -221,7 +221,10 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
       {!isLoading && story && (imageLoading || imageUrl) && (
         <div className="mt-4">
           {imageLoading && (
-            <div className="w-full aspect-square rounded-2xl border border-[var(--border-card)] bg-[var(--surface-chip-inactive)] animate-pulse" />
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-full aspect-square rounded-2xl border border-[var(--border-card)] bg-[var(--surface-chip-inactive)] animate-pulse" />
+              <p className="text-sm text-secondary text-center">✨ Creating your illustration…</p>
+            </div>
           )}
           {imageUrl && !imageLoading && (
             // eslint-disable-next-line @next/next/no-img-element
