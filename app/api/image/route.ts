@@ -99,7 +99,7 @@ A scene featuring ${characterDesc} exploring the theme of ${theme}. Capture the 
 FINAL REMINDER: ZERO text, letters, words, numbers, or symbols of any kind anywhere in the image.`;
 
     const response = await openai.images.generate({
-      model: 'dall-e-3',
+      model: MODELS.dalleImage,
       prompt,
       size: '1024x1024',
       quality: 'standard',

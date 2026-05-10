@@ -2,8 +2,9 @@
 // Updated automatically by scripts/check-models.ts (weekly via HEARTBEAT.md)
 
 export const MODELS = {
-  opus:  'claude-opus-4-5',
-  haiku: 'claude-haiku-4-5',
+  opus:       'claude-opus-4-5',
+  haiku:      'claude-haiku-4-5',
+  dalleImage: 'dall-e-3',
 } as const;
 
 export type ModelKey = keyof typeof MODELS;
