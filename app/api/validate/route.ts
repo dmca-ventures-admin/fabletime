@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     const t0 = Date.now();
     const response = await anthropic.messages.create({
-      model: MODELS.fast,
+      model: MODELS.haiku,
       max_tokens: 128,
       messages: [
         {
@@ -52,7 +52,7 @@ If nonsensical/gibberish: {"valid": false, "suggestion": null}`,
       ],
     });
 
-    logApiCall({ endpoint: '/api/validate', model: MODELS.fast, usage: response.usage, durationMs: Date.now() - t0, meta: { type, value: trimmed } });
+    logApiCall({ endpoint: '/api/validate', model: MODELS.haiku, usage: response.usage, durationMs: Date.now() - t0, meta: { type, value: trimmed } });
     const text =
       response.content[0].type === 'text' ? response.content[0].text : '';
 

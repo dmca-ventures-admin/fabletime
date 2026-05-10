@@ -15,7 +15,7 @@ import { MODELS } from '@/lib/models';
 export async function isChildFriendly(text: string): Promise<boolean> {
   try {
     const response = await anthropic.messages.create({
-      model: MODELS.fast,
+      model: MODELS.haiku,
       max_tokens: 3,
       system:
         'You are a content filter for a children\'s storytelling app (ages 4-8). ' +

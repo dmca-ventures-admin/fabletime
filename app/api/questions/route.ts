@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const t0 = Date.now();
     const response = await anthropic.messages.create({
-      model: MODELS.fast,
+      model: MODELS.haiku,
       max_tokens: 512,
       messages: [
         {
@@ -64,7 +64,7 @@ ${story.slice(0, 4000)}`,
       ],
     });
 
-    logApiCall({ endpoint: '/api/questions', model: MODELS.fast, usage: response.usage, durationMs: Date.now() - t0 });
+    logApiCall({ endpoint: '/api/questions', model: MODELS.haiku, usage: response.usage, durationMs: Date.now() - t0 });
     const text =
       response.content[0].type === 'text' ? response.content[0].text : '';
 

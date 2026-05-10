@@ -135,7 +135,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
 
           const streamStart = Date.now();
           const anthropicStream = anthropic.messages.stream({
-            model: MODELS.story,
+            model: MODELS.opus,
             max_tokens: 2048,
             messages: [{ role: 'user', content: prompt }],
           });
@@ -152,7 +152,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
           const finalMsg = await anthropicStream.finalMessage();
           logApiCall({
             endpoint: '/api/generate',
-            model: MODELS.story,
+            model: MODELS.opus,
             usage: finalMsg.usage,
             durationMs: Date.now() - streamStart,
             meta: { storyId, characters, theme, length },
@@ -209,14 +209,14 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
                 if (entryData && entryData.emoji === null) {
                   const t0emoji = Date.now();
                   const msg = await anthropic.messages.create({
-                    model: MODELS.fast,
+                    model: MODELS.haiku,
                     max_tokens: 10,
                     messages: [{
                       role: 'user',
                       content: `What is the single best emoji for '${entry.value}' as a children's story character or theme? Reply with ONLY the emoji character, nothing else.`,
                     }],
                   });
-                  logApiCall({ endpoint: '/api/generate#emoji', model: MODELS.fast, usage: msg.usage, durationMs: Date.now() - t0emoji, meta: { entry } });
+                  logApiCall({ endpoint: '/api/generate#emoji', model: MODELS.haiku, usage: msg.usage, durationMs: Date.now() - t0emoji, meta: { entry } });
                   const emoji =
                     msg.content[0]?.type === 'text' ? msg.content[0].text.trim() : null;
                   if (emoji) {

@@ -23,7 +23,7 @@ async function selectStyle(characters: string[], theme: string, storyExcerpt: st
   try {
     const t0 = Date.now();
     const response = await anthropic.messages.create({
-      model: MODELS.fast,
+      model: MODELS.haiku,
       max_tokens: 10,
       messages: [{
         role: 'user',
@@ -44,7 +44,7 @@ Story excerpt: ${storyExcerpt.slice(0, 800)}`,
       }],
     });
 
-    logApiCall({ endpoint: '/api/image#selectStyle', model: MODELS.fast, usage: response.usage, durationMs: Date.now() - t0 });
+    logApiCall({ endpoint: '/api/image#selectStyle', model: MODELS.haiku, usage: response.usage, durationMs: Date.now() - t0 });
     const text = response.content[0].type === 'text' ? response.content[0].text.trim() : '1';
     const num = parseInt(text.match(/[1-7]/)?.[0] || '1', 10);
     return STYLES[num] ? num : 1;
@@ -88,20 +88,15 @@ export async function POST(request: NextRequest) {
 
     console.log(`[IMG] Selected style ${styleNum}: ${styleDesc}`);
 
-    const prompt = `RULE: NO TEXT OF ANY KIND IN THIS IMAGE. No words, no letters, no numbers, no signs, no labels, no captions, no writing, no speech bubbles, no caption boxes. VIOLATION of this rule means the image is rejected. Pure visual illustration only.
+    const prompt = `RULE: NO TEXT OF ANY KIND IN THIS IMAGE. No words, no letters, no numbers, no signs, no labels, no captions, no writing, no speech bubbles, no caption boxes. VIOLATION of this rule means the image is rejected.
 
-ADDITIONAL RULE: FULL IMAGE COVERAGE. The scene must fill the ENTIRE image frame edge to edge. No white margins, no page borders, no book page layout, no text columns, no empty white space. The illustration bleeds to all edges with zero borders.
+ADDITIONAL RULE: FULL IMAGE COVERAGE. The scene must fill the ENTIRE image frame edge to edge. No white margins, no page borders, no book page layout, no empty white space.
 
 ${styleDesc}.
 
-Illustrate the key emotional moment from this children's story:
-Characters: ${characterDesc}
-Theme: ${theme}
-Scene: ${storyContext.slice(0, 600)}
+A scene featuring ${characterDesc} exploring the theme of ${theme}. Capture the emotional heart of the moment — warmth, wonder, connection. Full-bleed illustration, edge to edge, no borders.
 
-Show the most meaningful or dramatic moment — the resolution, the heartfelt connection, or the central lesson in action. The scene fills the entire frame edge to edge with no margins or borders.
-
-REMINDER: ZERO text of any kind. Full-bleed illustration only.`;
+FINAL REMINDER: ZERO text, letters, words, numbers, or symbols of any kind anywhere in the image.`;
 
     const response = await openai.images.generate({
       model: 'dall-e-3',
