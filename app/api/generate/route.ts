@@ -132,107 +132,124 @@ Write the story directly without any preamble or meta-commentary. Begin with "On
       console.error('[S01] Failed to insert placeholder story:', storyId, insertErr);
     }
 
-    // Generate the full story text (non-streaming on Vercel; streaming works locally
-    // but Vercel's serverless runtime does not flush ReadableStream chunks before
-    // the function exits with maxDuration.)
-    const streamStart = Date.now();
-    let fullResponse = '';
-    try {
-      const response = await anthropic.messages.create({
-        model: MODELS.story,
-        max_tokens: 2048,
-        messages: [{ role: 'user', content: prompt }],
-      });
-      fullResponse = response.content[0]?.type === 'text' ? response.content[0].text : '';
-      logApiCall({
-        endpoint: '/api/generate',
-        model: MODELS.story,
-        usage: response.usage,
-        durationMs: Date.now() - streamStart,
-        meta: { storyId, characters, theme, length },
-      });
-    } catch (anthropicError) {
-      const msg = anthropicError instanceof Error ? anthropicError.message : String(anthropicError);
-      console.error('[generate] Anthropic error:', msg);
-      return new Response(`Failed to generate story: ${msg}`, { status: 500 });
-    }
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          let fullResponse = '';
 
-    // Update the placeholder with the full story response
-    try {
-      const { error: dbError } = await supabase
-        .from('stories')
-        .update({ response: fullResponse })
-        .eq('id', storyId);
-      if (dbError) {
-        console.error('[S01] Failed to update story response:', storyId, dbError);
-      }
-    } catch (dbError) {
-      console.error('[S01] Failed to update story response:', storyId, dbError);
-    }
-
-    // Track usage for each character and the theme (S03)
-    const entriesToTrack: { type: string; value: string }[] = [
-      ...characters.map((character: string) => ({ type: 'character', value: character })),
-      { type: 'theme', value: theme },
-    ];
-
-    try {
-      const upsertResults = await Promise.all(
-        entriesToTrack.map((entry) =>
-          supabase.rpc('upsert_entry', { p_type: entry.type, p_value: entry.value })
-        )
-      );
-      for (const result of upsertResults) {
-        const { error } = result as { error: { message: string } | null };
-        if (error) {
-          console.error('[S03] Usage tracking upsert failed:', error);
-        }
-      }
-    } catch (upsertError) {
-      console.error('[S03] Usage tracking failed:', upsertError);
-    }
-
-    // Assign emojis for entries that don't have one yet (#80) — best-effort
-    for (const entry of entriesToTrack) {
-      try {
-        const { data: entryData } = await supabase
-          .from('custom_entries')
-          .select('emoji')
-          .eq('type', entry.type)
-          .eq('value', entry.value)
-          .single();
-
-        if (entryData && entryData.emoji === null) {
-          const t0emoji = Date.now();
-          const msg = await anthropic.messages.create({
-            model: MODELS.fast,
-            max_tokens: 10,
-            messages: [{
-              role: 'user',
-              content: `What is the single best emoji for '${entry.value}' as a children's story character or theme? Reply with ONLY the emoji character, nothing else.`,
-            }],
+          const streamStart = Date.now();
+          const anthropicStream = anthropic.messages.stream({
+            model: MODELS.story,
+            max_tokens: 2048,
+            messages: [{ role: 'user', content: prompt }],
           });
-          logApiCall({ endpoint: '/api/generate#emoji', model: MODELS.fast, usage: msg.usage, durationMs: Date.now() - t0emoji, meta: { entry } });
-          const emoji = msg.content[0]?.type === 'text' ? msg.content[0].text.trim() : null;
-          if (emoji) {
-            const { error: updateError } = await supabase
-              .from('custom_entries')
-              .update({ emoji })
-              .eq('type', entry.type)
-              .eq('value', entry.value);
-            if (updateError) {
-              console.error('[#80] Failed to update emoji for', entry.value, updateError);
+
+          for await (const chunk of anthropicStream) {
+            if (
+              chunk.type === 'content_block_delta' &&
+              chunk.delta.type === 'text_delta'
+            ) {
+              controller.enqueue(new TextEncoder().encode(chunk.delta.text));
+              fullResponse += chunk.delta.text;
             }
           }
-        }
-      } catch (err) {
-        console.error('[#80] Emoji assignment error for', entry.value, err);
-      }
-    }
+          const finalMsg = await anthropicStream.finalMessage();
+          logApiCall({
+            endpoint: '/api/generate',
+            model: MODELS.story,
+            usage: finalMsg.usage,
+            durationMs: Date.now() - streamStart,
+            meta: { storyId, characters, theme, length },
+          });
+          controller.close();
 
-    return new Response(fullResponse, {
+          // Update the placeholder with the full story response
+          try {
+            const { error: dbError } = await supabase
+              .from('stories')
+              .update({ response: fullResponse })
+              .eq('id', storyId);
+            if (dbError) {
+              console.error('[S01] Failed to update story response:', storyId, dbError);
+            }
+          } catch (dbError) {
+            console.error('[S01] Failed to update story response:', storyId, dbError);
+          }
+
+          // Track usage for each character and the theme (S03)
+          const entriesToTrack: { type: string; value: string }[] = [
+            ...characters.map((character: string) => ({ type: 'character', value: character })),
+            { type: 'theme', value: theme },
+          ];
+
+          try {
+            const upsertResults = await Promise.all(
+              entriesToTrack.map((entry) =>
+                supabase.rpc('upsert_entry', { p_type: entry.type, p_value: entry.value })
+              )
+            );
+
+            for (const result of upsertResults) {
+              const { error } = result as { error: { message: string } | null };
+              if (error) {
+                console.error('[S03] Usage tracking upsert failed:', error);
+              }
+            }
+          } catch (upsertError) {
+            console.error('[S03] Usage tracking failed:', upsertError);
+          }
+
+          // Assign emojis for entries that don't have one yet — fire-and-forget, non-blocking (#80)
+          for (const entry of entriesToTrack) {
+            (async () => {
+              try {
+                const { data: entryData } = await supabase
+                  .from('custom_entries')
+                  .select('emoji')
+                  .eq('type', entry.type)
+                  .eq('value', entry.value)
+                  .single();
+
+                if (entryData && entryData.emoji === null) {
+                  const t0emoji = Date.now();
+                  const msg = await anthropic.messages.create({
+                    model: MODELS.fast,
+                    max_tokens: 10,
+                    messages: [{
+                      role: 'user',
+                      content: `What is the single best emoji for '${entry.value}' as a children's story character or theme? Reply with ONLY the emoji character, nothing else.`,
+                    }],
+                  });
+                  logApiCall({ endpoint: '/api/generate#emoji', model: MODELS.fast, usage: msg.usage, durationMs: Date.now() - t0emoji, meta: { entry } });
+                  const emoji =
+                    msg.content[0]?.type === 'text' ? msg.content[0].text.trim() : null;
+                  if (emoji) {
+                    const { error: updateError } = await supabase
+                      .from('custom_entries')
+                      .update({ emoji })
+                      .eq('type', entry.type)
+                      .eq('value', entry.value);
+                    if (updateError) {
+                      console.error('[#80] Failed to update emoji for', entry.value, updateError);
+                    }
+                  }
+                }
+              } catch (err) {
+                console.error('[#80] Emoji assignment error for', entry.value, err);
+              }
+            })();
+          }
+        } catch (error) {
+          console.error('[generate] Stream error:', error);
+          controller.error(error);
+        }
+      },
+    });
+
+    return new Response(stream, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
         'X-Story-Id': storyId,
         'Access-Control-Expose-Headers': 'X-Story-Id',
       },
