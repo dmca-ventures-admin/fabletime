@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Fredoka, Nunito } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import Footer from '@/app/components/Footer';
 import './globals.css';
 
 const fredoka = Fredoka({
@@ -37,6 +38,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         {children}
+        <Footer />
         <Analytics />
         <SpeedInsights />
       </body>
