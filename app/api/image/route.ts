@@ -31,13 +31,13 @@ async function selectStyle(characters: string[], theme: string, storyExcerpt: st
         content: `Given this children's story, which illustration style best fits? Reply with ONLY the number (1-7).
 
 Styles:
-1. Whimsical watercolor scene, vivid colours, painterly
-2. Soft pencil and wash scene, gentle dreamy atmosphere
-3. Bright vibrant digital art scene, bold colours, dynamic
-4. Charming crayon art scene, warm and playful
-5. Delicate watercolour scene, soft pastel tones, cosy
-6. Coloured pencil scene, warm textures, expressive
-7. Bold ink and colour scene, strong lines, expressive characters
+1. Whimsical watercolour illustration, vivid saturated colours, painterly brushwork
+2. Dreamy soft-focus illustration, muted watercolour washes, gentle light
+3. Bright vibrant digital illustration, bold flat colours, dynamic composition
+4. Warm cheerful illustration, thick textured strokes, playful energy, rich colours
+5. Delicate pastel illustration, soft diffused light, cosy intimate mood
+6. Rich textured illustration, layered warm tones, expressive mark-making
+7. Bold graphic illustration, strong confident lines, vivid colour fills, expressive characters
 
 Characters: ${characters.join(', ')}
 Theme: ${theme}
