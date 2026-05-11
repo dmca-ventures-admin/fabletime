@@ -212,8 +212,8 @@ export default function StoryForm() {
   }, [isLoading, characterPills.length]);
 
   // Add a character pill (from comma or autocomplete selection)
-  // Now validates synchronously before adding
-  const addCharacterPill = useCallback(async (value: string) => {
+  // trusted=true skips /api/validate (autocomplete/DB-sourced entries)
+  const addCharacterPill = useCallback(async (value: string, trusted = false) => {
     const trimmed = value.trim();
     if (!trimmed) return;
     if (characterPills.includes(trimmed)) return;
@@ -223,7 +223,15 @@ export default function StoryForm() {
       setCustomCharacterError(`"${trimmed}" exceeds ${MAX_WORDS_PER_ENTRY} words`);
       return;
     }
-    
+
+    // Trusted entries (autocomplete/preset) skip validation entirely
+    if (trusted) {
+      setCharacterPills((prev) => [...prev, trimmed]);
+      setCustomCharacterInput('');
+      setCustomCharacterError('');
+      return;
+    }
+
     // Synchronous validation before adding pill
     setCharValidating(true);
     setCustomCharacterError('');
@@ -267,8 +275,8 @@ export default function StoryForm() {
   }, []);
 
   // Add a theme pill (from comma or autocomplete selection)
-  // Now validates synchronously before adding
-  const addThemePill = useCallback(async (value: string) => {
+  // trusted=true skips /api/validate (autocomplete/DB-sourced entries)
+  const addThemePill = useCallback(async (value: string, trusted = false) => {
     const trimmed = value.trim();
     if (!trimmed) return;
     if (themePills.includes(trimmed)) return;
@@ -276,7 +284,16 @@ export default function StoryForm() {
       setCustomThemeError(`Theme must be ${MAX_WORDS_PER_ENTRY} words or fewer`);
       return;
     }
-    
+
+    // Trusted entries (autocomplete/preset) skip validation entirely
+    if (trusted) {
+      setThemePills([trimmed]);
+      setCustomThemeInput('');
+      setCustomThemeError('');
+      setSelectedTheme('');
+      return;
+    }
+
     // Synchronous validation before adding pill
     setThemeValidating(true);
     setCustomThemeError('');

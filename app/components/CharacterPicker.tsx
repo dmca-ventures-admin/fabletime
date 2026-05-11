@@ -40,7 +40,7 @@ interface CharacterPickerProps {
   /** Toggle a character selection */
   onToggleCharacter: (value: string) => void;
   /** Add a character pill */
-  onAddPill: (value: string) => void;
+  onAddPill: (value: string, trusted?: boolean) => void;
   /** Remove a character pill */
   onRemovePill: (value: string) => void;
   /** Handle input change */
@@ -261,7 +261,7 @@ const CharacterPicker = memo(function CharacterPicker({
                     e.preventDefault();
                   }}
                   onClick={() => {
-                    onAddPill(entry.value);
+                    onAddPill(entry.value, true);
                     setShowDropdown(false);
                   }}
                   className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-chip-active)] transition-colors duration-150"
