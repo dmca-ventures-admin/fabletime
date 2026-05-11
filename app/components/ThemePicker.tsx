@@ -33,6 +33,8 @@ interface ThemePickerProps {
   themeValidationWarning: string;
   /** Whether form is submitting */
   isLoading: boolean;
+  /** Whether validation is in progress */
+  isValidating?: boolean;
   /** Select a theme from grid */
   onSelectTheme: (value: string) => void;
   /** Add a theme pill */
@@ -54,6 +56,7 @@ const ThemePicker = memo(function ThemePicker({
   customThemeError,
   themeValidationWarning,
   isLoading,
+  isValidating = false,
   onSelectTheme,
   onAddPill,
   onRemovePill,
@@ -165,7 +168,7 @@ const ThemePicker = memo(function ThemePicker({
             customThemeError
               ? 'border-red-400'
               : 'border-[var(--border-subtle)] focus-within:ring-2 focus-within:ring-secondary/60 focus-within:border-secondary'
-          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isLoading || isValidating ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={() => {
             const input = inputWrapperRef.current?.querySelector('input');
             input?.focus();
@@ -213,7 +216,8 @@ const ThemePicker = memo(function ThemePicker({
                   }
                 }
               }}
-              disabled={isLoading}
+              disabled={isLoading || isValidating}
+              maxLength={30}
               placeholder="Or type a custom theme..."
               aria-label="Custom theme"
               aria-autocomplete="list"

@@ -33,6 +33,8 @@ interface CharacterPickerProps {
   charValidationWarning: string;
   /** Whether form is submitting */
   isLoading: boolean;
+  /** Whether validation is in progress */
+  isValidating?: boolean;
   /** Max characters allowed */
   maxCharacters: number;
   /** Toggle a character selection */
@@ -56,6 +58,7 @@ const CharacterPicker = memo(function CharacterPicker({
   customCharacterError,
   charValidationWarning,
   isLoading,
+  isValidating = false,
   maxCharacters,
   onToggleCharacter,
   onAddPill,
@@ -182,7 +185,7 @@ const CharacterPicker = memo(function CharacterPicker({
             customCharacterError
               ? 'border-red-400'
               : 'border-[var(--border-subtle)] focus-within:ring-2 focus-within:ring-secondary/60 focus-within:border-secondary'
-          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isLoading || isValidating ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={() => {
             const input = inputWrapperRef.current?.querySelector('input');
             input?.focus();
@@ -233,7 +236,8 @@ const CharacterPicker = memo(function CharacterPicker({
                 }
               }
             }}
-            disabled={isLoading || maxReached}
+            disabled={isLoading || maxReached || isValidating}
+            maxLength={30}
             placeholder={characterPills.length === 0 ? 'Type custom characters...' : maxReached ? '' : 'Add more...'}
             aria-label="Custom characters"
             aria-autocomplete="list"

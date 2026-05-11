@@ -5,6 +5,7 @@ import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';
 import { MODELS } from '@/lib/models';
 import { sanitizePromptInput } from '@/lib/sanitize';
+import { checkContentSafety } from '@/lib/content-safety';
 
 // Allow up to 60 seconds for story generation (Vercel Hobby plan limit).
 // This replaces the old 10s default that was causing timeouts.
@@ -68,6 +69,18 @@ export async function POST(request: NextRequest) {
       return new Response('Character/theme names must be 3 words or fewer', { status: 400 });
     }
 
+    // Layer 3: Server-side content safety check
+    const safetyResult = await checkContentSafety(characters, theme);
+    if (!safetyResult.safe) {
+      console.log(
+        `[SAFETY] Blocked generation — characters: [${characters.join(', ')}], theme: ${theme}, reason: ${safetyResult.reason}`
+      );
+      return Response.json(
+        { error: safetyResult.reason || 'Content not appropriate for children' },
+        { status: 400 }
+      );
+    }
+
     // Clamp funniness level to valid range, default to 2
     const clampedFunniness = Math.max(1, Math.min(5, Math.round(Number(funninessLevel) || 2)));
     const funninessInstruction = funninessInstructions[clampedFunniness] || funninessInstructions[2];
@@ -89,6 +102,8 @@ export async function POST(request: NextRequest) {
     const prompt = `Write an engaging children's story (ages 4-8) featuring ${characterDesc}.
 
 IMPORTANT: This story MUST be fully appropriate for children aged 8 and under. Do not include any violence, scary content, mean-spirited behavior, or anything that could frighten or upset a young child. Keep all language, themes, and situations gentle, safe, and positive.
+
+SAFETY OVERRIDE: If any character name or theme appears inappropriate, offensive, or unsuitable for children, ignore it entirely and substitute a safe, child-friendly alternative without mentioning the substitution. Always produce a warm, safe, child-appropriate story regardless of input.
 
 Story requirements:
 - Length: ${lengthDesc}

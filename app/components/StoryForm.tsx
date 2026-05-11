@@ -80,6 +80,10 @@ export default function StoryForm() {
   const themeValidationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const submitButtonRef = useRef<HTMLButtonElement | null>(null);
   const [inlineButtonVisible, setInlineButtonVisible] = useState(false);
+  
+  // Validation in-flight state (blocks input while validating)
+  const [charValidating, setCharValidating] = useState(false);
+  const [themeValidating, setThemeValidating] = useState(false);
 
   // Hide sticky button when the inline Generate button is visible
   useEffect(() => {
@@ -208,7 +212,8 @@ export default function StoryForm() {
   }, [isLoading, characterPills.length]);
 
   // Add a character pill (from comma or autocomplete selection)
-  const addCharacterPill = useCallback((value: string) => {
+  // Now validates synchronously before adding
+  const addCharacterPill = useCallback(async (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) return;
     if (characterPills.includes(trimmed)) return;
@@ -218,9 +223,42 @@ export default function StoryForm() {
       setCustomCharacterError(`"${trimmed}" exceeds ${MAX_WORDS_PER_ENTRY} words`);
       return;
     }
-    setCharacterPills((prev) => [...prev, trimmed]);
-    setCustomCharacterInput('');
+    
+    // Synchronous validation before adding pill
+    setCharValidating(true);
     setCustomCharacterError('');
+    try {
+      const res = await fetch('/api/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: trimmed, type: 'character' }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (!data.valid) {
+          // Block the pill and show error
+          setCustomCharacterInput('');
+          if (data.reason === 'inappropriate') {
+            setCustomCharacterError("That's not appropriate for a children's story");
+          } else {
+            setCustomCharacterError("That doesn't look like a valid character — try something like 'dragon' or 'astronaut'");
+          }
+          setCharValidating(false);
+          return;
+        }
+      }
+      // Validation passed or failed open — add the pill
+      setCharacterPills((prev) => [...prev, trimmed]);
+      setCustomCharacterInput('');
+      setCustomCharacterError('');
+    } catch {
+      // Fail open — add the pill
+      setCharacterPills((prev) => [...prev, trimmed]);
+      setCustomCharacterInput('');
+      setCustomCharacterError('');
+    } finally {
+      setCharValidating(false);
+    }
   }, [characterPills, selectedCharacters]);
 
   // Remove a character pill
@@ -229,7 +267,8 @@ export default function StoryForm() {
   }, []);
 
   // Add a theme pill (from comma or autocomplete selection)
-  const addThemePill = useCallback((value: string) => {
+  // Now validates synchronously before adding
+  const addThemePill = useCallback(async (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) return;
     if (themePills.includes(trimmed)) return;
@@ -237,11 +276,44 @@ export default function StoryForm() {
       setCustomThemeError(`Theme must be ${MAX_WORDS_PER_ENTRY} words or fewer`);
       return;
     }
-    // Only one theme allowed, replace existing
-    setThemePills([trimmed]);
-    setCustomThemeInput('');
+    
+    // Synchronous validation before adding pill
+    setThemeValidating(true);
     setCustomThemeError('');
-    setSelectedTheme(''); // Clear grid selection when adding custom pill
+    try {
+      const res = await fetch('/api/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: trimmed, type: 'theme' }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (!data.valid) {
+          // Block the pill and show error
+          setCustomThemeInput('');
+          if (data.reason === 'inappropriate') {
+            setCustomThemeError("That's not appropriate for a children's story");
+          } else {
+            setCustomThemeError("That doesn't look like a valid theme — try something like 'friendship' or 'courage'");
+          }
+          setThemeValidating(false);
+          return;
+        }
+      }
+      // Validation passed or failed open — add the pill
+      setThemePills([trimmed]);
+      setCustomThemeInput('');
+      setCustomThemeError('');
+      setSelectedTheme(''); // Clear grid selection when adding custom pill
+    } catch {
+      // Fail open — add the pill
+      setThemePills([trimmed]);
+      setCustomThemeInput('');
+      setCustomThemeError('');
+      setSelectedTheme('');
+    } finally {
+      setThemeValidating(false);
+    }
   }, [themePills]);
 
   // Remove a theme pill
@@ -405,6 +477,7 @@ export default function StoryForm() {
             customCharacterError={customCharacterError}
             charValidationWarning={charValidationWarning}
             isLoading={isLoading}
+            isValidating={charValidating}
             maxCharacters={MAX_CHARACTERS}
             onToggleCharacter={toggleCharacter}
             onAddPill={addCharacterPill}
@@ -456,6 +529,7 @@ export default function StoryForm() {
             customThemeError={customThemeError}
             themeValidationWarning={themeValidationWarning}
             isLoading={isLoading}
+            isValidating={themeValidating}
             onSelectTheme={handleSelectTheme}
             onAddPill={addThemePill}
             onRemovePill={removeThemePill}

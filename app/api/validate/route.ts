@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const trimmed = value.trim();
     if (!trimmed || trimmed.length > 50) {
-      return Response.json({ valid: false, suggestion: null });
+      return Response.json({ valid: false, reason: 'invalid', suggestion: null });
     }
 
     const t0 = Date.now();
@@ -36,18 +36,20 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'user',
-          content: `You are validating user input for a children's story generator. The user entered "${trimmed}" as a ${type}.
+          content: `You are a strict content filter for a children's storytelling app (ages 4-8).
 
-Check if this is:
-1. A valid, recognizable ${type} for a children's story (ages 4-8)
-2. Correctly spelled
+Check the input for TWO things:
+1. Is it appropriate for young children? Reject anything sexual, violent, offensive, or adult in nature.
+2. Is it a recognisable ${type} type or story ${type === 'character' ? 'character' : 'theme'} suitable for a children's story?
+
+Input: "${trimmed}"
 
 Reply with ONLY a JSON object (no markdown, no code fences):
-{"valid": true/false, "suggestion": "corrected spelling or null"}
+{"valid": true/false, "reason": null/"inappropriate"/"invalid", "suggestion": "corrected spelling or null"}
 
-If valid and correctly spelled: {"valid": true, "suggestion": null}
-If misspelled but recognizable: {"valid": false, "suggestion": "correct spelling"}
-If nonsensical/gibberish: {"valid": false, "suggestion": null}`,
+- valid: true only if BOTH checks pass
+- reason: "inappropriate" if it fails check 1, "invalid" if it fails check 2 only, null if valid
+- suggestion: corrected spelling if misspelled but otherwise valid, null otherwise`,
         },
       ],
     });
@@ -58,22 +60,23 @@ If nonsensical/gibberish: {"valid": false, "suggestion": null}`,
 
     const cleaned = text.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
 
-    let result: { valid: boolean; suggestion: string | null };
+    let result: { valid: boolean; reason: string | null; suggestion: string | null };
     try {
       result = JSON.parse(cleaned);
     } catch {
       console.error('[V] Failed to parse AI response:', cleaned);
       // Fail open — don't block the user on a parse error
-      return Response.json({ valid: true, suggestion: null });
+      return Response.json({ valid: true, reason: null, suggestion: null });
     }
 
     return Response.json({
       valid: !!result.valid,
+      reason: result.reason || null,
       suggestion: result.suggestion || null,
     });
   } catch (error) {
     console.error('[V] Error validating input:', error);
     // Fail open — don't block the user
-    return Response.json({ valid: true, suggestion: null });
+    return Response.json({ valid: true, reason: null, suggestion: null });
   }
 }
