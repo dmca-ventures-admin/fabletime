@@ -1,7 +1,7 @@
 # Codebase Map
 
-Generated: 2026-05-11T06:10:15Z | Files: 43 | Described: 0/43
-<!-- gsd:codebase-meta {"generatedAt":"2026-05-11T06:10:15Z","fingerprint":"b579fd8f1cd152deb209b3666d7a7163be168019","fileCount":43,"truncated":false} -->
+Generated: 2026-05-11T06:23:02Z | Files: 46 | Described: 0/46
+<!-- gsd:codebase-meta {"generatedAt":"2026-05-11T06:23:02Z","fingerprint":"1a9e5f1a836ffb599bcd1a719db328d6090c1e17","fileCount":46,"truncated":false} -->
 
 ### (root)/
 - `.env.local.example`
@@ -49,10 +49,13 @@ Generated: 2026-05-11T06:10:15Z | Files: 43 | Described: 0/43
 - `app/bug/page.tsx`
 
 ### app/components/
+- `app/components/CharacterPicker.tsx`
+- `app/components/FunninessSlider.tsx`
 - `app/components/GenerateButton.tsx`
 - `app/components/IssueForm.tsx`
 - `app/components/StoryDisplay.tsx`
 - `app/components/StoryForm.tsx`
+- `app/components/ThemePicker.tsx`
 - `app/components/ThemeToggle.tsx`
 
 ### app/feedback/

@@ -222,9 +222,19 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
       {!isLoading && story && (imageLoading || imageUrl) && (
         <div className="mt-4">
           {imageLoading && (
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-full aspect-square rounded-2xl border border-[var(--border-card)] bg-[var(--surface-chip-inactive)] animate-pulse" />
-              <p className="text-sm text-secondary text-center">✨ Creating your illustration…</p>
+            <div className="relative w-full aspect-square">
+              <div className="absolute inset-0 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-chip-inactive)] animate-pulse" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-2xl mb-2" aria-hidden="true">✨</span>
+                <p className="text-sm text-secondary text-center">
+                  Creating your illustration
+                  <span className="inline-flex ml-0.5">
+                    <span className="inline-block w-1 h-1 rounded-full bg-secondary animate-bounce [animation-delay:-0.3s]" />
+                    <span className="inline-block w-1 h-1 rounded-full bg-secondary animate-bounce [animation-delay:-0.15s] ml-0.5" />
+                    <span className="inline-block w-1 h-1 rounded-full bg-secondary animate-bounce ml-0.5" />
+                  </span>
+                </p>
+              </div>
             </div>
           )}
           {imageUrl && !imageLoading && (
