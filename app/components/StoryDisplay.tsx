@@ -224,16 +224,16 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
           {imageLoading && (
             <div className="relative w-full aspect-square">
               <div className="absolute inset-0 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-chip-inactive)] animate-pulse" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl mb-2" aria-hidden="true">✨</span>
-                <p className="text-sm text-secondary text-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                <span className="text-5xl" aria-hidden="true">✨</span>
+                <p className="text-base font-medium text-secondary text-center">
                   Creating your illustration
-                  <span className="inline-flex ml-0.5">
-                    <span className="inline-block w-1 h-1 rounded-full bg-secondary animate-bounce [animation-delay:-0.3s]" />
-                    <span className="inline-block w-1 h-1 rounded-full bg-secondary animate-bounce [animation-delay:-0.15s] ml-0.5" />
-                    <span className="inline-block w-1 h-1 rounded-full bg-secondary animate-bounce ml-0.5" />
-                  </span>
                 </p>
+                <span className="inline-flex gap-1.5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce [animation-delay:-0.3s]" />
+                  <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce [animation-delay:-0.15s]" />
+                  <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce" />
+                </span>
               </div>
             </div>
           )}
