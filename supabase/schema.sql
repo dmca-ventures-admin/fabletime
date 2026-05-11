@@ -48,10 +48,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- D003: Anonymous model — no auth, RLS disabled on all tables
-ALTER TABLE stories DISABLE ROW LEVEL SECURITY;
-ALTER TABLE ratings DISABLE ROW LEVEL SECURITY;
-ALTER TABLE custom_entries DISABLE ROW LEVEL SECURITY;
+-- Row Level Security
+-- Server-side API routes use the service role key, which bypasses RLS.
+-- The anon key (used by client-side requests) is restricted by RLS policies.
+ALTER TABLE stories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ratings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE custom_entries ENABLE ROW LEVEL SECURITY;
+
+-- custom_entries: allow public read access for suggestions endpoint
+CREATE POLICY "public_read" ON custom_entries FOR SELECT USING (true);
 
 -- #92: Cache style selection and DALL-E image URL per story
 -- Run these manually against both preview and production Supabase projects:
