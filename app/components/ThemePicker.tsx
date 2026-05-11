@@ -38,7 +38,7 @@ interface ThemePickerProps {
   /** Select a theme from grid */
   onSelectTheme: (value: string) => void;
   /** Add a theme pill */
-  onAddPill: (value: string) => void;
+  onAddPill: (value: string, trusted?: boolean) => void;
   /** Remove a theme pill */
   onRemovePill: (value: string) => void;
   /** Handle input change */
@@ -215,6 +215,18 @@ const ThemePicker = memo(function ThemePicker({
                     onAddPill(customThemeInput.trim());
                   }
                 }
+                // Comma commits current input as pill
+                if (e.key === ',' || e.key === 'Comma') {
+                  e.preventDefault();
+                  if (customThemeInput.trim()) {
+                    onAddPill(customThemeInput.trim());
+                  }
+                }
+                // Tab commits current input as pill (only if non-empty)
+                if (e.key === 'Tab' && customThemeInput.trim()) {
+                  e.preventDefault();
+                  onAddPill(customThemeInput.trim());
+                }
               }}
               disabled={isLoading || isValidating}
               maxLength={30}
@@ -242,7 +254,7 @@ const ThemePicker = memo(function ThemePicker({
                     e.preventDefault();
                   }}
                   onClick={() => {
-                    onAddPill(entry.value);
+                    onAddPill(entry.value, true);
                     setShowDropdown(false);
                   }}
                   className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-chip-active)] transition-colors duration-150"

@@ -40,7 +40,7 @@ interface CharacterPickerProps {
   /** Toggle a character selection */
   onToggleCharacter: (value: string) => void;
   /** Add a character pill */
-  onAddPill: (value: string) => void;
+  onAddPill: (value: string, trusted?: boolean) => void;
   /** Remove a character pill */
   onRemovePill: (value: string) => void;
   /** Handle input change */
@@ -235,6 +235,18 @@ const CharacterPicker = memo(function CharacterPicker({
                   onAddPill(customCharacterInput.trim());
                 }
               }
+              // Comma commits current input as pill
+              if (e.key === ',' || e.key === 'Comma') {
+                e.preventDefault();
+                if (customCharacterInput.trim()) {
+                  onAddPill(customCharacterInput.trim());
+                }
+              }
+              // Tab commits current input as pill (only if non-empty)
+              if (e.key === 'Tab' && customCharacterInput.trim()) {
+                e.preventDefault();
+                onAddPill(customCharacterInput.trim());
+              }
             }}
             disabled={isLoading || maxReached || isValidating}
             maxLength={30}
@@ -261,7 +273,7 @@ const CharacterPicker = memo(function CharacterPicker({
                     e.preventDefault();
                   }}
                   onClick={() => {
-                    onAddPill(entry.value);
+                    onAddPill(entry.value, true);
                     setShowDropdown(false);
                   }}
                   className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-chip-active)] transition-colors duration-150"
