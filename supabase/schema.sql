@@ -52,3 +52,10 @@ $$ LANGUAGE plpgsql;
 ALTER TABLE stories DISABLE ROW LEVEL SECURITY;
 ALTER TABLE ratings DISABLE ROW LEVEL SECURITY;
 ALTER TABLE custom_entries DISABLE ROW LEVEL SECURITY;
+
+-- #92: Cache style selection and DALL-E image URL per story
+-- Run these manually against both preview and production Supabase projects:
+--   ALTER TABLE stories ADD COLUMN IF NOT EXISTS style INTEGER;
+--   ALTER TABLE stories ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS style INTEGER;
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS image_url TEXT;

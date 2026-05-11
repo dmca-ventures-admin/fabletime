@@ -73,10 +73,11 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
     setImageLoading(true);
     const storySnapshot = story;
     const charactersSnapshot = [...characters];
+    const storyIdSnapshot = storyId;
     fetch('/api/image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ characters: charactersSnapshot, theme, story: storySnapshot }),
+      body: JSON.stringify({ characters: charactersSnapshot, theme, story: storySnapshot, storyId: storyIdSnapshot }),
     })
       .then((res) => res.json())
       .then((data) => { if (!cancelled && data.url) setImageUrl(data.url); })

@@ -4,6 +4,7 @@ import { anthropic } from '@/lib/anthropic';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';
 import { MODELS } from '@/lib/models';
+import { supabase } from '@/lib/supabase';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -53,6 +54,44 @@ Story excerpt: ${storyExcerpt.slice(0, 800)}`,
   }
 }
 
+// Try to read cached style and image_url from stories table
+async function getCachedImageData(storyId: string): Promise<{ style: number | null; image_url: string | null } | null> {
+  try {
+    const { data, error } = await supabase
+      .from('stories')
+      .select('style, image_url')
+      .eq('id', storyId)
+      .single();
+    if (error) {
+      console.error('[IMG] Cache read error:', error.message);
+      return null;
+    }
+    return data;
+  } catch (err) {
+    console.error('[IMG] Cache read exception:', err);
+    return null;
+  }
+}
+
+// Save style and/or image_url back to stories table
+async function saveCachedImageData(storyId: string, style: number, imageUrl: string | null): Promise<void> {
+  try {
+    const updateData: { style: number; image_url?: string } = { style };
+    if (imageUrl) {
+      updateData.image_url = imageUrl;
+    }
+    const { error } = await supabase
+      .from('stories')
+      .update(updateData)
+      .eq('id', storyId);
+    if (error) {
+      console.error('[IMG] Cache write error:', error.message);
+    }
+  } catch (err) {
+    console.error('[IMG] Cache write exception:', err);
+  }
+}
+
 export async function POST(request: NextRequest) {
   // Rate limit: 5 image generations per minute per IP (DALL-E 3 costs ~$0.04/call)
   const ip = getClientIp(request);
@@ -66,6 +105,24 @@ export async function POST(request: NextRequest) {
 
     if (!body.characters || !Array.isArray(body.characters) || body.characters.length === 0 || !body.theme) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Optional storyId for caching
+    const storyId: string | null = typeof body.storyId === 'string' ? body.storyId : null;
+
+    // Check cache if storyId provided
+    let cachedStyle: number | null = null;
+    if (storyId) {
+      const cached = await getCachedImageData(storyId);
+      if (cached?.style && cached?.image_url) {
+        console.log(`[IMG] Cache hit for story ${storyId} — skipping DALL-E`);
+        return NextResponse.json({ url: cached.image_url, style: cached.style });
+      }
+      // If we have cached style but no image_url, we'll use the style below
+      if (cached?.style) {
+        cachedStyle = cached.style;
+        console.log(`[IMG] Partial cache hit for story ${storyId} — using cached style ${cachedStyle}`);
+      }
     }
 
     // Sanitize all user-supplied text before interpolating into AI prompts.
@@ -82,11 +139,16 @@ export async function POST(request: NextRequest) {
       ? `a ${characters[0]}`
       : characters.slice(0, -1).map((c: string) => `a ${c}`).join(', ') + ` and a ${characters[characters.length - 1]}`;
 
-    // Select the best illustration style for this story
-    const styleNum = await selectStyle(characters, theme, storyContext);
+    // Select the best illustration style for this story (or use cached)
+    let styleNum: number;
+    if (cachedStyle) {
+      styleNum = cachedStyle;
+    } else {
+      styleNum = await selectStyle(characters, theme, storyContext);
+      console.log(`[IMG] Selected style ${styleNum}: ${STYLES[styleNum]}`);
+    }
+    
     const styleDesc = STYLES[styleNum];
-
-    console.log(`[IMG] Selected style ${styleNum}: ${styleDesc}`);
 
     const prompt = `RULE: NO TEXT OF ANY KIND IN THIS IMAGE. No words, no letters, no numbers, no signs, no labels, no captions, no writing, no speech bubbles, no caption boxes. VIOLATION of this rule means the image is rejected.
 
@@ -109,6 +171,12 @@ FINAL REMINDER: ZERO text, letters, words, numbers, or symbols of any kind anywh
     const url = response.data?.[0]?.url;
     if (!url) {
       return NextResponse.json({ error: 'No image generated' }, { status: 500 });
+    }
+
+    // Save to cache if storyId provided
+    if (storyId) {
+      await saveCachedImageData(storyId, styleNum, url);
+      console.log(`[IMG] Cached style=${styleNum} and image_url for story ${storyId}`);
     }
 
     return NextResponse.json({ url, style: styleNum });
