@@ -235,6 +235,18 @@ const CharacterPicker = memo(function CharacterPicker({
                   onAddPill(customCharacterInput.trim());
                 }
               }
+              // Comma commits current input as pill
+              if (e.key === ',' || e.key === 'Comma') {
+                e.preventDefault();
+                if (customCharacterInput.trim()) {
+                  onAddPill(customCharacterInput.trim());
+                }
+              }
+              // Tab commits current input as pill (only if non-empty)
+              if (e.key === 'Tab' && customCharacterInput.trim()) {
+                e.preventDefault();
+                onAddPill(customCharacterInput.trim());
+              }
             }}
             disabled={isLoading || maxReached || isValidating}
             maxLength={30}

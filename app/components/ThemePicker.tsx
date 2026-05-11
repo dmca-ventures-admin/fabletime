@@ -215,6 +215,18 @@ const ThemePicker = memo(function ThemePicker({
                     onAddPill(customThemeInput.trim());
                   }
                 }
+                // Comma commits current input as pill
+                if (e.key === ',' || e.key === 'Comma') {
+                  e.preventDefault();
+                  if (customThemeInput.trim()) {
+                    onAddPill(customThemeInput.trim());
+                  }
+                }
+                // Tab commits current input as pill (only if non-empty)
+                if (e.key === 'Tab' && customThemeInput.trim()) {
+                  e.preventDefault();
+                  onAddPill(customThemeInput.trim());
+                }
               }}
               disabled={isLoading || isValidating}
               maxLength={30}
