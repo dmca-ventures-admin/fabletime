@@ -150,21 +150,15 @@ export async function POST(request: NextRequest) {
     
     const styleDesc = STYLES[styleNum];
 
-    const prompt = `RULE: NO TEXT OF ANY KIND IN THIS IMAGE. No words, no letters, no numbers, no signs, no labels, no captions, no writing, no speech bubbles, no caption boxes. VIOLATION of this rule means the image is rejected.
+    const prompt = `${styleDesc}. A scene featuring ${characterDesc} exploring the theme of ${theme}. Capture the emotional heart of the moment — warmth, wonder, connection. Full-bleed illustration, edge to edge, no white borders, no margins.
 
-ADDITIONAL RULE: FULL IMAGE COVERAGE. The scene must fill the ENTIRE image frame edge to edge. No white margins, no page borders, no book page layout, no empty white space.
-
-${styleDesc}.
-
-A scene featuring ${characterDesc} exploring the theme of ${theme}. Capture the emotional heart of the moment — warmth, wonder, connection. Full-bleed illustration, edge to edge, no borders.
-
-FINAL REMINDER: ZERO text, letters, words, numbers, or symbols of any kind anywhere in the image.`;
+Pure illustration only. No text, letters, words, numbers, or symbols anywhere in the image.`;
 
     const response = await openai.images.generate({
       model: MODELS.dalleImage,
       prompt,
       size: '1024x1024',
-      quality: 'standard',
+      quality: 'hd',
       n: 1,
     });
 
