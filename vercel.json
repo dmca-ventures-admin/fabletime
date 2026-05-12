@@ -2,6 +2,9 @@
   "functions": {
     "app/api/generate/route.ts": {
       "maxDuration": 60
+    },
+    "app/api/image/route.ts": {
+      "maxDuration": 60
     }
   }
 }
