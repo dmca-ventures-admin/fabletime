@@ -66,9 +66,11 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
     }
   }, [isLoading]);
 
-  // Fetch story image once story finishes streaming (trigger on isLoading→false)
+  // Fetch story image once storyId is set (story is ready). Triggering on storyId
+  // (a stable value) instead of isLoading avoids aborting the in-flight request when
+  // unrelated re-renders cause cleanup to fire mid-fetch.
   useEffect(() => {
-    if (isLoading || !story || imageFetchedRef.current) return;
+    if (!storyId || imageFetchedRef.current) return;
     if (!characters.length || !theme) return;
     imageFetchedRef.current = true;
     const controller = new AbortController();
@@ -100,7 +102,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
       });
     return () => { controller.abort(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
+  }, [storyId]);
 
   // Fetch discussion questions once the story finishes streaming
   useEffect(() => {
