@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
+import { createClient } from '@supabase/supabase-js';
 import { anthropic } from '@/lib/anthropic';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';
@@ -173,9 +174,15 @@ Pure illustration only. No text, letters, words, numbers, or symbols anywhere in
     }
 
     // Upload to Supabase Storage so we have a persistent public URL.
+    // Use a service-role client locally so we bypass RLS on Storage writes.
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     const path = `${storyId || randomUUID()}.png`;
     const buffer = Buffer.from(b64, 'base64');
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from('story-images')
       .upload(path, buffer, { contentType: 'image/png', upsert: true });
     if (uploadError) {
@@ -183,7 +190,7 @@ Pure illustration only. No text, letters, words, numbers, or symbols anywhere in
       return NextResponse.json({ error: 'Failed to store image' }, { status: 500 });
     }
 
-    const { data: publicUrlData } = supabase.storage
+    const { data: publicUrlData } = supabaseAdmin.storage
       .from('story-images')
       .getPublicUrl(path);
     const url = publicUrlData.publicUrl;
