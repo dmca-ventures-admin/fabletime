@@ -46,6 +46,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
   // Story image state
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const imageFetchedRef = useRef(false);
 
   // Reset fetch guard and rating state when a new story starts
@@ -57,6 +58,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
       setQuestionsError(false);
       setImageUrl(null);
       setImageLoading(false);
+      setImageError(false);
       setSelectedRating(0);
       setHoveredRating(0);
       setFeedbackText('');
@@ -69,7 +71,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
     if (isLoading || !story || imageFetchedRef.current) return;
     if (!characters.length || !theme) return;
     imageFetchedRef.current = true;
-    let cancelled = false;
+    const controller = new AbortController();
     setImageLoading(true);
     const storySnapshot = story;
     const charactersSnapshot = [...characters];
@@ -78,12 +80,25 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ characters: charactersSnapshot, theme, story: storySnapshot, storyId: storyIdSnapshot }),
+      signal: controller.signal,
     })
       .then((res) => res.json())
-      .then((data) => { if (!cancelled && data.url) setImageUrl(data.url); })
-      .catch((err) => { console.error('[IMG] client fetch error:', err); })
-      .finally(() => { if (!cancelled) setImageLoading(false); });
-    return () => { cancelled = true; };
+      .then((data) => {
+        if (data.url) {
+          setImageUrl(data.url);
+        } else {
+          setImageError(true);
+        }
+      })
+      .catch((err) => {
+        if (err?.name === 'AbortError') return;
+        console.error('[IMG] client fetch error:', err);
+        setImageError(true);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setImageLoading(false);
+      });
+    return () => { controller.abort(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
@@ -219,7 +234,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
       </div>
 
       {/* Story Illustration — appears after story, before discussion questions */}
-      {!isLoading && story && (imageLoading || imageUrl) && (
+      {!isLoading && story && (imageLoading || imageUrl || imageError) && (
         <div className="mt-4">
           {imageLoading && (
             <div className="relative w-full aspect-square">
@@ -244,6 +259,11 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
               alt="Story illustration"
               className="w-full rounded-2xl border border-[var(--border-card)] shadow-sm"
             />
+          )}
+          {!imageLoading && !imageUrl && imageError && (
+            <p className="text-sm text-secondary italic text-center">
+              Could not load illustration
+            </p>
           )}
         </div>
       )}
