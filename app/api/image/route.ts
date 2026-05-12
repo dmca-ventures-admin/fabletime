@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { anthropic } from '@/lib/anthropic';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';
@@ -93,7 +94,7 @@ async function saveCachedImageData(storyId: string, style: number, imageUrl: str
 }
 
 export async function POST(request: NextRequest) {
-  // Rate limit: 5 image generations per minute per IP (DALL-E 3 costs ~$0.04/call)
+  // Rate limit: 5 image generations per minute per IP (gpt-image-1 is metered per call)
   const ip = getClientIp(request);
   const { allowed } = checkRateLimit(`image:${ip}`, 5, 60_000);
   if (!allowed) {
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
     if (storyId) {
       const cached = await getCachedImageData(storyId);
       if (cached?.style && cached?.image_url) {
-        console.log(`[IMG] Cache hit for story ${storyId} — skipping DALL-E`);
+        console.log(`[IMG] Cache hit for story ${storyId} — skipping image generation`);
         return NextResponse.json({ url: cached.image_url, style: cached.style });
       }
       // If we have cached style but no image_url, we'll use the style below
@@ -154,18 +155,38 @@ export async function POST(request: NextRequest) {
 
 Pure illustration only. No text, letters, words, numbers, or symbols anywhere in the image.`;
 
+    // gpt-image-1 always returns base64-encoded images — `response_format` is
+    // not accepted for GPT image models. We upload the bytes to Supabase Storage
+    // and use the public URL going forward.
     const response = await openai.images.generate({
       model: MODELS.dalleImage,
       prompt,
       size: '1024x1024',
-      quality: 'hd',
+      quality: 'high',
       n: 1,
     });
 
-    const url = response.data?.[0]?.url;
-    if (!url) {
+    const b64 = response.data?.[0]?.b64_json;
+    if (!b64) {
+      console.error('[IMG] No b64_json in image response');
       return NextResponse.json({ error: 'No image generated' }, { status: 500 });
     }
+
+    // Upload to Supabase Storage so we have a persistent public URL.
+    const path = `${storyId || randomUUID()}.png`;
+    const buffer = Buffer.from(b64, 'base64');
+    const { error: uploadError } = await supabase.storage
+      .from('story-images')
+      .upload(path, buffer, { contentType: 'image/png', upsert: true });
+    if (uploadError) {
+      console.error('[IMG] Supabase Storage upload error:', uploadError.message);
+      return NextResponse.json({ error: 'Failed to store image' }, { status: 500 });
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from('story-images')
+      .getPublicUrl(path);
+    const url = publicUrlData.publicUrl;
 
     // Save to cache if storyId provided
     if (storyId) {

@@ -5,7 +5,7 @@
 export const MODELS = {
   opus:       'claude-opus-4-7',
   haiku:      'claude-haiku-4-5',
-  dalleImage: 'dall-e-3',
+  dalleImage: 'gpt-image-1',
 } as const;
 
 export type ModelKey = keyof typeof MODELS;
