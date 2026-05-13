@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://oaidalleapiprodscus.blob.core.windows.net",
+    "img-src 'self' data: blob: https://*.supabase.co",
     "connect-src 'self' https://*.supabase.co https://api.anthropic.com https://vitals.vercel-insights.com",
     'frame-ancestors none',
   ].join('; ');
