@@ -163,7 +163,7 @@ Pure illustration only. No text, letters, words, numbers, or symbols anywhere in
       model: MODELS.dalleImage,
       prompt,
       size: '1024x1024',
-      quality: 'high',
+      quality: 'medium',
       n: 1,
     });
 
