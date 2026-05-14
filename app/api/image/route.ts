@@ -10,6 +10,9 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 import { sanitizePromptInput } from '@/lib/sanitize';
 
+// Vercel function timeout — gpt-image-1 can take 30–50s for a single image.
+export const maxDuration = 60;
+
 const STYLES: Record<number, string> = {
   1: 'Whimsical watercolor scene, full-bleed, vivid colours, painterly',
   2: 'Soft pencil and wash scene, full-bleed, gentle dreamy atmosphere',
@@ -103,14 +106,23 @@ export async function POST(request: NextRequest) {
       sanitizePromptInput(typeof c === 'string' ? c : String(c))
     );
     const theme: string = sanitizePromptInput(typeof body.theme === 'string' ? body.theme : String(body.theme));
-    // Optional story text — when present, the image prompt is enriched with a
-    // brief excerpt so gpt-image-1 can illustrate the actual narrative beats
-    // rather than just the characters and theme. Style selection stays random
-    // (#129) — no Haiku call.
-    const storyContext: string | null =
-      typeof body.story === 'string' && body.story.trim().length > 0
-        ? sanitizePromptInput(body.story).slice(0, 1200)
-        : null;
+    // Optional story text — when present, we extract only the narrative
+    // setting (the body without the title line) and take the first 300 chars.
+    // Passing the full story verbatim into gpt-image-1 reliably triggers
+    // OpenAI's image content policy on words like "scared", "danger", "fear"
+    // that appear in normal children's narratives — so we deliberately keep
+    // the excerpt short and scene-focused, and we do NOT pass it through
+    // sanitizePromptInput here (that strips newlines and produces a run-on
+    // blob; we want clean prose).
+    let storyContext: string | null = null;
+    if (typeof body.story === 'string' && body.story.trim().length > 0) {
+      const withoutTitle = body.story
+        .split('\n')
+        .filter((line: string) => !line.trim().startsWith('#'))
+        .join('\n')
+        .trim();
+      storyContext = withoutTitle.slice(0, 300).trim() || null;
+    }
 
     const characterDesc = characters.length === 1
       ? `a ${characters[0]}`
@@ -124,9 +136,7 @@ export async function POST(request: NextRequest) {
 
     const styleDesc = STYLES[styleNum];
 
-    const storyLine = storyContext
-      ? `\n\nStory context (illustrate a key moment from this narrative): ${storyContext}`
-      : '';
+    const storyLine = storyContext ? `\n\nScene: ${storyContext}` : '';
 
     const prompt = `${styleDesc}. A scene featuring ${characterDesc} exploring the theme of ${theme}. Capture the emotional heart of the moment — warmth, wonder, connection. Full-bleed illustration, edge to edge, no white borders, no margins.${storyLine}
 
