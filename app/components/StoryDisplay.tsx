@@ -75,23 +75,24 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
     }
   }, [isLoading]);
 
-  // #124: Fetch the story image as soon as storyId is available. StoryForm
-  // sets storyId from the response header BEFORE the streaming loop starts, so
-  // this effect runs in parallel with story streaming — not after it. The
-  // image API no longer uses story text (style is random — #129) so we omit
-  // it from the body.
+  // Fetch the story image AFTER the story finishes streaming. Gated on both
+  // storyId being set and isLoading being false so the image prompt can
+  // include the final story text. Style selection remains random (#129) — no
+  // Haiku API call — but the story text is passed through so gpt-image-1 can
+  // generate an illustration aligned to the actual narrative.
   useEffect(() => {
-    if (!storyId || imageFetchedRef.current) return;
+    if (!storyId || isLoading || imageFetchedRef.current) return;
     if (!characters.length || !theme) return;
     imageFetchedRef.current = true;
     const controller = new AbortController();
     setImageLoading(true);
     const charactersSnapshot = [...characters];
+    const storySnapshot = story;
     const storyIdSnapshot = storyId;
     fetch('/api/image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ characters: charactersSnapshot, theme, storyId: storyIdSnapshot }),
+      body: JSON.stringify({ characters: charactersSnapshot, theme, story: storySnapshot, storyId: storyIdSnapshot }),
       signal: controller.signal,
     })
       .then((res) => res.json())
@@ -112,7 +113,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
       });
     return () => { controller.abort(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storyId]);
+  }, [storyId, isLoading]);
 
   // Fetch discussion questions once the story finishes streaming
   useEffect(() => {
