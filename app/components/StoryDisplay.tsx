@@ -49,9 +49,18 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
   const [imageError, setImageError] = useState(false);
   const imageFetchedRef = useRef(false);
 
-  // Reset fetch guard and rating state when a new story starts
+  // #130: Reset per-story state ONLY when a new generation starts
+  // (isLoading transitions false → true). Resetting on every isLoading change
+  // wiped image state when streaming ended (true → false), even though the
+  // image fetch was already in-flight or just resolved. Tracking the previous
+  // value with a ref makes the trigger explicit.
+  const prevIsLoadingRef = useRef(isLoading);
   useEffect(() => {
-    if (isLoading) {
+    const wasLoading = prevIsLoadingRef.current;
+    prevIsLoadingRef.current = isLoading;
+
+    // Only reset on the false → true edge (new generation kicking off).
+    if (!wasLoading && isLoading) {
       questionsFetchedRef.current = false;
       imageFetchedRef.current = false;
       setQuestions([]);
@@ -66,17 +75,19 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
     }
   }, [isLoading]);
 
-  // Fetch story image once storyId is set (story is ready). Triggering on storyId
-  // (a stable value) instead of isLoading avoids aborting the in-flight request when
-  // unrelated re-renders cause cleanup to fire mid-fetch.
+  // Fetch the story image AFTER the story finishes streaming. Gated on both
+  // storyId being set and isLoading being false so the image prompt can
+  // include the final story text. Style selection remains random (#129) — no
+  // Haiku API call — but the story text is passed through so gpt-image-1 can
+  // generate an illustration aligned to the actual narrative.
   useEffect(() => {
-    if (!storyId || imageFetchedRef.current) return;
+    if (!storyId || isLoading || imageFetchedRef.current) return;
     if (!characters.length || !theme) return;
     imageFetchedRef.current = true;
     const controller = new AbortController();
     setImageLoading(true);
-    const storySnapshot = story;
     const charactersSnapshot = [...characters];
+    const storySnapshot = story;
     const storyIdSnapshot = storyId;
     fetch('/api/image', {
       method: 'POST',
@@ -102,7 +113,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
       });
     return () => { controller.abort(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storyId]);
+  }, [storyId, isLoading]);
 
   // Fetch discussion questions once the story finishes streaming
   useEffect(() => {
@@ -244,7 +255,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                 <span className="text-5xl" aria-hidden="true">✨</span>
                 <p className="text-base font-medium text-secondary text-center">
-                  Creating your illustration
+                  Illustrating
                 </p>
                 <span className="inline-flex gap-1.5">
                   <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce [animation-delay:-0.3s]" />
@@ -260,6 +271,14 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
               src={imageUrl}
               alt="Story illustration"
               className="w-full rounded-2xl border border-[var(--border-card)] shadow-sm"
+              onError={() => {
+                // #130: If the Supabase public URL fails to load (404, CORS,
+                // network), surface the fallback message instead of silently
+                // showing broken-image alt text.
+                console.error('[IMG] <img> failed to load:', imageUrl);
+                setImageUrl(null);
+                setImageError(true);
+              }}
             />
           )}
           {!imageLoading && !imageUrl && imageError && (

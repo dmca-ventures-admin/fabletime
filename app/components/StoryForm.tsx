@@ -248,6 +248,8 @@ export default function StoryForm() {
           setCustomCharacterInput('');
           if (data.reason === 'inappropriate') {
             setCustomCharacterError("That's not appropriate for a children's story");
+          } else if (data.reason === 'trademark') {
+            setCustomCharacterError("That's a trademarked character — please use your own original character instead");
           } else {
             setCustomCharacterError("That doesn't look like a valid character — try something like 'dragon' or 'astronaut'");
           }

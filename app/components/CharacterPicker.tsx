@@ -295,8 +295,8 @@ const CharacterPicker = memo(function CharacterPicker({
             {charValidationWarning}
           </p>
         )}
-        {characterPills.length === 0 && !customCharacterInput && (
-          <p className="text-xs text-secondary italic mt-1">Type and press comma or Enter to add</p>
+        {characterPills.length === 0 && (
+          <p className="text-xs text-secondary italic mt-1">Type and press comma, tab or enter to add</p>
         )}
       </div>
     </fieldset>

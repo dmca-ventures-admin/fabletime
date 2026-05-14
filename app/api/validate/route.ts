@@ -30,6 +30,30 @@ export async function POST(request: NextRequest) {
     }
 
     const t0 = Date.now();
+
+    const characterChecks = `Check the input for THREE things:
+1. Is it appropriate for young children? Reject anything sexual, violent, offensive, or adult in nature.
+2. Is it a recognisable, named fictional character from existing media — a movie, TV show, book, video game, or any other IP (Disney, Pixar, Marvel, DC, Nintendo, Dreamworks, Cartoon Network, Nickelodeon, etc.)? Examples to reject: Mickey Mouse, Minnie, Donald Duck, Elsa, Anna, Olaf, Moana, Spider-Man, Iron Man, Batman, Superman, Harry Potter, Hermione, Ron Weasley, Dumbledore, Pikachu, Charizard, Mario, Luigi, Sonic, Peppa Pig, Bluey, Dora, PAW Patrol characters (Chase, Marshall, Skye, Rubble), Shrek, Woody, Buzz Lightyear, Olaf, SpongeBob, Bart Simpson, Pokémon, Yoda, Darth Vader, etc. If the input is a recognisable named character from existing media, reject it. Generic character types (dragon, princess, astronaut, robot, wizard, knight) are fine.
+3. Is it a recognisable character type suitable for a children's story?`;
+
+    const themeChecks = `Check the input for TWO things:
+1. Is it appropriate for young children? Reject anything sexual, violent, offensive, or adult in nature.
+2. Is it a recognisable story theme suitable for a children's story?`;
+
+    const characterReasonRules = `- valid: true only if ALL checks pass
+- reason: "inappropriate" if it fails check 1, "trademark" if it fails check 2 (named character from existing media), "invalid" if it fails check 3 only, null if valid
+- suggestion: corrected spelling if misspelled but otherwise valid, null otherwise`;
+
+    const themeReasonRules = `- valid: true only if BOTH checks pass
+- reason: "inappropriate" if it fails check 1, "invalid" if it fails check 2 only, null if valid
+- suggestion: corrected spelling if misspelled but otherwise valid, null otherwise`;
+
+    const checksBlock = type === 'character' ? characterChecks : themeChecks;
+    const reasonRules = type === 'character' ? characterReasonRules : themeReasonRules;
+    const reasonValues = type === 'character'
+      ? 'null/"inappropriate"/"trademark"/"invalid"'
+      : 'null/"inappropriate"/"invalid"';
+
     const response = await anthropic.messages.create({
       model: MODELS.haiku,
       max_tokens: 128,
@@ -38,18 +62,14 @@ export async function POST(request: NextRequest) {
           role: 'user',
           content: `You are a strict content filter for a children's storytelling app (ages 4-8).
 
-Check the input for TWO things:
-1. Is it appropriate for young children? Reject anything sexual, violent, offensive, or adult in nature.
-2. Is it a recognisable ${type} type or story ${type === 'character' ? 'character' : 'theme'} suitable for a children's story?
+${checksBlock}
 
 Input: "${trimmed}"
 
 Reply with ONLY a JSON object (no markdown, no code fences):
-{"valid": true/false, "reason": null/"inappropriate"/"invalid", "suggestion": "corrected spelling or null"}
+{"valid": true/false, "reason": ${reasonValues}, "suggestion": "corrected spelling or null"}
 
-- valid: true only if BOTH checks pass
-- reason: "inappropriate" if it fails check 1, "invalid" if it fails check 2 only, null if valid
-- suggestion: corrected spelling if misspelled but otherwise valid, null otherwise`,
+${reasonRules}`,
         },
       ],
     });

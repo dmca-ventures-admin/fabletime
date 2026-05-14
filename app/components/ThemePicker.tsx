@@ -276,8 +276,8 @@ const ThemePicker = memo(function ThemePicker({
             {themeValidationWarning}
           </p>
         )}
-        {themePills.length === 0 && !customThemeInput && (
-          <p className="text-xs text-secondary italic mt-1">Type and press comma or Enter to add</p>
+        {themePills.length === 0 && (
+          <p className="text-xs text-secondary italic mt-1">Type and press comma, tab or enter to add</p>
         )}
       </div>
     </fieldset>

@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
+import { sanitizePromptInput } from '@/lib/sanitize';
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO_OWNER = 'dmca-ventures-admin';
@@ -22,20 +23,31 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { type, email, message } = await request.json();
+    const raw = await request.json();
+    const type = raw.type;
 
-    if (!message?.trim()) {
+    // #127: Sanitize all user-supplied text fields before they are used or
+    // stored anywhere. sanitizePromptInput strips ASCII control characters
+    // (including newlines) and collapses whitespace — this defends against
+    // prompt-injection-style payloads if any of these fields are ever fed
+    // into an AI prompt downstream, and keeps GitHub issue bodies hygienic.
+    // Trade-off: multi-line bug reports are collapsed to a single line; users
+    // who need structure should use punctuation instead of line breaks.
+    const email: string = typeof raw.email === 'string' ? sanitizePromptInput(raw.email) : '';
+    const message: string = typeof raw.message === 'string' ? sanitizePromptInput(raw.message) : '';
+
+    if (!message) {
       return Response.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    if (message.trim().length > MAX_MESSAGE_LENGTH) {
+    if (message.length > MAX_MESSAGE_LENGTH) {
       return Response.json(
         { error: `Message must be ${MAX_MESSAGE_LENGTH} characters or fewer` },
         { status: 400 }
       );
     }
 
-    if (email && email.trim().length > MAX_EMAIL_LENGTH) {
+    if (email && email.length > MAX_EMAIL_LENGTH) {
       return Response.json(
         { error: `Email must be ${MAX_EMAIL_LENGTH} characters or fewer` },
         { status: 400 }
@@ -66,14 +78,15 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({ name: cfg.name, color: cfg.color }),
     });
 
-    // Email is intentionally omitted from the issue body to protect user privacy
+    // Email is intentionally omitted from the issue body to protect user privacy.
+    // message is already sanitized + trimmed above (#127).
     const body = [
       `**Type:** ${cfg.title}`,
       `**Submitted:** ${new Date().toUTCString()}`,
       '',
       '---',
       '',
-      message.trim(),
+      message,
     ].join('\n');
 
     const res = await fetch(

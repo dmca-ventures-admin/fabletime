@@ -2,15 +2,16 @@ import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
-import { anthropic } from '@/lib/anthropic';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
-import { logApiCall } from '@/lib/cost-logger';
 import { MODELS } from '@/lib/models';
 import { supabase } from '@/lib/supabase';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 import { sanitizePromptInput } from '@/lib/sanitize';
+
+// Vercel function timeout — gpt-image-1 can take 30–50s for a single image.
+export const maxDuration = 60;
 
 const STYLES: Record<number, string> = {
   1: 'Whimsical watercolor scene, full-bleed, vivid colours, painterly',
@@ -22,38 +23,11 @@ const STYLES: Record<number, string> = {
   7: 'Bold ink and colour scene, full-bleed, strong lines, expressive characters',
 };
 
-async function selectStyle(characters: string[], theme: string, storyExcerpt: string): Promise<number> {
-  try {
-    const t0 = Date.now();
-    const response = await anthropic.messages.create({
-      model: MODELS.haiku,
-      max_tokens: 10,
-      messages: [{
-        role: 'user',
-        content: `Given this children's story, which illustration style best fits? Reply with ONLY the number (1-7).
-
-Styles:
-1. Whimsical watercolour illustration, vivid saturated colours, painterly brushwork
-2. Dreamy soft-focus illustration, muted watercolour washes, gentle light
-3. Bright vibrant digital illustration, bold flat colours, dynamic composition
-4. Warm cheerful illustration, thick textured strokes, playful energy, rich colours
-5. Delicate pastel illustration, soft diffused light, cosy intimate mood
-6. Rich textured illustration, layered warm tones, expressive mark-making
-7. Bold graphic illustration, strong confident lines, vivid colour fills, expressive characters
-
-Characters: ${characters.join(', ')}
-Theme: ${theme}
-Story excerpt: ${storyExcerpt.slice(0, 800)}`,
-      }],
-    });
-
-    logApiCall({ endpoint: '/api/image#selectStyle', model: MODELS.haiku, usage: response.usage, durationMs: Date.now() - t0 });
-    const text = response.content[0].type === 'text' ? response.content[0].text.trim() : '1';
-    const num = parseInt(text.match(/[1-7]/)?.[0] || '1', 10);
-    return STYLES[num] ? num : 1;
-  } catch {
-    return 1; // fallback to whimsical watercolor
-  }
+// #129: Pick a style uniformly at random across all 7 options so similar
+// stories get visual variety across runs. Replaces the previous Haiku-based
+// selection (saves one API call per image generation).
+function selectStyle(): number {
+  return Math.floor(Math.random() * 7) + 1;
 }
 
 // Try to read cached style and image_url from stories table
@@ -132,27 +106,39 @@ export async function POST(request: NextRequest) {
       sanitizePromptInput(typeof c === 'string' ? c : String(c))
     );
     const theme: string = sanitizePromptInput(typeof body.theme === 'string' ? body.theme : String(body.theme));
-    // Story is AI-generated but originates from a user session; sanitize as a precaution.
-    const storyContext: string = body.story
-      ? sanitizePromptInput(body.story).slice(0, 1500)
-      : '';
+    // Optional story text — when present, we extract only the narrative
+    // setting (the body without the title line) and take the first 300 chars.
+    // Passing the full story verbatim into gpt-image-1 reliably triggers
+    // OpenAI's image content policy on words like "scared", "danger", "fear"
+    // that appear in normal children's narratives — so we deliberately keep
+    // the excerpt short and scene-focused, and we do NOT pass it through
+    // sanitizePromptInput here (that strips newlines and produces a run-on
+    // blob; we want clean prose).
+    let storyContext: string | null = null;
+    if (typeof body.story === 'string' && body.story.trim().length > 0) {
+      const withoutTitle = body.story
+        .split('\n')
+        .filter((line: string) => !line.trim().startsWith('#'))
+        .join('\n')
+        .trim();
+      storyContext = withoutTitle.slice(0, 300).trim() || null;
+    }
 
     const characterDesc = characters.length === 1
       ? `a ${characters[0]}`
       : characters.slice(0, -1).map((c: string) => `a ${c}`).join(', ') + ` and a ${characters[characters.length - 1]}`;
 
-    // Select the best illustration style for this story (or use cached)
-    let styleNum: number;
-    if (cachedStyle) {
-      styleNum = cachedStyle;
-    } else {
-      styleNum = await selectStyle(characters, theme, storyContext);
+    // Pick an illustration style (cached one if we have it, otherwise random).
+    const styleNum: number = cachedStyle ?? selectStyle();
+    if (!cachedStyle) {
       console.log(`[IMG] Selected style ${styleNum}: ${STYLES[styleNum]}`);
     }
-    
+
     const styleDesc = STYLES[styleNum];
 
-    const prompt = `${styleDesc}. A scene featuring ${characterDesc} exploring the theme of ${theme}. Capture the emotional heart of the moment — warmth, wonder, connection. Full-bleed illustration, edge to edge, no white borders, no margins.
+    const storyLine = storyContext ? `\n\nScene: ${storyContext}` : '';
+
+    const prompt = `${styleDesc}. A scene featuring ${characterDesc} exploring the theme of ${theme}. Capture the emotional heart of the moment — warmth, wonder, connection. Full-bleed illustration, edge to edge, no white borders, no margins.${storyLine}
 
 Pure illustration only. No text, letters, words, numbers, or symbols anywhere in the image.`;
 
