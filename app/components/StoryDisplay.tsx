@@ -49,9 +49,18 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
   const [imageError, setImageError] = useState(false);
   const imageFetchedRef = useRef(false);
 
-  // Reset fetch guard and rating state when a new story starts
+  // #130: Reset per-story state ONLY when a new generation starts
+  // (isLoading transitions false → true). Resetting on every isLoading change
+  // wiped image state when streaming ended (true → false), even though the
+  // image fetch was already in-flight or just resolved. Tracking the previous
+  // value with a ref makes the trigger explicit.
+  const prevIsLoadingRef = useRef(isLoading);
   useEffect(() => {
-    if (isLoading) {
+    const wasLoading = prevIsLoadingRef.current;
+    prevIsLoadingRef.current = isLoading;
+
+    // Only reset on the false → true edge (new generation kicking off).
+    if (!wasLoading && isLoading) {
       questionsFetchedRef.current = false;
       imageFetchedRef.current = false;
       setQuestions([]);
@@ -66,22 +75,23 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
     }
   }, [isLoading]);
 
-  // Fetch story image once storyId is set (story is ready). Triggering on storyId
-  // (a stable value) instead of isLoading avoids aborting the in-flight request when
-  // unrelated re-renders cause cleanup to fire mid-fetch.
+  // #124: Fetch the story image as soon as storyId is available. StoryForm
+  // sets storyId from the response header BEFORE the streaming loop starts, so
+  // this effect runs in parallel with story streaming — not after it. The
+  // image API no longer uses story text (style is random — #129) so we omit
+  // it from the body.
   useEffect(() => {
     if (!storyId || imageFetchedRef.current) return;
     if (!characters.length || !theme) return;
     imageFetchedRef.current = true;
     const controller = new AbortController();
     setImageLoading(true);
-    const storySnapshot = story;
     const charactersSnapshot = [...characters];
     const storyIdSnapshot = storyId;
     fetch('/api/image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ characters: charactersSnapshot, theme, story: storySnapshot, storyId: storyIdSnapshot }),
+      body: JSON.stringify({ characters: charactersSnapshot, theme, storyId: storyIdSnapshot }),
       signal: controller.signal,
     })
       .then((res) => res.json())
@@ -260,6 +270,14 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
               src={imageUrl}
               alt="Story illustration"
               className="w-full rounded-2xl border border-[var(--border-card)] shadow-sm"
+              onError={() => {
+                // #130: If the Supabase public URL fails to load (404, CORS,
+                // network), surface the fallback message instead of silently
+                // showing broken-image alt text.
+                console.error('[IMG] <img> failed to load:', imageUrl);
+                setImageUrl(null);
+                setImageError(true);
+              }}
             />
           )}
           {!imageLoading && !imageUrl && imageError && (
