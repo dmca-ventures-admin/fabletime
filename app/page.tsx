@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import StoryForm from '@/app/components/StoryForm';
+import StoryFormLoader from '@/app/components/StoryFormLoader';
 import ThemeToggle from '@/app/components/ThemeToggle';
 
 export default function Home() {
@@ -28,7 +28,7 @@ export default function Home() {
         </div>
 
         {/* Form */}
-        <StoryForm />
+        <StoryFormLoader />
       </main>
 
       {/* Footer */}

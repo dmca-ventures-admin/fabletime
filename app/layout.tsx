@@ -34,6 +34,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fredoka.variable} ${nunito.variable} h-full antialiased`}>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full flex flex-col">

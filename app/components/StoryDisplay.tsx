@@ -255,7 +255,7 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                 <span className="text-5xl" aria-hidden="true">✨</span>
                 <p className="text-base font-medium text-secondary text-center">
-                  Creating your illustration
+                  Illustrating
                 </p>
                 <span className="inline-flex gap-1.5">
                   <span className="inline-block w-2 h-2 rounded-full bg-secondary animate-bounce [animation-delay:-0.3s]" />
