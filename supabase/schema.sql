@@ -15,13 +15,17 @@ CREATE TABLE IF NOT EXISTS stories (
 
 -- Ratings table: user feedback on stories (1-5 stars + optional text)
 CREATE TABLE IF NOT EXISTS ratings (
-  id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  story_id   UUID        NOT NULL REFERENCES stories(id),
-  stars      INTEGER     NOT NULL CHECK (stars >= 1 AND stars <= 5),
-  feedback   TEXT,
-  read       BOOLEAN     NOT NULL DEFAULT false,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  id                   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  story_id             UUID        NOT NULL REFERENCES stories(id),
+  stars                INTEGER     NOT NULL CHECK (stars >= 1 AND stars <= 5),
+  feedback             TEXT,
+  suspicious_feedback  BOOLEAN     NOT NULL DEFAULT false,
+  read                 BOOLEAN     NOT NULL DEFAULT false,
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+-- Add suspicious_feedback to existing deployments (issue #135 — flags rows whose
+-- feedback text matches known prompt-injection patterns; see lib/sanitize.ts).
+ALTER TABLE ratings ADD COLUMN IF NOT EXISTS suspicious_feedback BOOLEAN NOT NULL DEFAULT false;
 
 -- Custom entries table: user-submitted characters, themes, etc.
 CREATE TABLE IF NOT EXISTS custom_entries (

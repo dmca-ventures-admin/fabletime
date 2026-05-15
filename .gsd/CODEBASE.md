@@ -1,7 +1,7 @@
 # Codebase Map
 
-Generated: 2026-05-11T07:43:24Z | Files: 54 | Described: 0/54
-<!-- gsd:codebase-meta {"generatedAt":"2026-05-11T07:43:24Z","fingerprint":"ff1cf5cc813b1db0a614a71416adcf9470745c60","fileCount":54,"truncated":false} -->
+Generated: 2026-05-15T22:59:25Z | Files: 55 | Described: 0/55
+<!-- gsd:codebase-meta {"generatedAt":"2026-05-15T22:59:25Z","fingerprint":"22129c196ff1ea8ed3b7167d63cd4faed6172143","fileCount":55,"truncated":false} -->
 
 ### (root)/
 - `.env.local.example`
@@ -10,12 +10,12 @@ Generated: 2026-05-11T07:43:24Z | Files: 54 | Described: 0/54
 - `CLAUDE.md`
 - `eslint.config.mjs`
 - `GSD_BRIEF.md`
-- `middleware.ts`
 - `next.config.ts`
 - `package-lock.json`
 - `package.json`
 - `postcss.config.mjs`
 - `PROJECT.md`
+- `proxy.ts`
 - `README.md`
 - `tsconfig.json`
 - `vercel.json`
@@ -61,6 +61,7 @@ Generated: 2026-05-11T07:43:24Z | Files: 54 | Described: 0/54
 - `app/components/IssueForm.tsx`
 - `app/components/StoryDisplay.tsx`
 - `app/components/StoryForm.tsx`
+- `app/components/StoryFormLoader.tsx`
 - `app/components/ThemePicker.tsx`
 - `app/components/ThemeToggle.tsx`
 

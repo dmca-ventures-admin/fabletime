@@ -1,7 +1,26 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { ADMIN_COOKIE_NAME, verifySessionToken } from '@/lib/admin-auth';
 
-export function middleware(request: NextRequest) {
+// Next.js 16 renamed the `middleware` file convention to `proxy`. The exported
+// function name follows the same rename. Functionality is unchanged.
+export async function proxy(request: NextRequest) {
+  // /admin guard (issue #136).
+  // The login page is the only /admin path open to unauthenticated users.
+  // Everything else requires a valid signed session cookie.
+  const { pathname } = request.nextUrl;
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+    const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
+    const ok = await verifySessionToken(token);
+    if (!ok) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/admin/login';
+      // Preserve the original target so login can bounce back after success.
+      url.searchParams.set('next', pathname);
+      return NextResponse.redirect(url);
+    }
+  }
+
   const response = NextResponse.next();
 
   // Security headers

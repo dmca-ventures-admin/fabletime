@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
+import { sanitizePromptInput, looksLikeInjection } from '@/lib/sanitize';
 
 export const runtime = 'edge';
 
@@ -49,13 +50,25 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      if (feedback.length > 5000) {
+      // 500-char cap on free-text inputs (issue #135). Mirrors the client-side
+      // maxLength={500} on the rating feedback textarea.
+      if (feedback.length > 500) {
         return Response.json(
-          { error: 'feedback must be 5000 characters or fewer' },
+          { error: 'feedback must be 500 characters or fewer' },
           { status: 400 }
         );
       }
     }
+
+    // Sanitize and flag feedback before persisting.
+    // sanitizePromptInput strips control characters so the stored value is
+    // safe to embed in AI prompts later (defence #3 — input sanitisation).
+    // looksLikeInjection flags rows that match known prompt-injection patterns
+    // so the backlog-review agent can treat them with extra suspicion.
+    const sanitizedFeedback: string | null =
+      typeof feedback === 'string' ? sanitizePromptInput(feedback) : null;
+    const suspiciousFeedback: boolean =
+      sanitizedFeedback !== null && looksLikeInjection(sanitizedFeedback);
 
     // Insert into Supabase ratings table
     // CRITICAL: supabase-js does not throw on DB errors — must destructure { error }
@@ -69,7 +82,8 @@ export async function POST(request: NextRequest) {
       const { error } = await supabase.from('ratings').insert({
         story_id,
         stars,
-        feedback: feedback || null,
+        feedback: sanitizedFeedback,
+        suspicious_feedback: suspiciousFeedback,
       });
 
       if (!error) break;

@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import CharCounter from './CharCounter';
+
+const MAX_MESSAGE_LENGTH = 500;
 
 interface IssueFormProps {
   type: 'feedback' | 'bug';
@@ -137,9 +140,12 @@ export default function IssueForm({ type }: IssueFormProps) {
           placeholder={cfg.placeholder}
           rows={5}
           required
+          maxLength={MAX_MESSAGE_LENGTH}
+          aria-describedby="message-counter"
           className={`w-full rounded-2xl border-4 ${cfg.inputBorder} bg-[var(--surface-input)] px-4 py-3 text-foreground placeholder:text-secondary/50 focus:outline-none focus:ring-2 transition-all duration-200 resize-none`}
           disabled={isSubmitting}
         />
+        <CharCounter id="message-counter" value={message} max={MAX_MESSAGE_LENGTH} />
       </div>
 
       {error && (
@@ -160,7 +166,11 @@ export default function IssueForm({ type }: IssueFormProps) {
         </Link>
         <button
           type="submit"
-          disabled={isSubmitting || !message.trim()}
+          disabled={
+            isSubmitting ||
+            !message.trim() ||
+            message.length > MAX_MESSAGE_LENGTH
+          }
           className={`flex-1 rounded-2xl border-4 ${cfg.buttonClass} text-white font-bold py-3 px-6 transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer`}
         >
           {isSubmitting ? (

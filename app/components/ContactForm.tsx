@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import CharCounter from './CharCounter';
+
+const MAX_MESSAGE_LENGTH = 500;
 
 export default function ContactForm() {
   const [name, setName] = useState('');
@@ -41,7 +44,12 @@ export default function ContactForm() {
     }
   };
 
-  const canSubmit = name.trim() && email.trim() && message.trim() && !isSubmitting;
+  const canSubmit =
+    name.trim() &&
+    email.trim() &&
+    message.trim() &&
+    message.length <= MAX_MESSAGE_LENGTH &&
+    !isSubmitting;
 
   if (submitted) {
     return (
@@ -143,8 +151,15 @@ export default function ContactForm() {
           placeholder="How can we help?"
           rows={5}
           required
+          maxLength={MAX_MESSAGE_LENGTH}
+          aria-describedby="contact-message-counter"
           className="w-full rounded-2xl border-4 border-[var(--border-card)] focus:border-primary focus:ring-primary/20 bg-[var(--surface-input)] px-4 py-3 text-foreground placeholder:text-secondary/50 focus:outline-none focus:ring-2 transition-all duration-200 resize-none"
           disabled={isSubmitting}
+        />
+        <CharCounter
+          id="contact-message-counter"
+          value={message}
+          max={MAX_MESSAGE_LENGTH}
         />
       </div>
 
