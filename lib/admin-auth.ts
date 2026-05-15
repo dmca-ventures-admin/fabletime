@@ -25,7 +25,10 @@ export const ADMIN_USERNAME = 'admin';
 export const ADMIN_SESSION_MAX_AGE_S = 24 * 60 * 60; // 24h
 
 function getSecret(): string {
-  const secret = process.env.ADMIN_PASSWORD;
+  // Trim surrounding whitespace defensively — a stray newline in `.env.local`
+  // or in a copy-pasted Vercel value causes constant-time compare to fail
+  // for credentials the user thinks they typed correctly.
+  const secret = process.env.ADMIN_PASSWORD?.trim();
   if (!secret) {
     throw new Error('ADMIN_PASSWORD env var is not set');
   }
