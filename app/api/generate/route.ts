@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { anthropic } from '@/lib/anthropic';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';
 import { MODELS } from '@/lib/models';
@@ -136,7 +136,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
     // Insert placeholder story row BEFORE streaming so the rating endpoint
     // can find it immediately when the user submits a rating.
     try {
-      const { error: insertError } = await supabase.from('stories').insert({
+      const { error: insertError } = await getServiceSupabase().from('stories').insert({
         id: storyId,
         characters,
         theme,
@@ -187,7 +187,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
 
           // Update the placeholder with the full story response
           try {
-            const { error: dbError } = await supabase
+            const { error: dbError } = await getServiceSupabase()
               .from('stories')
               .update({ response: fullResponse })
               .eq('id', storyId);
@@ -207,7 +207,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
           try {
             const upsertResults = await Promise.all(
               entriesToTrack.map((entry) =>
-                supabase.rpc('upsert_entry', { p_type: entry.type, p_value: entry.value })
+                getServiceSupabase().rpc('upsert_entry', { p_type: entry.type, p_value: entry.value })
               )
             );
 
@@ -225,7 +225,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
           for (const entry of entriesToTrack) {
             (async () => {
               try {
-                const { data: entryData } = await supabase
+                const { data: entryData } = await getServiceSupabase()
                   .from('custom_entries')
                   .select('emoji')
                   .eq('type', entry.type)
@@ -246,7 +246,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
                   const emoji =
                     msg.content[0]?.type === 'text' ? msg.content[0].text.trim() : null;
                   if (emoji) {
-                    const { error: updateError } = await supabase
+                    const { error: updateError } = await getServiceSupabase()
                       .from('custom_entries')
                       .update({ emoji })
                       .eq('type', entry.type)
