@@ -58,12 +58,18 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 ## Project Structure
 
 ```
+proxy.ts                        # Next.js 16 middleware (renamed from middleware.ts in v16)
+                                # Admin auth guard + security headers + CSP
+
 app/
 ├── page.tsx                    # Home — story generator
 ├── layout.tsx                  # Root layout (fonts, analytics)
 ├── globals.css                 # Design system (Claymorphism tokens + funniness slider CSS)
 ├── feedback/page.tsx           # User feedback form
 ├── bug/page.tsx                # Bug report form
+├── admin/
+│   ├── page.tsx                # Admin dashboard (metrics, stories, ratings)
+│   └── login/page.tsx          # Admin login (HMAC-signed cookie, 24h TTL)
 ├── components/
 │   ├── StoryForm.tsx           # Main form — characters, length, theme, funniness picker
 │   ├── StoryDisplay.tsx        # Streamed story renderer + discussion questions + rating
@@ -81,10 +87,16 @@ app/
 
 lib/
 ├── anthropic.ts                # Shared Anthropic client singleton
+├── admin-auth.ts               # HMAC-signed session cookie helpers for admin dashboard
+├── admin-metrics.ts            # Server-only metrics aggregation for admin dashboard (service role)
 ├── constants.ts                # CHARACTER_EMOJI, THEME_EMOJI maps and emoji helper functions
 ├── content-filter.ts           # isChildFriendly() — Claude Haiku classifier for custom entries (fail-closed)
+├── content-safety.ts           # checkContentSafety() — server-side safety check before story generation
+├── cost-logger.ts              # Per-request API cost logger (structured JSON → Vercel logs)
+├── models.ts                   # Centralised AI model config (MODELS.opus, MODELS.haiku, MODELS.dalleImage)
 ├── ratelimit.ts                # In-memory rate limiter (per-IP, per-route)
-└── supabase.ts                 # Shared Supabase client
+├── sanitize.ts                 # sanitizePromptInput() — strip control chars + flag prompt-injection
+└── supabase.ts                 # Supabase client (anon) + getServiceSupabase() (service role, server-only)
 ```
 
 ## Database Schema
@@ -93,8 +105,9 @@ Three tables in Supabase:
 
 **`stories`** — every generated story
 ```sql
-id, created_at, characters[], theme, length, prompt, response, funniness_level
+id, created_at, characters[], theme, length, prompt, response, funniness_level, session_id
 ```
+`session_id` — anonymous browser session id for unique-user metrics (#140)
 
 **`ratings`** — user ratings per story
 ```sql
@@ -109,6 +122,17 @@ id, type (character|theme), value, usage_count, created_at, child_friendly, emoj
 ### Row Level Security
 
 RLS is intentionally **disabled** on all three tables (`stories`, `ratings`, `custom_entries`). The app uses an anonymous, server-side Supabase client — there are no authenticated users, so RLS rules would have no effect. All access is gated through the Next.js API routes; the Supabase anon key is only used server-side and is never exposed to the browser. This is recorded as decision D003 in `.gsd/DECISIONS.md`.
+
+## Admin Dashboard
+
+Available at `/admin` (redirects to `/admin/login` when unauthenticated).
+
+- **Auth:** Username `admin`, password set via `ADMIN_PASSWORD` env var
+- **Session:** HMAC-signed cookie (`fabletime_admin_session`), 24h TTL
+- **Metrics:** Total/today/week/month stories, unique users (via `session_id`), top characters/themes, ratings distribution, GitHub feedback/bug counts
+- **Service role:** All admin queries use `getServiceSupabase()` to bypass RLS
+
+Env vars required: `ADMIN_PASSWORD`, `ADMIN_USERNAME`, `SUPABASE_SERVICE_ROLE_KEY`, `GITHUB_TOKEN`
 
 ## Content Safety
 
