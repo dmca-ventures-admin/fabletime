@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import CharCounter from './CharCounter';
+
+const MAX_FEEDBACK_LENGTH = 500;
 
 interface StoryDisplayProps {
   story: string;
@@ -396,7 +399,14 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
               onChange={(e) => setFeedbackText(e.target.value)}
               placeholder="What did you think? (optional)"
               rows={3}
+              maxLength={MAX_FEEDBACK_LENGTH}
+              aria-describedby="rating-feedback-counter"
               className="w-full rounded-2xl border border-[var(--border-card)] bg-[var(--surface-input)] text-foreground placeholder:text-[var(--text-hint)] p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-shadow duration-150"
+            />
+            <CharCounter
+              id="rating-feedback-counter"
+              value={feedbackText}
+              max={MAX_FEEDBACK_LENGTH}
             />
           </div>
 
@@ -414,7 +424,11 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
           <button
             type="button"
             onClick={handleRatingSubmit}
-            disabled={selectedRating === 0 || isSubmitting}
+            disabled={
+              selectedRating === 0 ||
+              isSubmitting ||
+              feedbackText.length > MAX_FEEDBACK_LENGTH
+            }
             className="py-2.5 px-6 rounded-xl border border-primary bg-primary text-white font-heading font-semibold text-base hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center gap-2"
           >
             {isSubmitting ? (
