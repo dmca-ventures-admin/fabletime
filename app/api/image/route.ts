@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { MODELS } from '@/lib/models';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -33,7 +33,7 @@ function selectStyle(): number {
 // Try to read cached style and image_url from stories table
 async function getCachedImageData(storyId: string): Promise<{ style: number | null; image_url: string | null } | null> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getServiceSupabase()
       .from('stories')
       .select('style, image_url')
       .eq('id', storyId)
@@ -56,7 +56,7 @@ async function saveCachedImageData(storyId: string, style: number, imageUrl: str
     if (imageUrl) {
       updateData.image_url = imageUrl;
     }
-    const { error } = await supabase
+    const { error } = await getServiceSupabase()
       .from('stories')
       .update(updateData)
       .eq('id', storyId);
