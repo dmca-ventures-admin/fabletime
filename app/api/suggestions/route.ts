@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
 import { isChildFriendly } from '@/lib/content-filter';
 
 export const runtime = 'edge';
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   try {
     // Fetch top 100 per type to account for entries that may be filtered out,
     // so we can reliably return up to 50 child-friendly entries.
-    const { data: characterRows, error: charError } = await supabase
+    const { data: characterRows, error: charError } = await getServiceSupabase()
       .from('custom_entries')
       .select('id, value, child_friendly, emoji')
       .eq('type', 'character')
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       return Response.json({ characters: [], themes: [] });
     }
 
-    const { data: themeRows, error: themeError } = await supabase
+    const { data: themeRows, error: themeError } = await getServiceSupabase()
       .from('custom_entries')
       .select('id, value, child_friendly, emoji')
       .eq('type', 'theme')
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
           await Promise.all(
             batch.map(async (row) => {
               const isFriendly = await isChildFriendly(row.value);
-              const { error: updateError } = await supabase
+              const { error: updateError } = await getServiceSupabase()
                 .from('custom_entries')
                 .update({ child_friendly: isFriendly })
                 .eq('id', row.id);

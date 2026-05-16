@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { anthropic } from '@/lib/anthropic';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { logApiCall } from '@/lib/cost-logger';
 import { MODELS } from '@/lib/models';
@@ -58,6 +58,16 @@ export async function POST(request: NextRequest) {
 
     const theme: string = typeof body.theme === 'string' ? sanitizePromptInput(body.theme) : String(body.theme);
     const funninessLevel = body.funninessLevel;
+
+    // Anonymous per-browser session id used for unique-user metrics (#140).
+    // Optional — clients without localStorage send null/undefined and we
+    // simply store NULL. Cap at 64 chars and ensure it's a string to keep
+    // the column tidy and reject any obvious garbage.
+    const rawSessionId = body.sessionId;
+    const sessionId: string | null =
+      typeof rawSessionId === 'string' && rawSessionId.length > 0 && rawSessionId.length <= 64
+        ? rawSessionId
+        : null;
 
     // Validate that each character and the theme are 3 words or fewer
     for (const character of characters) {
@@ -126,7 +136,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
     // Insert placeholder story row BEFORE streaming so the rating endpoint
     // can find it immediately when the user submits a rating.
     try {
-      const { error: insertError } = await supabase.from('stories').insert({
+      const { error: insertError } = await getServiceSupabase().from('stories').insert({
         id: storyId,
         characters,
         theme,
@@ -134,6 +144,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
         prompt,
         response: '',
         funniness_level: clampedFunniness,
+        session_id: sessionId,
       });
       if (insertError) {
         console.error('[S01] Failed to insert placeholder story:', storyId, insertError);
@@ -176,7 +187,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
 
           // Update the placeholder with the full story response
           try {
-            const { error: dbError } = await supabase
+            const { error: dbError } = await getServiceSupabase()
               .from('stories')
               .update({ response: fullResponse })
               .eq('id', storyId);
@@ -196,7 +207,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
           try {
             const upsertResults = await Promise.all(
               entriesToTrack.map((entry) =>
-                supabase.rpc('upsert_entry', { p_type: entry.type, p_value: entry.value })
+                getServiceSupabase().rpc('upsert_entry', { p_type: entry.type, p_value: entry.value })
               )
             );
 
@@ -214,7 +225,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
           for (const entry of entriesToTrack) {
             (async () => {
               try {
-                const { data: entryData } = await supabase
+                const { data: entryData } = await getServiceSupabase()
                   .from('custom_entries')
                   .select('emoji')
                   .eq('type', entry.type)
@@ -235,7 +246,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
                   const emoji =
                     msg.content[0]?.type === 'text' ? msg.content[0].text.trim() : null;
                   if (emoji) {
-                    const { error: updateError } = await supabase
+                    const { error: updateError } = await getServiceSupabase()
                       .from('custom_entries')
                       .update({ emoji })
                       .eq('type', entry.type)

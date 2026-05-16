@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getServiceSupabase } from '@/lib/supabase';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { sanitizePromptInput, looksLikeInjection } from '@/lib/sanitize';
 
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     const RETRY_DELAY_MS = 2000;
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-      const { error } = await supabase.from('ratings').insert({
+      const { error } = await getServiceSupabase().from('ratings').insert({
         story_id,
         stars,
         feedback: sanitizedFeedback,

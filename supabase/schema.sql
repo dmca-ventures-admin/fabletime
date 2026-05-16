@@ -68,3 +68,7 @@ CREATE POLICY "public_read" ON custom_entries FOR SELECT USING (true);
 --   ALTER TABLE stories ADD COLUMN IF NOT EXISTS image_url TEXT;
 ALTER TABLE stories ADD COLUMN IF NOT EXISTS style INTEGER;
 ALTER TABLE stories ADD COLUMN IF NOT EXISTS image_url TEXT;
+-- Per-browser anonymous session id used to count unique users on the admin
+-- dashboard (issue #140). Nullable — old rows and any client that fails to
+-- persist localStorage simply don't contribute to the unique-user count.
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS session_id TEXT;

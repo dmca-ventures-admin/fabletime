@@ -65,6 +65,11 @@ export default function StoryForm() {
   // Generation ID ref to prevent stale stream writes (#94)
   const generationIdRef = useRef<number>(0);
 
+  // Anonymous per-browser session id for unique-user metrics (#140).
+  // Generated on first load, persisted in localStorage, and sent with every
+  // /api/generate request. Null until the client-only effect below runs.
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
   // Form state
   const [story, setStory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -84,6 +89,30 @@ export default function StoryForm() {
   // Validation in-flight state (blocks input while validating)
   const [charValidating, setCharValidating] = useState(false);
   const [themeValidating, setThemeValidating] = useState(false);
+
+  // Initialise anonymous session id from localStorage, or mint one (#140).
+  // Runs client-only — localStorage and crypto.randomUUID are browser APIs.
+  useEffect(() => {
+    const STORAGE_KEY = 'fabletime_session_id';
+    try {
+      let id = window.localStorage.getItem(STORAGE_KEY);
+      if (!id) {
+        id = crypto.randomUUID();
+        window.localStorage.setItem(STORAGE_KEY, id);
+      }
+      setSessionId(id);
+    } catch {
+      // localStorage disabled (private mode, cookies blocked). Mint an
+      // in-memory id so generation still works — it just won't survive
+      // a reload, which is fine for the metric.
+      try {
+        setSessionId(crypto.randomUUID());
+      } catch {
+        // crypto.randomUUID missing on very old browsers — leave null and
+        // skip session tracking entirely.
+      }
+    }
+  }, []);
 
   // Hide sticky button when the inline Generate button is visible
   useEffect(() => {
@@ -445,6 +474,7 @@ export default function StoryForm() {
           length,
           theme: finalTheme,
           funninessLevel,
+          sessionId,
         }),
       });
 
