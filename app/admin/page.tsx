@@ -55,6 +55,10 @@ export default async function AdminDashboard() {
 
       <StoryVolume metrics={metrics} />
 
+      <div className="mt-6">
+        <UniqueUsersCard metrics={metrics} />
+      </div>
+
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <RatingsCard metrics={metrics} />
         <IssuesCard metrics={metrics} />
@@ -107,11 +111,24 @@ function StoryVolume({ metrics }: { metrics: AdminMetrics }) {
         <StatNumber label="This week" value={metrics.storiesThisWeek} />
         <StatNumber label="This month" value={metrics.storiesThisMonth} />
       </div>
-      <p className="mt-4 rounded-lg border border-dashed border-[var(--border-card)] bg-[var(--surface-card)] px-3 py-2 text-xs text-secondary">
-        <span className="font-semibold text-foreground">TODO — Unique users:</span>{' '}
-        the stories table does not yet store a user id, session id, or IP.
-        Add one (e.g. <code>session_id</code> on stories) and compute a real
-        <code className="ml-1">COUNT(DISTINCT …)</code> here.
+    </Card>
+  );
+}
+
+function UniqueUsersCard({ metrics }: { metrics: AdminMetrics }) {
+  return (
+    <Card title="Unique users">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <StatNumber label="Total" value={metrics.uniqueUsersTotal} />
+        <StatNumber label="Today" value={metrics.uniqueUsersToday} />
+        <StatNumber label="This week" value={metrics.uniqueUsersThisWeek} />
+        <StatNumber label="This month" value={metrics.uniqueUsersThisMonth} />
+      </div>
+      <p className="mt-3 text-xs text-secondary">
+        Distinct browsers that generated a story, identified by an anonymous{' '}
+        <code>session_id</code> stored in <code>localStorage</code>. Stories
+        created before this metric shipped, or by clients with{' '}
+        <code>localStorage</code> disabled, are not counted.
       </p>
     </Card>
   );

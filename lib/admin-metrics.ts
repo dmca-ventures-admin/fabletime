@@ -19,6 +19,10 @@ export interface AdminMetrics {
   storiesToday: number;
   storiesThisWeek: number;
   storiesThisMonth: number;
+  uniqueUsersTotal: number;
+  uniqueUsersToday: number;
+  uniqueUsersThisWeek: number;
+  uniqueUsersThisMonth: number;
   topCharacters: Array<{ value: string; count: number }>;
   topThemes: Array<{ value: string; count: number }>;
   ratingsDistribution: Array<{ stars: number; count: number }>;
@@ -180,12 +184,59 @@ async function loadRatings(errors: string[]) {
   }
 }
 
-// NOTE — "Unique users" metric is intentionally NOT computed here.
-// The stories/ratings tables have no user_id or IP column today, so any
-// number we returned would be misleading. Issue #136 spec calls this out
-// explicitly: omit the metric and show a TODO note in the dashboard until
-// a session/user identifier lands on stories. When it does, add a real
-// DISTINCT count and reinstate this field in AdminMetrics.
+/**
+ * Unique-user counts based on stories.session_id (issue #140).
+ *
+ * Pulls every (session_id, created_at) pair in one round-trip and aggregates
+ * distinct session ids per window in JS. Same approach as topThemes — at
+ * thousands of rows the cost is negligible, and it avoids needing a SQL
+ * function on the Supabase side. Rows without a session_id (older rows, or
+ * clients with localStorage disabled) are skipped — they're real activity
+ * but not attributable to a unique user.
+ */
+async function loadUniqueUserCounts(errors: string[]) {
+  try {
+    const sb = getServiceSupabase();
+    const { data, error } = await sb
+      .from('stories')
+      .select('session_id, created_at')
+      .not('session_id', 'is', null)
+      .limit(50000); // generous cap; we only need distinct counts
+    if (error) throw error;
+
+    const todayStart = startOfTodayUtc().getTime();
+    const weekStart = daysAgoUtc(7).getTime();
+    const monthStart = daysAgoUtc(30).getTime();
+
+    const total = new Set<string>();
+    const today = new Set<string>();
+    const week = new Set<string>();
+    const month = new Set<string>();
+
+    for (const row of (data ?? []) as Array<{ session_id: string | null; created_at: string }>) {
+      const sid = row.session_id;
+      if (!sid) continue;
+      total.add(sid);
+      const ts = Date.parse(row.created_at);
+      if (Number.isNaN(ts)) continue;
+      if (ts >= monthStart) month.add(sid);
+      if (ts >= weekStart) week.add(sid);
+      if (ts >= todayStart) today.add(sid);
+    }
+
+    return {
+      total: total.size,
+      today: today.size,
+      week: week.size,
+      month: month.size,
+    };
+  } catch (err) {
+    errors.push(
+      `unique users: ${err instanceof Error ? err.message : String(err)}`
+    );
+    return { total: 0, today: 0, week: 0, month: 0 };
+  }
+}
 
 async function loadIssueCountsFromGitHub(errors: string[]) {
   const token = process.env.GITHUB_TOKEN;
@@ -232,8 +283,9 @@ async function loadIssueCountsFromGitHub(errors: string[]) {
 export async function loadAdminMetrics(): Promise<AdminMetrics> {
   const errors: string[] = [];
 
-  const [stories, chars, themes, ratings, issues] = await Promise.all([
+  const [stories, uniqueUsers, chars, themes, ratings, issues] = await Promise.all([
     loadStoryCounts(errors),
+    loadUniqueUserCounts(errors),
     topArrayValues('characters', 10, errors),
     topThemes(10, errors),
     loadRatings(errors),
@@ -245,6 +297,10 @@ export async function loadAdminMetrics(): Promise<AdminMetrics> {
     storiesToday: stories.today,
     storiesThisWeek: stories.week,
     storiesThisMonth: stories.month,
+    uniqueUsersTotal: uniqueUsers.total,
+    uniqueUsersToday: uniqueUsers.today,
+    uniqueUsersThisWeek: uniqueUsers.week,
+    uniqueUsersThisMonth: uniqueUsers.month,
     topCharacters: chars,
     topThemes: themes,
     ratingsDistribution: ratings.distribution,

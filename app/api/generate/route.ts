@@ -59,6 +59,16 @@ export async function POST(request: NextRequest) {
     const theme: string = typeof body.theme === 'string' ? sanitizePromptInput(body.theme) : String(body.theme);
     const funninessLevel = body.funninessLevel;
 
+    // Anonymous per-browser session id used for unique-user metrics (#140).
+    // Optional — clients without localStorage send null/undefined and we
+    // simply store NULL. Cap at 64 chars and ensure it's a string to keep
+    // the column tidy and reject any obvious garbage.
+    const rawSessionId = body.sessionId;
+    const sessionId: string | null =
+      typeof rawSessionId === 'string' && rawSessionId.length > 0 && rawSessionId.length <= 64
+        ? rawSessionId
+        : null;
+
     // Validate that each character and the theme are 3 words or fewer
     for (const character of characters) {
       if (character.split(/\s+/).length > 3) {
@@ -134,6 +144,7 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
         prompt,
         response: '',
         funniness_level: clampedFunniness,
+        session_id: sessionId,
       });
       if (insertError) {
         console.error('[S01] Failed to insert placeholder story:', storyId, insertError);
