@@ -5,6 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 import { MODELS } from '@/lib/models';
 import { getServiceSupabase } from '@/lib/supabase';
+import { checkContentSafety } from '@/lib/content-safety';
+import { verifyImageToken } from '@/lib/image-token';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -71,7 +73,7 @@ async function saveCachedImageData(storyId: string, style: number, imageUrl: str
 export async function POST(request: NextRequest) {
   // Rate limit: 5 image generations per minute per IP (gpt-image-1 is metered per call)
   const ip = getClientIp(request);
-  const { allowed } = checkRateLimit(`image:${ip}`, 5, 60_000);
+  const { allowed } = await checkRateLimit(`image:${ip}`, 5, 60_000);
   if (!allowed) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
@@ -83,8 +85,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Optional storyId for caching
+    // Optional storyId for caching. When present it identifies a `stories`
+    // row we will read from and write back to — see the HMAC ownership check
+    // below.
     const storyId: string | null = typeof body.storyId === 'string' ? body.storyId : null;
+    const imageTokenFromClient: string | null =
+      typeof body.imageToken === 'string' ? body.imageToken : null;
+    const rawSessionId = body.sessionId;
+    const sessionId: string | null =
+      typeof rawSessionId === 'string' && rawSessionId.length > 0 && rawSessionId.length <= 64
+        ? rawSessionId
+        : null;
+
+    // Ownership check: if the caller wants to bind this image to a specific
+    // storyId (which lets them overwrite that row's cached style + image_url)
+    // they must present the HMAC token that /api/generate returned for that
+    // story. Anonymous generations (no storyId) still work — they just don't
+    // persist to a row.
+    if (storyId) {
+      if (!imageTokenFromClient) {
+        return NextResponse.json(
+          { error: 'Missing image token for storyId — refusing to write to that row' },
+          { status: 403 }
+        );
+      }
+      const tokenValid = await verifyImageToken(storyId, sessionId, imageTokenFromClient);
+      if (!tokenValid) {
+        console.warn(`[IMG] Invalid image token for story ${storyId}`);
+        return NextResponse.json({ error: 'Invalid image token' }, { status: 403 });
+      }
+    }
+
+    // Sanitize + validate character/theme text before doing any expensive
+    // work. We reuse the same content-safety filter /api/generate uses so
+    // that /api/image can't be used as a side-channel to run inappropriate
+    // prompts through gpt-image-1.
+    const rawCharacters: string[] = body.characters.map((c: unknown) =>
+      typeof c === 'string' ? c : String(c)
+    );
+    const rawTheme: string = typeof body.theme === 'string' ? body.theme : String(body.theme);
+    const safety = await checkContentSafety(rawCharacters, rawTheme);
+    if (!safety.safe) {
+      return NextResponse.json(
+        { error: safety.reason || 'Content not appropriate for children' },
+        { status: 400 }
+      );
+    }
 
     // Check cache if storyId provided
     let cachedStyle: number | null = null;

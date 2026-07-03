@@ -6,6 +6,7 @@ import { logApiCall } from '@/lib/cost-logger';
 import { MODELS } from '@/lib/models';
 import { sanitizePromptInput } from '@/lib/sanitize';
 import { checkContentSafety } from '@/lib/content-safety';
+import { signImageToken } from '@/lib/image-token';
 
 // Allow up to 60 seconds for story generation (Vercel Hobby plan limit).
 // This replaces the old 10s default that was causing timeouts.
@@ -28,7 +29,7 @@ const funninessInstructions: Record<number, string> = {
 export async function POST(request: NextRequest) {
   // Rate limit: 10 generations per minute per IP
   const ip = getClientIp(request);
-  const { allowed } = checkRateLimit(`generate:${ip}`, 10, 60_000);
+  const { allowed } = await checkRateLimit(`generate:${ip}`, 10, 60_000);
   if (!allowed) {
     return new Response('Too many requests', { status: 429 });
   }
@@ -154,6 +155,16 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
       console.error('[S01] Failed to insert placeholder story:', storyId, insertErr);
     }
 
+    // Mint the image-write token: binds this storyId to this sessionId so
+    // only the caller who initiated the story can later drive the /api/image
+    // cache-write for it. Returned to the client via X-Image-Token below.
+    const imageToken = await signImageToken(storyId, sessionId);
+    if (!imageToken) {
+      console.warn(
+        '[generate] IMAGE_TOKEN_SECRET is not set — /api/image writes to this storyId will be rejected'
+      );
+    }
+
     const stream = new ReadableStream({
       async start(controller) {
         try {
@@ -268,14 +279,17 @@ FORMATTING: Output a # Title on line 1 (a creative, engaging title for the story
       },
     });
 
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Transfer-Encoding': 'chunked',
-        'X-Story-Id': storyId,
-        'Access-Control-Expose-Headers': 'X-Story-Id',
-      },
-    });
+    const responseHeaders: Record<string, string> = {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Transfer-Encoding': 'chunked',
+      'X-Story-Id': storyId,
+      'Access-Control-Expose-Headers': imageToken
+        ? 'X-Story-Id, X-Image-Token'
+        : 'X-Story-Id',
+    };
+    if (imageToken) responseHeaders['X-Image-Token'] = imageToken;
+
+    return new Response(stream, { headers: responseHeaders });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error('Error generating story:', msg, error);

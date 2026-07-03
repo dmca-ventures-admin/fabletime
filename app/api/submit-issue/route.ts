@@ -19,7 +19,7 @@ const MAX_EMAIL_LENGTH = 255;
 export async function POST(request: NextRequest) {
   // Rate limit: 5 submissions per minute per IP to prevent spam
   const ip = getClientIp(request);
-  const { allowed } = checkRateLimit(`submit-issue:${ip}`, 5, 60_000);
+  const { allowed } = await checkRateLimit(`submit-issue:${ip}`, 5, 60_000);
   if (!allowed) {
     return Response.json({ error: 'Too many requests' }, { status: 429 });
   }

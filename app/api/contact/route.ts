@@ -17,7 +17,7 @@ const MAX_MESSAGE_LENGTH = 500;
 export async function POST(request: NextRequest) {
   // Rate limit: 5 submissions per hour per IP
   const ip = getClientIp(request);
-  const { allowed } = checkRateLimit(`contact:${ip}`, 5, 60 * 60 * 1000);
+  const { allowed } = await checkRateLimit(`contact:${ip}`, 5, 60 * 60 * 1000);
   if (!allowed) {
     return Response.json(
       { error: 'Too many requests. Please try again later.' },

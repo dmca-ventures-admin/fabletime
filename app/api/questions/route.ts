@@ -9,7 +9,7 @@ import { MODELS } from '@/lib/models';
 export async function POST(request: NextRequest) {
   // Rate limit: 20 question generations per minute per IP
   const ip = getClientIp(request);
-  const { allowed } = checkRateLimit(`questions:${ip}`, 20, 60_000);
+  const { allowed } = await checkRateLimit(`questions:${ip}`, 20, 60_000);
   if (!allowed) {
     return Response.json({ error: 'Too many requests' }, { status: 429 });
   }

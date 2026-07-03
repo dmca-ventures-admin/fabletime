@@ -9,6 +9,10 @@ interface StoryDisplayProps {
   story: string;
   isLoading: boolean;
   storyId: string | null;
+  /** HMAC token from /api/generate that authorises /api/image to write to storyId. */
+  imageToken: string | null;
+  /** Anonymous per-browser session id — must match the one sent to /api/generate. */
+  sessionId: string | null;
   hasRated: boolean;
   onRated: () => void;
   characters: string[];
@@ -33,7 +37,7 @@ function StarIcon({ filled, className }: { filled: boolean; className?: string }
   );
 }
 
-export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRated, characters, theme, onGenerateAnother }: StoryDisplayProps) {
+export default function StoryDisplay({ story, isLoading, storyId, imageToken, sessionId, hasRated, onRated, characters, theme, onGenerateAnother }: StoryDisplayProps) {
   const [selectedRating, setSelectedRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState('');
@@ -95,7 +99,14 @@ export default function StoryDisplay({ story, isLoading, storyId, hasRated, onRa
     fetch('/api/image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ characters: charactersSnapshot, theme, story: storySnapshot, storyId: storyIdSnapshot }),
+      body: JSON.stringify({
+        characters: charactersSnapshot,
+        theme,
+        story: storySnapshot,
+        storyId: storyIdSnapshot,
+        sessionId,
+        imageToken,
+      }),
       signal: controller.signal,
     })
       .then((res) => res.json())
