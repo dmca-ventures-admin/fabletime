@@ -21,7 +21,7 @@ import { checkRateLimit, getClientIp } from '@/lib/ratelimit';
 export async function GET(request: NextRequest) {
   // Rate limit: 30 requests per minute per IP
   const ip = getClientIp(request);
-  const { allowed } = checkRateLimit(`suggestions:${ip}`, 30, 60_000);
+  const { allowed } = await checkRateLimit(`suggestions:${ip}`, 30, 60_000);
   if (!allowed) {
     return Response.json({ error: 'Too many requests' }, { status: 429 });
   }

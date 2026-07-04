@@ -10,7 +10,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export async function POST(request: NextRequest) {
   // Rate limit: 20 ratings per minute per IP
   const ip = getClientIp(request);
-  const { allowed } = checkRateLimit(`rate:${ip}`, 20, 60_000);
+  const { allowed } = await checkRateLimit(`rate:${ip}`, 20, 60_000);
   if (!allowed) {
     return Response.json({ error: 'Too many requests' }, { status: 429 });
   }

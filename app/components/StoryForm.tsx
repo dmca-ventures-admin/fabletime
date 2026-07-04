@@ -75,6 +75,7 @@ export default function StoryForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [storyId, setStoryId] = useState<string | null>(null);
+  const [imageToken, setImageToken] = useState<string | null>(null);
   const [hasRated, setHasRated] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
@@ -460,6 +461,7 @@ export default function StoryForm() {
     setStory('');
     setError('');
     setStoryId(null);
+    setImageToken(null);
     setHasRated(false);
     setIsLoading(true);
 
@@ -483,6 +485,8 @@ export default function StoryForm() {
 
       const id = response.headers.get('X-Story-Id');
       setStoryId(id);
+      const imgToken = response.headers.get('X-Image-Token');
+      setImageToken(imgToken);
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -642,6 +646,8 @@ export default function StoryForm() {
         story={story}
         isLoading={isLoading}
         storyId={storyId}
+        imageToken={imageToken}
+        sessionId={sessionId}
         hasRated={hasRated}
         onRated={() => setHasRated(true)}
         characters={finalCharacters}
@@ -650,6 +656,7 @@ export default function StoryForm() {
           // Reset story state only — keep all form selections
           setStory('');
           setStoryId(null);
+          setImageToken(null);
           setHasRated(false);
           setIsLoading(false);
           window.scrollTo({ top: 0, behavior: 'smooth' });

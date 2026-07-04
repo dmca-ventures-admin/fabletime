@@ -4,14 +4,22 @@
  * Design:
  *   - Single hardcoded username ("admin") + password from process.env.ADMIN_PASSWORD.
  *   - On successful login, we mint a cookie of the form `<expiresAtMs>.<sigBase64Url>`
- *     where the signature is HMAC-SHA256 over the expiry, keyed by ADMIN_PASSWORD.
+ *     where the signature is HMAC-SHA256 over the expiry, keyed by
+ *     ADMIN_SESSION_SECRET (a value distinct from the admin password).
  *   - Middleware/proxy verifies the cookie by recomputing the HMAC and checking
  *     the expiry — no DB round-trip, works in the Edge runtime.
  *   - 24h lifetime per the issue spec.
  *
- * Why ADMIN_PASSWORD as the HMAC key: avoids requiring a separate
- * ADMIN_SESSION_SECRET env var. Rotating ADMIN_PASSWORD invalidates all live
- * sessions, which is the desired behaviour.
+ * Why a separate secret for HMAC signing (not ADMIN_PASSWORD): if the two
+ * were the same, a leaked session cookie would give an attacker an offline
+ * HMAC oracle they could brute-force against a wordlist to recover the
+ * admin password. Splitting them means a leaked cookie only exposes future
+ * cookie forgery capability — not the login credential itself.
+ *
+ * For backward compatibility with existing deployments we fall back to
+ * ADMIN_PASSWORD if ADMIN_SESSION_SECRET is not set, and log a warning at
+ * every use. Operators should set ADMIN_SESSION_SECRET to a fresh 32-byte
+ * random hex string as soon as possible.
  *
  * Why Web Crypto (SubtleCrypto): works in both the Edge runtime (middleware)
  * and the Node runtime (server actions). `node:crypto` is unavailable in
@@ -33,6 +41,28 @@ function getSecret(): string {
     throw new Error('ADMIN_PASSWORD env var is not set');
   }
   return secret;
+}
+
+let warnedAboutSessionSecretFallback = false;
+
+/**
+ * Secret used to HMAC-sign session cookies. Distinct from ADMIN_PASSWORD so
+ * that a leaked cookie doesn't double as an offline oracle for the admin
+ * password. Falls back to ADMIN_PASSWORD for backward compatibility with
+ * existing deployments, but warns loudly (once per process) so operators
+ * notice.
+ */
+function getSessionSecret(): string {
+  const explicit = process.env.ADMIN_SESSION_SECRET?.trim();
+  if (explicit) return explicit;
+
+  if (!warnedAboutSessionSecretFallback) {
+    console.warn(
+      '[admin-auth] ADMIN_SESSION_SECRET not set — falling back to ADMIN_PASSWORD. Set ADMIN_SESSION_SECRET to a separate random value for better security.'
+    );
+    warnedAboutSessionSecretFallback = true;
+  }
+  return getSecret();
 }
 
 /**
@@ -103,7 +133,7 @@ export function verifyCredentials(username: string, password: string): boolean {
 export async function createSessionToken(): Promise<string> {
   const expiresAt = Date.now() + ADMIN_SESSION_MAX_AGE_S * 1000;
   const payload = String(expiresAt);
-  const sig = await hmacSign(payload, getSecret());
+  const sig = await hmacSign(payload, getSessionSecret());
   return `${payload}.${sig}`;
 }
 
@@ -129,7 +159,7 @@ export async function verifySessionToken(
 
   let expected: string;
   try {
-    expected = await hmacSign(payload, getSecret());
+    expected = await hmacSign(payload, getSessionSecret());
   } catch {
     return false;
   }

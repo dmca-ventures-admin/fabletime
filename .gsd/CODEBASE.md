@@ -1,7 +1,7 @@
 # Codebase Map
 
-Generated: 2026-05-15T22:59:25Z | Files: 55 | Described: 0/55
-<!-- gsd:codebase-meta {"generatedAt":"2026-05-15T22:59:25Z","fingerprint":"22129c196ff1ea8ed3b7167d63cd4faed6172143","fileCount":55,"truncated":false} -->
+Generated: 2026-07-03T23:50:22Z | Files: 63 | Described: 0/63
+<!-- gsd:codebase-meta {"generatedAt":"2026-07-03T23:50:22Z","fingerprint":"c462c17438355ffa94eae0a49741b430a2362211","fileCount":63,"truncated":false} -->
 
 ### (root)/
 - `.env.local.example`
@@ -24,6 +24,15 @@ Generated: 2026-05-15T22:59:25Z | Files: 55 | Described: 0/55
 - `app/globals.css`
 - `app/layout.tsx`
 - `app/page.tsx`
+
+### app/admin/
+- `app/admin/actions.ts`
+- `app/admin/layout.tsx`
+- `app/admin/page.tsx`
+
+### app/admin/login/
+- `app/admin/login/LoginForm.tsx`
+- `app/admin/login/page.tsx`
 
 ### app/api/contact/
 - `app/api/contact/route.ts`
@@ -54,6 +63,7 @@ Generated: 2026-05-15T22:59:25Z | Files: 55 | Described: 0/55
 
 ### app/components/
 - `app/components/CharacterPicker.tsx`
+- `app/components/CharCounter.tsx`
 - `app/components/ContactForm.tsx`
 - `app/components/Footer.tsx`
 - `app/components/FunninessSlider.tsx`
@@ -78,6 +88,8 @@ Generated: 2026-05-15T22:59:25Z | Files: 55 | Described: 0/55
 - `app/terms/page.tsx`
 
 ### lib/
+- `lib/admin-auth.ts`
+- `lib/admin-metrics.ts`
 - `lib/anthropic.ts`
 - `lib/constants.ts`
 - `lib/content-filter.ts`

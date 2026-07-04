@@ -9,7 +9,7 @@ import { MODELS } from '@/lib/models';
 export async function POST(request: NextRequest) {
   // Rate limit: 30 validations per minute per IP
   const ip = getClientIp(request);
-  const { allowed } = checkRateLimit(`validate:${ip}`, 30, 60_000);
+  const { allowed } = await checkRateLimit(`validate:${ip}`, 30, 60_000);
   if (!allowed) {
     return Response.json({ error: 'Too many requests' }, { status: 429 });
   }
